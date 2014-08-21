@@ -6,3 +6,7 @@
 standard-app-packages
 autopublish
 insecure
+collection-api
+bootstrap
+accounts-password
+accounts-ui
