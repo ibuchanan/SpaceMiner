@@ -1,0 +1,1 @@
+Levels = new Meteor.Collection("levels");
