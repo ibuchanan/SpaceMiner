@@ -31,10 +31,12 @@
         <p>
           {{> loginButtons}}
           {{> levelEditor}}    
-          {{> levels}}            
+          {{> levels}}     
+          {{> spriteParts}}
         </p>
       </td>
       <td>
+        
         <canvas id='towermanGame' width='640' height='640'></canvas>          
       </td>
     </tr>
@@ -66,10 +68,23 @@
     <button class="btn btn-primary levelSaveNew">Save New Level</button>
   </div>  
 </template>
-
+<template name = "spriteParts">
+  <div>
+    <h2>Sprites</h2>
+    {{#each spriteParts}}
+      <div>
+        <h3>{{part}}</h3>
+        {{#each choices}}
+          <img src = "images/spriteParts/{{this}}" data-parent="{{../_id}}" /><br />
+        {{/each}}
+      </div>
+    {{/each}}
+    <div><button class="btn btn-success save">Save</button></div>
+  </div>
+</template>
 <template name="levels">
   <div>
-    <h2>Levels</h2>
+    <h1>Levels</h1>
     {{#each levels}}
       <div><button class="btn btn-success levelPlay">{{this.name}}</button></div>
     {{/each}}

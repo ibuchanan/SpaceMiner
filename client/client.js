@@ -49,6 +49,10 @@ Template.levels.levels = function () {
   return Levels.find();
 };
 
+Template.spriteParts.spriteParts = function() {
+  return SpriteParts.find();
+};
+
 Template.levelEditor.events({
   'click button.levelSaveNew': function(evt, template) {
     var val = JSON.parse($("#levelEditor").val());
@@ -59,6 +63,16 @@ Template.levelEditor.events({
     };
     Levels.insert(level);
   } 
+});
+Template.spriteParts.events({
+  'click img' : function(evt, template) {
+    var parentDocId = $(evt.currentTarget).attr("data-parent");
+    var spritePart = SpriteParts.findOne({_id: parentDocId});
+    spritePart.selected = this + "";
+    console.log(spritePart);
+  }, 'click button.save': function(evt,template){
+    console.log(this);
+  }
 });
 
 Template.levels.events({
