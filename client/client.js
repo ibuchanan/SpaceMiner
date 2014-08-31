@@ -50,7 +50,7 @@ Template.levels.levels = function () {
 };
 
 Template.spriteParts.spriteParts = function() {
-  return SpriteParts.find();
+  return SpriteParts.find({}, {sort: {sort: 1}});
 };
 
 Template.levelEditor.events({
@@ -64,14 +64,18 @@ Template.levelEditor.events({
     Levels.insert(level);
   } 
 });
+
 Template.spriteParts.events({
   'click img' : function(evt, template) {
     var parentDocId = $(evt.currentTarget).attr("data-parent");
     SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
-  }, 'click button.save': function(evt,template){
-    SpriteParts.find().forEach(function(part) {
-      console.log(part);
+  }, 
+  'click button.save': function(evt,template){
+    var selections = [];
+    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
+      selections.push(part.selected);
     });
+    Meteor.call('getSpritePreview', selections);
   }
 });
 
@@ -86,7 +90,6 @@ Template.levels.events({
 });
 
 window.addEventListener("load",function() { 
- 
       // Set up a basic Quintus object
       // with the necessary modules and controls
       Q = window.Q = Quintus({ development: true })
