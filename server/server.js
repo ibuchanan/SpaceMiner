@@ -4,11 +4,9 @@ Meteor.startup(function () {
     Meteor.methods({
       'getSpritePreview': function(selections) {        
         var root = '/home/action/Towerman/public/images/spriteParts/';
-        var sprite = null;
-        _.each(selections, function(selection) {
-          if (!sprite) sprite = gm(root + selection).options({imageMagick: true});
-          else sprite = sprite.append(root + selection);
-        });
+        var sprite = _.reduce(_.rest(selections, 1), function(sprite, selection) { 
+          return sprite.append(root + selection);
+        }, gm(root + selections[0]).options({imageMagick:true}));      
         sprite.write("/home/action/Towerman/sprite.png", function(err){
           // console.log(err);
         });        
@@ -19,6 +17,7 @@ Meteor.startup(function () {
       Levels.insert({name: "Level 1"});
     }
   
+    SpriteParts.remove({});
     if (SpriteParts.find().count() === 0) {
       var spritePartSort = {
         Player: 1,
