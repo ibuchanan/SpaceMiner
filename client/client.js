@@ -67,11 +67,11 @@ Template.levelEditor.events({
 Template.spriteParts.events({
   'click img' : function(evt, template) {
     var parentDocId = $(evt.currentTarget).attr("data-parent");
-    var spritePart = SpriteParts.findOne({_id: parentDocId});
-    spritePart.selected = this + "";
-    console.log(spritePart);
+    SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
   }, 'click button.save': function(evt,template){
-    console.log(this);
+    SpriteParts.find().forEach(function(part) {
+      console.log(part);
+    });
   }
 });
 
