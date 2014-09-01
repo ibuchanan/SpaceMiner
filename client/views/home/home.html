@@ -1,0 +1,55 @@
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=640, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+  <title>Space Mines</title>
+  <script src='//cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
+</head>
+
+<body>
+</body>
+
+<template name="home">  
+  <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+           <span class="icon-bar"></span>
+           <span class="icon-bar"></span>
+           <span class="icon-bar"></span>
+        </button>
+        <a class="brand" href="#">Space Miner!</a>
+        <div class="nav-collapse collapse">
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+  </div>  
+  <table border="0" cellpadding="10">
+    <tr>
+      <td>
+        <h1>Login to continue</h1>
+        <p>
+          {{> loginButtons}}
+          {{> levels}}     
+        </p>
+      </td>
+      <td>        
+        <div><canvas id='towermanGame' width='640' height='640'></canvas></div>
+        <div><button class='btn btn-success customize'>Customize Level</button></div>        
+      </td>
+    </tr>
+  </table>
+</template>
+
+<template name="levels">
+  <div>
+    <h1>Levels</h1>
+    {{#each levels}}
+      <div><button class="btn btn-success levelPlay">{{this.name}}</button></div>
+    {{/each}}
+  </div>
+</template>

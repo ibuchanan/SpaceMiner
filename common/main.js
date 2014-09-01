@@ -4,5 +4,5 @@ SpriteSheets = new Meteor.Collection("spriteSheets");
 
 Router.map(function() {
   this.route('home', {path: '/'});
-  this.route('about');  
+  this.route('levelCustomize');  
 });

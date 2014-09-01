@@ -15,4 +15,6 @@ meteorhacks:npm
 
 npm-container
 iron:router
+jquery
+underscore
 

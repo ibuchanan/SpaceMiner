@@ -2,11 +2,11 @@ var gm = Meteor.npmRequire('gm');
 
 Meteor.startup(function () {
     Router.map(function() {
-      this.route('levelSpriteSheet/:name', {
+      this.route('levelSprites/:name', {
         where: 'server',
         action: function() {
-          var sheet = SpriteSheets.findOne({name: this.params.name})
-          var img = new Buffer(sheet.data, 'base64');         
+          var level = Levels.findOne({name: this.params.name})
+          var img = new Buffer(level.spritesData, 'base64');         
           this.response.writeHead(200, {
             'Content-Type': 'image/png',
             'Content-Length': img.length
@@ -17,18 +17,15 @@ Meteor.startup(function () {
     });
   
     Meteor.methods({
-      'getSpritePreview': function(name, selections) {        
+      'levelSave': function(level) {
         var root = '/home/action/Towerman/public/images/spriteParts/';
-        var sprite = _.reduce(_.rest(selections, 1), function(sprite, selection) { 
+        var sprite = _.reduce(_.rest(level.selections, 1), function(sprite, selection) { 
           return sprite.append(root + selection);
-        }, gm(root + selections[0]).options({imageMagick:true}));
+        }, gm(root + level.selections[0]).options({imageMagick:true}));
         sprite.toBuffer('PNG', Meteor.bindEnvironment(function (err, buffer) {
-          var data = buffer.toString('base64');
-          SpriteSheets.upsert({name:name}, {$set: {data:data}});
+          level.spritesData = buffer.toString('base64');
+          Levels.insert(level);
         }));
-        //sprite.write("/home/action/Towerman/sprite.png", function(err){
-          // console.log(err);
-        //});        
       }
     });
   

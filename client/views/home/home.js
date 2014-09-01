@@ -32,9 +32,7 @@ function levelMapCreate(levelMapId) {
   });
 
   Q.scene(levelMapId,function(stage) {
-    console.log("The map");    
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
-    console.log(map);
     map.setup();
     stage.insert(new Q.Score());
     stage.insert(new Q.Player(Q.tilePos(10,7)));
@@ -45,63 +43,20 @@ function levelMapCreate(levelMapId) {
   });
 }
 
-Template.levels.levels = function () {
-  return Levels.find();
-};
-
-Template.spriteParts.spriteParts = function() {
-  return SpriteParts.find({}, {sort: {sort: 1}});
-};
-
-Template.levelEditor.events({
-  'click button.test': function(evt, template) {
-      Q.load("sprites.png", function() {
-        Q.compileSheets("sprites.png","sprites.json");
-      });    
+_.extend(Template.home, {
+  events: {
+    'click button.customize': function(evt, template) {
+      evt.preventDefault();
+      window.open('/levelCustomize', '_blank');      
+    }
   },
-  'click button.levelSaveNew': function(evt, template) {
-    var val = JSON.parse($("#levelEditor").val());
-    var name = $("#levelEditorName").val();
-    var level = {
-      board: val,
-      name: name
-    };
-    Levels.insert(level);
-  } 
-});
-
-Template.spriteParts.events({
-  'click img' : function(evt, template) {
-    var parentDocId = $(evt.currentTarget).attr("data-parent");
-    SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
-  }, 
-  'click button.save': function(evt,template){
-    var selections = [];
-    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
-      selections.push(part.selected);
-    });
-    var name = $("#levelEditorName").val() || "nameo";
-    Meteor.call('getSpritePreview', name, selections);
-  }
-});
-
-Template.levels.events({
-  'click button.levelPlay': function(evt, template) {
-      var levelId = this._id;
-      levelMapCreate(levelId);
-      Q.load(levelId + ".lvl", function() {
-        Q.stageScene(levelId);
-      });
-  }
-});
-
-window.addEventListener("load",function() { 
+  rendered: function() {
       // Set up a basic Quintus object
       // with the necessary modules and controls
       Q = window.Q = Quintus({ development: true })
         .include("Sprites, Scenes, Input, 2D, UI")
         .setup("towermanGame", { width: 640, height: 480 })
-        .controls(true);
+        .controls(false);
       
       // Add in the default keyboard controls
       // along with joypad controls for touch
@@ -457,4 +412,20 @@ window.addEventListener("load",function() {
         Q.stageScene("level1");
        
       });
+  }  
+})
+
+_.extend(Template.levels, {
+  levels: function() {
+    return Levels.find();
+  },
+  events: {
+    'click button.levelPlay': function(evt, template) {
+      var levelId = this._id;
+      levelMapCreate(levelId);
+      Q.load(levelId + ".lvl", function() {
+        Q.stageScene(levelId);
+      });
+    } 
+  }
 });
