@@ -1,15 +1,34 @@
 var gm = Meteor.npmRequire('gm');
 
 Meteor.startup(function () {
+    Router.map(function() {
+      this.route('levelSpriteSheet/:name', {
+        where: 'server',
+        action: function() {
+          var sheet = SpriteSheets.findOne({name: this.params.name})
+          var img = new Buffer(sheet.data, 'base64');         
+          this.response.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': img.length
+          });
+          this.response.end(img);
+        }
+      });
+    });
+  
     Meteor.methods({
-      'getSpritePreview': function(selections) {        
+      'getSpritePreview': function(name, selections) {        
         var root = '/home/action/Towerman/public/images/spriteParts/';
         var sprite = _.reduce(_.rest(selections, 1), function(sprite, selection) { 
           return sprite.append(root + selection);
-        }, gm(root + selections[0]).options({imageMagick:true}));      
-        sprite.write("/home/action/Towerman/sprite.png", function(err){
+        }, gm(root + selections[0]).options({imageMagick:true}));
+        sprite.toBuffer('PNG', Meteor.bindEnvironment(function (err, buffer) {
+          var data = buffer.toString('base64');
+          SpriteSheets.upsert({name:name}, {$set: {data:data}});
+        }));
+        //sprite.write("/home/action/Towerman/sprite.png", function(err){
           // console.log(err);
-        });        
+        //});        
       }
     });
   

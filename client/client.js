@@ -80,7 +80,8 @@ Template.spriteParts.events({
     SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
       selections.push(part.selected);
     });
-    Meteor.call('getSpritePreview', selections);
+    var name = $("#levelEditorName").val() || "nameo";
+    Meteor.call('getSpritePreview', name, selections);
   }
 });
 

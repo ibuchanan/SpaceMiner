@@ -10,3 +10,9 @@ collection-api
 bootstrap
 accounts-password
 accounts-ui
+meteorhacks:npm
+
+
+npm-container
+iron:router
+
