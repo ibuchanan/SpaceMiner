@@ -69,14 +69,21 @@ _.extend(Template.home, {
       Q.gravityY = 0;
   
       Q.loadAssetLevel = function(key,src,callback,errorCallback) {
-          var fileParts = src.split("."),
-              fileName = fileParts[0];
-          Q.loadAssetOther(key, Meteor.absoluteUrl("collectionapi/levels/" + fileName), function(key, val) {
+          var fileParts = src.split("."), fileName = fileParts[0];
+          Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             Q.assets[key] = JSON.parse(val)[0].board;
             callback(Q.assets[key]);
           }, errorCallback);
       };
       Q.assetTypes.lvl = 'Level';  
+    
+      Q.loadAssetSprite = function(key,src,callback,errorCallback) {
+        var img = new Image();
+        img.onload = function() {  callback(key,img); };
+        img.onerror = errorCallback;
+        img.src = Q.assetUrl("levelSprites/", src);
+      };
+      Q.assetTypes.spr = 'Sprite';    
   
       Q.TileLayer.prototype.load = function (dataAsset) {
         var fileParts = dataAsset.split("."),
@@ -90,8 +97,8 @@ _.extend(Template.home, {
           throw "file type not supported";
         }
         this.p.tiles = data;
-      }; 
-
+      };
+   
       Q.component("towerManControls", {
         // default properties to add onto our entity
         defaults: { speed: 100, direction: 'up' },
@@ -423,7 +430,8 @@ _.extend(Template.levels, {
     'click button.levelPlay': function(evt, template) {
       var levelId = this._id;
       levelMapCreate(levelId);
-      Q.load(levelId + ".lvl", function() {
+      Q.load(levelId + ".spr, " + levelId + ".lvl", function() {
+        Q.compileSheets(levelId + ".spr","sprites.json");        
         Q.stageScene(levelId);
       });
     } 

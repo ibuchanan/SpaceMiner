@@ -2,10 +2,11 @@ var gm = Meteor.npmRequire('gm');
 
 Meteor.startup(function () {
     Router.map(function() {
-      this.route('levelSprites/:name', {
+      this.route('levelSprites/:id', {
         where: 'server',
         action: function() {
-          var level = Levels.findOne({name: this.params.name})
+          id = this.params.id.split('.')[0];
+          var level = Levels.findOne(id);
           var img = new Buffer(level.spritesData, 'base64');         
           this.response.writeHead(200, {
             'Content-Type': 'image/png',
