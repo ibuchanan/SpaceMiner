@@ -54,6 +54,11 @@ Template.spriteParts.spriteParts = function() {
 };
 
 Template.levelEditor.events({
+  'click button.test': function(evt, template) {
+      Q.load("sprites.png", function() {
+        Q.compileSheets("sprites.png","sprites.json");
+      });    
+  },
   'click button.levelSaveNew': function(evt, template) {
     var val = JSON.parse($("#levelEditor").val());
     var name = $("#levelEditorName").val();
