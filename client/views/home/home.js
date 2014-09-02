@@ -83,7 +83,15 @@ _.extend(Template.home, {
         img.onerror = errorCallback;
         img.src = Q.assetUrl("levelSprites/", src);
       };
-      Q.assetTypes.spr = 'Sprite';    
+      Q.assetTypes.spr = 'Sprite';
+    
+      Q.loadAssetTile = function(key,src,callback,errorCallback) {
+        var img = new Image();
+        img.onload = function() {  callback(key,img); };
+        img.onerror = errorCallback;
+        img.src = Q.assetUrl("levelTiles/", src);
+      };
+      Q.assetTypes.til = 'Tile';    
   
       Q.TileLayer.prototype.load = function (dataAsset) {
         var fileParts = dataAsset.split("."),
@@ -413,11 +421,8 @@ _.extend(Template.home, {
 
       Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png", function() {
         Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
-
         Q.compileSheets("sprites.png","sprites.json");
-
-        Q.stageScene("level1");
-       
+        Q.stageScene("level1");       
       });
   }  
 })
@@ -430,8 +435,9 @@ _.extend(Template.levels, {
     'click button.levelPlay': function(evt, template) {
       var levelId = this._id;
       levelMapCreate(levelId);
-      Q.load(levelId + ".spr, " + levelId + ".lvl", function() {
-        Q.compileSheets(levelId + ".spr","sprites.json");        
+      Q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
+        Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
+        Q.compileSheets(levelId + ".spr","sprites.json");
         Q.stageScene(levelId);
       });
     } 

@@ -1,44 +1,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=640, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
-  <title>Space Mines</title>
+  <title>Space Miner!</title>
   <script src='//cdn.html5quintus.com/v0.2.0/quintus-all.js'></script>
 </head>
 
-<body>
-</body>
-
 <template name="home">  
-  <div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-      <div class="container">
-        <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-           <span class="icon-bar"></span>
-           <span class="icon-bar"></span>
-           <span class="icon-bar"></span>
-        </button>
-        <a class="brand" href="#">Space Miner!</a>
-        <div class="nav-collapse collapse">
-          <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#about">About</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
+  <div class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+          <a class="navbar-brand" href="#">Space Miner!</a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+          </button>
       </div>
-    </div>
+      <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              {{> loginButtons }} <!-- here -->
+          </ul>
+      </div>
   </div>  
   <table border="0" cellpadding="10">
-    <tr>
+    <tr valign='top'>
       <td>
-        <h1>Login to continue</h1>
-        <p>
-          {{> loginButtons}}
-          {{> levels}}     
-        </p>
+        {{> levels}}
       </td>
       <td>        
-        <div><canvas id='towermanGame' width='640' height='640'></canvas></div>
+        <div style='background: black; border:4px solid darkgray;'><canvas id='towermanGame' width='640' height='640'></canvas></div>
         <div><button class='btn btn-success customize'>Customize Level</button></div>        
       </td>
     </tr>

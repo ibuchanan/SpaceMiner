@@ -7,14 +7,12 @@ standard-app-packages
 autopublish
 insecure
 collection-api
-bootstrap
-accounts-password
-accounts-ui
 meteorhacks:npm
-
-
 npm-container
 iron:router
 jquery
 underscore
+accounts-password
+bootstrap-3
+accounts-ui-bootstrap-3
 

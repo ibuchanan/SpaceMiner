@@ -1,6 +1,9 @@
 {
   "packages": {
     "collection-api": {},
-    "npm": {}
+    "npm": {},
+    "bootstrap-3": {},
+    "accounts-github": {},
+    "accounts-ui-bootstrap-3": {}
   }
 }
