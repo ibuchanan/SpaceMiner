@@ -3,7 +3,7 @@
     "collection-api": {},
     "npm": {},
     "bootstrap-3": {},
-    "accounts-github": {},
-    "accounts-ui-bootstrap-3": {}
+    "accounts-ui-bootstrap-3": {},
+    "ace-embed": {}
   }
 }

@@ -1,6 +1,7 @@
 accounts-base@1.0.0
 accounts-password@1.0.0
 accounts-ui-bootstrap-3@0.0.0
+ace-embed@0.0.0
 application-configuration@1.0.0
 autopublish@1.0.0
 autoupdate@1.0.5

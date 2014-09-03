@@ -2,6 +2,12 @@ _.extend(Template.levelCustomize, {
   spriteParts: function() {
     return SpriteParts.find({}, {sort: {sort: 1}});  
   },
+  rendered: function() {
+    var editor = ace.edit("levelBoard");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/javascript");
+    editor.setHighlightActiveLine(true);
+  },
   events: {
     'click img' : function(evt, template) {
       var parentDocId = $(evt.currentTarget).attr("data-parent");
@@ -11,20 +17,14 @@ _.extend(Template.levelCustomize, {
       var board = JSON.parse($('#levelBoard').val());
       var name = $('#levelName').val() || 'nameo';
       var selections = [];
-      var tile = '';
       SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
-        if (part.selected.indexOf('tile') > -1) {
-          tile = part.selected;
-        } else {
-          selections.push(part.selected);
-        }
+        selections.push(part.selected);
       });
       var level = {
         board: board,
         name: name,
-        selections: selections,
-        tile: tile
-      };
+        selections: selections
+      };      
       Meteor.call('levelSave', level);
     }
   }

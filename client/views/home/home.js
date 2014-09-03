@@ -3,6 +3,8 @@ var SPRITE_TILES = 2;
 var SPRITE_ENEMY = 4;
 var SPRITE_DOT = 8;
 
+var OnEnemyHit = function() {};
+
 function levelMapCreate(levelMapId) {
   Q.TileLayer.extend("Level" + levelMapId,{
     init: function() {
@@ -55,8 +57,10 @@ _.extend(Template.home, {
       // with the necessary modules and controls
       Q = window.Q = Quintus({ development: true })
         .include("Sprites, Scenes, Input, 2D, UI")
-        .setup("towermanGame", { width: 640, height: 480 })
-        .controls(false);
+        .setup("towermanGame", { 
+          width: 640, height: 480, scaleToFit: true
+         })
+        .controls(true);
       
       // Add in the default keyboard controls
       // along with joypad controls for touch
@@ -72,6 +76,10 @@ _.extend(Template.home, {
           var fileParts = src.split("."), fileName = fileParts[0];
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             Q.assets[key] = JSON.parse(val)[0].board;
+            // TODO fix hack
+            var obj = JSON.parse(val)[0].onEnemyHit;
+            OnEnemyHit = eval(obj);
+            console.log(obj);
             callback(Q.assets[key]);
           }, errorCallback);
       };
@@ -361,6 +369,7 @@ _.extend(Template.home, {
 
         hit: function(col) {
           if(col.obj.isA("Player")) {
+            OnEnemyHit();
             Q.state.reset({ score: 0, lives: 2, stage: 1});
             Q.stageScene("level1");
           }
