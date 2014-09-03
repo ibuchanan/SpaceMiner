@@ -14,16 +14,23 @@ _.extend(Template.levelCustomize, {
       SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
     }, 
     'click button.save': function(evt,template){
-      var board = JSON.parse($('#levelBoard').val());
+      var board = JSON.parse(ace.edit("levelBoard").getSession().getValue());
       var name = $('#levelName').val() || 'nameo';
       var selections = [];
+      var tile = '';
       SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
         selections.push(part.selected);
+        if (part.selected.indexOf('tile') > -1) {
+          tile = part.selected;
+        } else {
+          selections.push(part.selected);
+        }        
       });
       var level = {
         board: board,
         name: name,
-        selections: selections
+        selections: selections,
+        tile: tile
       };      
       Meteor.call('levelSave', level);
     }

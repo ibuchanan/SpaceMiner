@@ -77,9 +77,17 @@ _.extend(Template.home, {
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             Q.assets[key] = JSON.parse(val)[0].board;
             // TODO fix hack
-            var obj = JSON.parse(val)[0].onEnemyHit;
-            OnEnemyHit = eval(obj);
-            console.log(obj);
+            try {
+              var obj = JSON.parse(val)[0].onEnemyHit;
+              var func = eval(obj);
+              if (_.isFunction(func)) {
+                OnEnemyHit = func;
+                console.log(OnEnemyHit);
+              }
+            } catch (ex) {
+              console.log("No onEnemyHit function provided: ");
+              console.log(ex);
+            }
             callback(Q.assets[key]);
           }, errorCallback);
       };
