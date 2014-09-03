@@ -19,7 +19,6 @@ _.extend(Template.levelCustomize, {
       var selections = [];
       var tile = '';
       SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
-        selections.push(part.selected);
         if (part.selected.indexOf('tile') > -1) {
           tile = part.selected;
         } else {
