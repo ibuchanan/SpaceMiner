@@ -3,7 +3,36 @@ var SPRITE_TILES = 2;
 var SPRITE_ENEMY = 4;
 var SPRITE_DOT = 8;
 
-var OnEnemyHit = function() {};
+// Global facaces on top of the Quintus API
+// for students to program against in their code 
+// sections.
+var game = {
+  reset: function() {
+    Q.state.reset({ score: 0, lives: 2, stage: 1});
+    Q.stageScene("level1");
+  },
+  pause: function() {
+    Q.pauseGame();
+  },
+  unpause: function() {
+    Q.unpauseGame();
+  },
+  playSound: function(soundName) {
+    Q.audio.play(soundName);
+  },
+  showMessage: function(message) {
+
+  }
+};
+
+var player = {
+  incScore: function(amount) {
+    Q.state.inc("score", amount);
+  },
+  decScore: function(amount) {
+    Q.state.dec("score", amount);
+  }
+};
 
 function levelMapCreate(levelMapId) {
   Q.TileLayer.extend("Level" + levelMapId,{
@@ -35,8 +64,18 @@ function levelMapCreate(levelMapId) {
 
   Q.scene(levelMapId,function(stage) {
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
+    var levelMap = Q.assets[levelMapId + ".lvl"];
+    console.log(levelMap);
     map.setup();
-    stage.insert(new Q.Score());
+    var container = stage.insert(new Q.UI.Container({
+      fill: "gray",
+      border: 5,
+      shadow: 10,
+      shadowColor: "rgba(0,0,0,0.5)",
+      x:75,
+      y:15
+    }));    
+    stage.insert(new Q.Score(), container);
     stage.insert(new Q.Player(Q.tilePos(10,7)));
 
     stage.insert(new Q.Enemy(Q.tilePos(10,4)));
@@ -55,11 +94,14 @@ _.extend(Template.home, {
   rendered: function() {
       // Set up a basic Quintus object
       // with the necessary modules and controls
-      Q = window.Q = Quintus({ development: true })
-        .include("Sprites, Scenes, Input, 2D, UI")
-        .setup("towermanGame", { 
+      Q = window.Q = Quintus({ 
+        development: true,
+        audioSupported: ['wav'] })
+        .include("Audio, Sprites, Scenes, Input, 2D, UI")
+        .setup("towermanGame", {
           width: 640, height: 480, scaleToFit: true
          })
+        .enableSound()
         .controls(true);
       
       // Add in the default keyboard controls
@@ -67,7 +109,6 @@ _.extend(Template.home, {
       Q.input.keyboardControls();
       Q.input.joypadControls();
       Q.state.reset({ score: 0, lives: 2, stage: 1});
-      console.log(Q.state.get("score"));
 
       Q.gravityX = 0;
       Q.gravityY = 0;
@@ -82,10 +123,21 @@ _.extend(Template.home, {
               var func = eval(obj);
               if (_.isFunction(func)) {
                 OnEnemyHit = func;
-                console.log(OnEnemyHit);
               }
+
+              var obj = JSON.parse(val)[0].onCoinHit;
+              var func = eval(obj);
+              if (_.isFunction(func)) {
+                OnCoinHit = func;
+              }
+              
+              var obj = JSON.parse(val)[0].onGemHit;
+              var func = eval(obj);
+              if (_.isFunction(func)) {
+                OnGemHit = func;
+              }              
             } catch (ex) {
-              console.log("No onEnemyHit function provided: ");
+              console.log("Error getting level functions:");
               console.log(ex);
             }
             callback(Q.assets[key]);
@@ -177,10 +229,9 @@ _.extend(Template.home, {
       Q.UI.Text.extend("Score", {
         init: function(p) {
         this._super({
-        label: "Score: 0",
-        x:100,
-        y:20
-      });
+          label: "Score: 0",
+          color: "yellow"
+        });
         Q.state.on("change.score",this,"scoreChange");
        },
       scoreChange: function(score) {
@@ -199,7 +250,6 @@ _.extend(Template.home, {
           this.add("2d, towerManControls");
       }
       });
-
 
       // Create the Dot sprite
       Q.Sprite.extend("Dot", {
@@ -222,8 +272,9 @@ _.extend(Template.home, {
           // Destroy it and keep track of how many dots are left
           this.destroy();
           this.stage.dotCount--;
-          Q.state.inc("score",100);
+          OnCoinHit();
           // If there are no more dots left, just restart the game
+          // TODO move to next level from page
           if(this.stage.dotCount == 0) {
             Q.stageScene("level2");
           }
@@ -364,7 +415,6 @@ _.extend(Template.home, {
 
       Q.Sprite.extend("Enemy", {
         init: function(p) {
-
           this._super(p,{
             sheet:"enemy",
             type: SPRITE_ENEMY,
@@ -378,31 +428,28 @@ _.extend(Template.home, {
         hit: function(col) {
           if(col.obj.isA("Player")) {
             OnEnemyHit();
-            Q.state.reset({ score: 0, lives: 2, stage: 1});
-            Q.stageScene("level1");
           }
         }
       });
 
       Q.scene("level1",function(stage) {
         var map = stage.collisionLayer(new Q.TowerManMap());
+    
+        var levelMap = Q.assets["level.json"];
+        console.log(levelMap);
+        
         map.setup();
-        /**
+        
         var container = stage.insert(new Q.UI.Container({
-         
-          y: 48,
-          x: Q.width/2 
-        }));
-
-        stage.insert(new Q.UI.Text({ 
-        label: "Score: " + Q.state.get("score"),
-        color: "white",
-        x: -207,
-        y: -30
-        }),container);
-        container.fit(2,2);
-        **/
-        stage.insert(new Q.Score());
+          fill: "gray",
+          border: 5,
+          shadow: 10,
+          shadowColor: "rgba(0,0,0,0.5)",
+          x:75,
+          y:15
+        })); 
+        
+        stage.insert(new Q.Score(), container);
         stage.insert(new Q.Player(Q.tilePos(10,7)));
 
         stage.insert(new Q.Enemy(Q.tilePos(10,4)));
@@ -436,17 +483,40 @@ _.extend(Template.home, {
         stage.insert(new Q.Enemy(Q.tilePos(5,10)));
       });
 
-      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png", function() {
+      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, coin1.wav", function() {
         Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
         Q.compileSheets("sprites.png","sprites.json");
         Q.stageScene("level1");       
       });
+    
+      // Default handlers for events
+      function OnEnemyHit() {
+        game.reset();
+      }
+    
+      function OnCoinHit() {
+        player.incScore(100);
+        game.playSound('coin1.wav');
+      }
+    
+      function OnGemHit() {
+        player.incScore(1000);
+        game.playSound('coin1.wav');        
+      }
+    
+      function OnPause() {
+        game.pause();
+      }
+    
+      function OnUnpause() {
+        game.unpause();
+      }
   }  
 })
 
 _.extend(Template.levels, {
   levels: function() {
-    return Levels.find();
+    return Levels.find({published:true});
   },
   events: {
     'click button.levelPlay': function(evt, template) {
@@ -456,6 +526,7 @@ _.extend(Template.levels, {
         Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
         Q.compileSheets(levelId + ".spr","sprites.json");
         Q.stageScene(levelId);
+        $("#towermanGame").focus();
       });
     } 
   }

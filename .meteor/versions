@@ -2,6 +2,7 @@ accounts-base@1.0.0
 accounts-password@1.0.0
 accounts-ui-bootstrap-3@0.0.0
 ace-embed@0.0.0
+animated-each@0.0.0
 application-configuration@1.0.0
 autopublish@1.0.0
 autoupdate@1.0.5
@@ -11,6 +12,7 @@ blaze@1.0.3
 bootstrap-3@0.0.0
 callback-hook@1.0.0
 check@1.0.0
+coffeescript@1.0.2
 collection-api@0.0.0
 ctl-helper@1.0.2
 ctl@1.0.0

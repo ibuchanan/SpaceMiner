@@ -43,7 +43,7 @@ Meteor.startup(function () {
             .append(root + level.tile, base + 'tileRight.png', true);
           tiles.toBuffer('PNG', Meteor.bindEnvironment(function(err2, buffer2) {
             level.tilesData = buffer2.toString('base64');
-            Levels.insert(level);
+            Levels.upsert(level._id, {$set: level});
           }));
         }));
       }
@@ -76,7 +76,8 @@ Meteor.startup(function () {
               SpriteParts.insert({
                 part: category,
                 choices: parts,
-                sort: spritePartSort[category]
+                sort: spritePartSort[category],
+                selected: parts[0]
               });
           });
       }));

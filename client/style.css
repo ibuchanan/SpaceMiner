@@ -5,3 +5,19 @@ body {
 h2{
   color:#D3D3D3;
 }
+
+.editor {
+  width:98%;
+  height:350px;
+}
+
+.previewContainer {
+  width: 640;
+  height: 480;
+  display: inline-block;
+}
+
+.preview {
+  background: black;
+  text-align: center;
+}
