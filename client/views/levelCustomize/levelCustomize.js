@@ -22,7 +22,10 @@ function getLevelDto() {
     }        
   });
   
+  var userId = Meteor.userId();
+  
   var level = {  
+    userId: userId,
     board: board,
     name: name,
     selections: selections,
@@ -42,7 +45,6 @@ Session.set("hasBoardJson", false);
 
 _.extend(Template.levelCustomize, {
   rendered: function() {
-    Session.set("hasBoardJson", false);
     var board =
       "[\n"
     + " [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],\n"
@@ -62,6 +64,7 @@ _.extend(Template.levelCustomize, {
     + "]";    
     
     var level = {
+      userId: Meteor.userId(),
       board: board,
       name: 'N',
       selections: [
@@ -104,7 +107,7 @@ _.extend(Template.levelCustomize, {
       }, 1000);
     });    
     
-    Session.set("hasBoardJson", true);
+    //Session.set("hasBoardJson", true);
   },
   level: function() {
     return Session.get("level");
@@ -141,7 +144,7 @@ _.extend(Template.boardPreview, {
     try {
       board = JSON.parse(level.board);
     } catch (ex) {
-      Session.set("hasBoardJson", false);
+      //Session.set("hasBoardJson", false);
       return [];
     }
     var sprites = _.map(board, function(row){
@@ -157,39 +160,44 @@ _.extend(Template.boardPreview, {
           }
       });
     });
-    Session.set("hasBoardJson", true);    
+    //Session.set("hasBoardJson", true);    
     return sprites;
   }  
 });
 
 function updateLevelPreviews() {
-  var level = getLevelDto();
-  var board = [];
   try {
-    board = JSON.parse(level.board);
-  } catch (ex) {
-    $(".previewContainer").html("Oops, we couldn't render your preview! Is your map array correct?");
+    var level = getLevelDto();
+    var board = [];
+    try {
+      board = JSON.parse(level.board);
+    } catch (ex) {
+      $(".previewContainer").html("Oops, we couldn't render your preview! Is your map array correct?");
+    }
+    var sprites = _.map(board, function(row){
+      return _.map(row, function(column){
+        if (column === 0) {
+          return level.selections[3];
+        }
+        if (column === 1){
+          return level.tile;
+        }
+        if (column === 2){
+          return level.selections[2];
+        }
+      });
+    });
+
+    $(".previewContainer").empty();
+    _.each(sprites, function(row) {
+      var div = $("<div class='preview'></div>");      
+      _.each(row, function(column) {
+        div.append($("<img src='images/spriteParts/" + column + "' />"));
+      });
+      $(".previewContainer").append(div);
+    });
+  } catch (ex) {    
+    console.log("error in updateLevelPreviews");
+    console.log(ex);
   }
-  var sprites = _.map(board, function(row){
-    return _.map(row, function(column){
-      if (column === 0) {
-        return level.selections[3];
-      }
-      if (column === 1){
-        return level.tile;
-      }
-      if (column === 2){
-        return level.selections[2];
-      }
-    });
-  });
-  
-  $(".previewContainer").empty();
-  _.each(sprites, function(row) {
-    var div = $("<div class='preview'></div>");      
-    _.each(row, function(column) {
-      div.append($("<img src='images/spriteParts/" + column + "' />"));
-    });
-    $(".previewContainer").append(div)
-  });
 }

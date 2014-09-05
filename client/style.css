@@ -21,3 +21,9 @@ h2{
   background: black;
   text-align: center;
 }
+
+.levels {
+  padding: 10px;
+  height: 400;
+  overflow: scroll;
+}
