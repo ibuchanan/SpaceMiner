@@ -5,8 +5,6 @@ _.extend(Template.sprites, {
 });
 
 function getLevelDto() {
-  var levelId = Session.get("level")._id;
-  
   // Grab all the code snippets first
   var board = ace.edit("levelBoard").getSession().getValue();
   var onEnemyHit = ace.edit("codeEnemyEditor").getSession().getValue();
@@ -24,8 +22,7 @@ function getLevelDto() {
     }        
   });
   
-  var level = {
-    _id: levelId,
+  var level = {  
     board: board,
     name: name,
     selections: selections,
@@ -38,11 +35,14 @@ function getLevelDto() {
   return level;
 }
 
+/*
 var dep = new Deps.Dependency();
 Session.set("hasBoardJson", false);
+*/
 
 _.extend(Template.levelCustomize, {
   rendered: function() {
+    Session.set("hasBoardJson", false);
     var board =
       "[\n"
     + " [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],\n"
@@ -79,6 +79,7 @@ _.extend(Template.levelCustomize, {
       tilesData: '',
       published: false
     };
+    
     var id = Levels.insert(level);
     var levelDoc = Levels.findOne(id);
     Session.set("level", levelDoc);
@@ -95,9 +96,12 @@ _.extend(Template.levelCustomize, {
     ace.edit("levelBoard").on('change', function() {
       if (timeoutId !== null) clearTimeout(timeoutId);
       timeoutId = setTimeout(function() {
+        /*
         Session.set("hasBoardJson", true);
         dep.changed();
-      }, 1000);      
+        */
+        updateLevelPreviews();
+      }, 1000);
     });    
     
     Session.set("hasBoardJson", true);
@@ -107,25 +111,31 @@ _.extend(Template.levelCustomize, {
   },
   events: {
     'click img' : function(evt, template) {
-      dep.depend();
+      //dep.depend();
       var parentDocId = $(evt.currentTarget).attr("data-parent");
       SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
+      /*
       Session.set("hasBoardJson", true);
+      */
+      updateLevelPreviews();
     }, 
     'click button.save': function(evt,template){    
       var level = getLevelDto();
+      var id = Session.get("level")._id;
       level.published = true;
-      Meteor.call('levelSave', level);
+      Meteor.call('levelSave', id, level);
     }
   }
 });
 
 _.extend(Template.boardPreview, {
   hasBoardJson: function() {
+    console.log("In hasBoardJson helper");
     return Session.get("hasBoardJson");
   },
   boardMappedToSprites: function() {
-    dep.depend();
+    console.log("In boardMappedToSprites helper");
+    //dep.depend();
     var level = getLevelDto();
     var board = [];
     try {
@@ -150,4 +160,36 @@ _.extend(Template.boardPreview, {
     Session.set("hasBoardJson", true);    
     return sprites;
   }  
-})
+});
+
+function updateLevelPreviews() {
+  var level = getLevelDto();
+  var board = [];
+  try {
+    board = JSON.parse(level.board);
+  } catch (ex) {
+    $(".previewContainer").html("Oops, we couldn't render your preview! Is your map array correct?");
+  }
+  var sprites = _.map(board, function(row){
+    return _.map(row, function(column){
+      if (column === 0) {
+        return level.selections[3];
+      }
+      if (column === 1){
+        return level.tile;
+      }
+      if (column === 2){
+        return level.selections[2];
+      }
+    });
+  });
+  
+  $(".previewContainer").empty();
+  _.each(sprites, function(row) {
+    var div = $("<div class='preview'></div>");      
+    _.each(row, function(column) {
+      div.append($("<img src='images/spriteParts/" + column + "' />"));
+    });
+    $(".previewContainer").append(div)
+  });
+}

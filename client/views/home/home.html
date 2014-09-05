@@ -41,8 +41,14 @@
 <template name="levels">
   <div>
     <h1>Levels</h1>
+    <div class="levels">
     {{#each levels}}
-      <div><button class="btn btn-success levelPlay">{{this.name}}</button></div>
+      {{> level}}
     {{/each}}
+    </div>
   </div>
+</template>
+
+<template name="level">
+  <div><button class="btn btn-success levelPlay">{{name}}</button></div>  
 </template>

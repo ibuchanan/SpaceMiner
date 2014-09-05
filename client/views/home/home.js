@@ -6,7 +6,7 @@ var SPRITE_DOT = 8;
 // Global facaces on top of the Quintus API
 // for students to program against in their code 
 // sections.
-var game = {
+game = {
   reset: function() {
     Q.state.reset({ score: 0, lives: 2, stage: 1});
     Q.stageScene("level1");
@@ -25,7 +25,7 @@ var game = {
   }
 };
 
-var player = {
+player = {
   incScore: function(amount) {
     Q.state.inc("score", amount);
   },
@@ -65,6 +65,7 @@ function levelMapCreate(levelMapId) {
   Q.scene(levelMapId,function(stage) {
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
     var levelMap = Q.assets[levelMapId + ".lvl"];
+    console.log("Level map:");
     console.log(levelMap);
     map.setup();
     var container = stage.insert(new Q.UI.Container({
@@ -116,23 +117,22 @@ _.extend(Template.home, {
       Q.loadAssetLevel = function(key,src,callback,errorCallback) {
           var fileParts = src.split("."), fileName = fileParts[0];
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
-            Q.assets[key] = JSON.parse(val)[0].board;
+            var obj = JSON.parse(val)[0];
+            var board = JSON.parse(obj.board);
+            Q.assets[key] = board;
             // TODO fix hack
             try {
-              var obj = JSON.parse(val)[0].onEnemyHit;
-              var func = eval(obj);
+              var func = eval(obj.onEnemyHit);
               if (_.isFunction(func)) {
                 OnEnemyHit = func;
               }
 
-              var obj = JSON.parse(val)[0].onCoinHit;
-              var func = eval(obj);
+              var func = eval(obj.onCoinHit);
               if (_.isFunction(func)) {
                 OnCoinHit = func;
               }
-              
-              var obj = JSON.parse(val)[0].onGemHit;
-              var func = eval(obj);
+
+              var func = eval(obj).onGemHit;
               if (_.isFunction(func)) {
                 OnGemHit = func;
               }              
@@ -143,7 +143,7 @@ _.extend(Template.home, {
             callback(Q.assets[key]);
           }, errorCallback);
       };
-      Q.assetTypes.lvl = 'Level';  
+      Q.assetTypes.lvl = 'Level'; 
     
       Q.loadAssetSprite = function(key,src,callback,errorCallback) {
         var img = new Image();
@@ -517,7 +517,10 @@ _.extend(Template.home, {
 _.extend(Template.levels, {
   levels: function() {
     return Levels.find({published:true});
-  },
+  }
+});
+
+_.extend(Template.level, {
   events: {
     'click button.levelPlay': function(evt, template) {
       var levelId = this._id;
@@ -530,4 +533,4 @@ _.extend(Template.levels, {
       });
     } 
   }
-});
+})
