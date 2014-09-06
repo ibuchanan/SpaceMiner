@@ -7,9 +7,9 @@ _.extend(Template.sprites, {
 function getLevelDto() {
   // Grab all the code snippets first
   var board = ace.edit("levelBoard").getSession().getValue();
-  var onEnemyHit = ace.edit("codeEnemyEditor").getSession().getValue();
-  var onCoinHit = ace.edit("codeCoinEditor").getSession().getValue();
-  var onGemHit = ace.edit("codeGemEditor").getSession().getValue();
+  var onEnemyHit = ace.edit("onEnemyHit").getSession().getValue();
+  var onCoinHit = ace.edit("onCoinHit").getSession().getValue();
+  var onGemHit = ace.edit("onGemHit").getSession().getValue();
   
   var name = $('#levelName').val() || 'nameo';
   var selections = [];
@@ -83,34 +83,47 @@ _.extend(Template.levelCustomize, {
       published: false
     };
     
-    var id = Levels.insert(level);
-    var levelDoc = Levels.findOne(id);
-    Session.set("level", levelDoc);
-    
-    _.each(["levelBoard", "codeEnemyEditor", 
-           "codeCoinEditor", "codeGemEditor"], function(editorSelector) {
-      var editor = ace.edit(editorSelector);
-      editor.setTheme("ace/theme/monokai");
-      editor.getSession().setMode("ace/mode/javascript");
-      editor.setHighlightActiveLine(true);
+    Levels.insert(level, function(err, id) {
+      if (err) {
+        console.log("Error inserting the Level:");
+        console.log(err);
+      } 
+      else {
+        var levelDoc = Levels.findOne(id);
+        Session.set("level", levelDoc);
+
+        _.each(["levelBoard", "onEnemyHit", 
+             "onCoinHit", "onGemHit"], function(editorSelector) {
+          var editor = ace.edit(editorSelector);
+          editor.setTheme("ace/theme/monokai");
+          var session = editor.getSession();
+          session.setMode("ace/mode/javascript");
+          if (editorSelector !== "levelBoard") {
+            var val = levelDoc[editorSelector];
+            session.setValue(levelDoc[editorSelector]);
+          } else {
+            session.setValue(levelDoc.board);
+          }
+          editor.setHighlightActiveLine(true);
+        });
+
+        var timeoutId = null;
+        ace.edit("levelBoard").on('change', function() {
+          if (timeoutId !== null) clearTimeout(timeoutId);
+          timeoutId = setTimeout(function() {
+            /*
+            Session.set("hasBoardJson", true);
+            dep.changed();
+            */
+            updateLevelPreviews();
+          }, 1000);
+        });
+        //Session.set("hasBoardJson", true);
+      }
     });
-    
-    var timeoutId = null;
-    ace.edit("levelBoard").on('change', function() {
-      if (timeoutId !== null) clearTimeout(timeoutId);
-      timeoutId = setTimeout(function() {
-        /*
-        Session.set("hasBoardJson", true);
-        dep.changed();
-        */
-        updateLevelPreviews();
-      }, 1000);
-    });    
-    
-    //Session.set("hasBoardJson", true);
   },
   level: function() {
-    return Session.get("level");
+    var lev = Session.get("level");
   },
   events: {
     'click img' : function(evt, template) {
@@ -133,11 +146,9 @@ _.extend(Template.levelCustomize, {
 
 _.extend(Template.boardPreview, {
   hasBoardJson: function() {
-    console.log("In hasBoardJson helper");
     return Session.get("hasBoardJson");
   },
   boardMappedToSprites: function() {
-    console.log("In boardMappedToSprites helper");
     //dep.depend();
     var level = getLevelDto();
     var board = [];
@@ -172,7 +183,10 @@ function updateLevelPreviews() {
     try {
       board = JSON.parse(level.board);
     } catch (ex) {
+      console.log("Error trying to parse board:");
+      console.log(ex);
       $(".previewContainer").html("Oops, we couldn't render your preview! Is your map array correct?");
+      return;
     }
     var sprites = _.map(board, function(row){
       return _.map(row, function(column){
@@ -187,8 +201,8 @@ function updateLevelPreviews() {
         }
       });
     });
-
-    $(".previewContainer").empty();
+    
+    $(".previewContainer").empty();  
     _.each(sprites, function(row) {
       var div = $("<div class='preview'></div>");      
       _.each(row, function(column) {

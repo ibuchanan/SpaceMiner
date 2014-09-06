@@ -35,7 +35,7 @@
             <div class="col-md-4">
               <h2>Edit map</h2>
               Now you can customize how your level is mapped out.              
-              <div class="editor" id="levelBoard">{{level.board}}</div>
+              <div class="editor" id="levelBoard"></div>
             </div>
             <div class="col-md-8">
               <h2>Preview</h2>
@@ -49,15 +49,15 @@
       
       <div class="tab-pane" id="codeEnemy">
         Now you get to write some code to complete your level. This program, like many programs, is made up of <a href="todo">objects</a>. Objects contain <a href="todo">functions</a> and <a href="todo">properties</a>. There is an object called <code>game</code>. The <code>game</code> contains several functions: pause, unpause, reset, playSound, showMessage. It also has one property: player. Player has several functions: getScore, incScore, decScore, getLives, incLives, decLives.
-        <div class="editor" id="codeEnemyEditor">{{level.onEnemyHit}}</div>
+        <div class="editor eventHandler" id="onEnemyHit"></div>
       </div>
       
       <div class="tab-pane" id="codeCoin">
-        <div class="editor" id="codeCoinEditor">{{level.onCoinHit}}</div>
+        <div class="editor eventHandler" id="onCoinHit"></div>
       </div>
       
       <div class="tab-pane" id="codeGem">
-        <div class="editor" id="codeGemEditor">{{level.onGemHit}}</div>        
+        <div class="editor eventHandler" id="onGemHit"></div>        
       </div>      
 
       <div class="tab-pane" id="save">
