@@ -38,11 +38,6 @@ function getLevelDto() {
   return level;
 }
 
-/*
-var dep = new Deps.Dependency();
-Session.set("hasBoardJson", false);
-*/
-
 _.extend(Template.levelCustomize, {
   rendered: function() {
     var board =
@@ -111,14 +106,9 @@ _.extend(Template.levelCustomize, {
         ace.edit("levelBoard").on('change', function() {
           if (timeoutId !== null) clearTimeout(timeoutId);
           timeoutId = setTimeout(function() {
-            /*
-            Session.set("hasBoardJson", true);
-            dep.changed();
-            */
             updateLevelPreviews();
           }, 1000);
         });
-        //Session.set("hasBoardJson", true);
       }
     });
   },
@@ -127,12 +117,8 @@ _.extend(Template.levelCustomize, {
   },
   events: {
     'click img' : function(evt, template) {
-      //dep.depend();
       var parentDocId = $(evt.currentTarget).attr("data-parent");
       SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
-      /*
-      Session.set("hasBoardJson", true);
-      */
       updateLevelPreviews();
     }, 
     'click button.save': function(evt,template){    
@@ -142,38 +128,6 @@ _.extend(Template.levelCustomize, {
       Meteor.call('levelSave', id, level);
     }
   }
-});
-
-_.extend(Template.boardPreview, {
-  hasBoardJson: function() {
-    return Session.get("hasBoardJson");
-  },
-  boardMappedToSprites: function() {
-    //dep.depend();
-    var level = getLevelDto();
-    var board = [];
-    try {
-      board = JSON.parse(level.board);
-    } catch (ex) {
-      //Session.set("hasBoardJson", false);
-      return [];
-    }
-    var sprites = _.map(board, function(row){
-        return _.map(row, function(column){
-          if (column === 0) {
-            return level.selections[3];
-          }
-          if (column === 1){
-            return level.tile;
-          }
-          if (column === 2){
-            return level.selections[2];
-          }
-      });
-    });
-    //Session.set("hasBoardJson", true);    
-    return sprites;
-  }  
 });
 
 function updateLevelPreviews() {
