@@ -65,18 +65,15 @@ function levelMapCreate(levelMapId) {
   Q.scene(levelMapId,function(stage) {
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
     var levelMap = Q.assets[levelMapId + ".lvl"];
-    console.log("Level map:");
-    console.log(levelMap);
     map.setup();
-    var container = stage.insert(new Q.UI.Container({
-      fill: "gray",
-      border: 5,
-      shadow: 10,
-      shadowColor: "rgba(0,0,0,0.5)",
-      x:75,
-      y:15
-    }));    
-    stage.insert(new Q.Score(), container);
+    var score = new Q.Score();
+    var box = stage.insert(new Q.UI.Container({
+        x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: "rgba(0,0,0,0.5)"
+      }));
+    box.insert(score);
+    //box.fit(10,5);
+    box.fit()
+    
     stage.insert(new Q.Player(Q.tilePos(10,7)));
 
     stage.insert(new Q.Enemy(Q.tilePos(10,4)));
@@ -225,30 +222,34 @@ _.extend(Template.home, {
           }
         }
       });
-
-      Q.UI.Text.extend("Score", {
+    
+      Q.UI.Button.extend("Score", {
         init: function(p) {
-        this._super({
-          label: "Score: 0",
-          color: "yellow"
-        });
-        Q.state.on("change.score",this,"scoreChange");
-       },
-      scoreChange: function(score) {
-      this.p.label = "Score: " + score;
-     }
-    });  
+          this._super({
+            label: "000000",
+            fontColor: "yellow",
+            x:0,
+            y:0
+          });
+          Q.state.on("change.score", this, "scoreChange");
+        },
+        scoreChange: function(score) {
+          if (score <= 99999) { 
+            score = ("00000" + score).slice(-5); 
+          }
+          this.p.label = score;
+        }
+      });
+    
       Q.Sprite.extend("Player", {
         init: function(p) {
-
           this._super(p,{
             sheet:"player",
             type: SPRITE_PLAYER,
             collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
           });
-
           this.add("2d, towerManControls");
-      }
+        }
       });
 
       // Create the Dot sprite
@@ -439,17 +440,8 @@ _.extend(Template.home, {
         console.log(levelMap);
         
         map.setup();
-        
-        var container = stage.insert(new Q.UI.Container({
-          fill: "gray",
-          border: 5,
-          shadow: 10,
-          shadowColor: "rgba(0,0,0,0.5)",
-          x:75,
-          y:15
-        })); 
-        
-        stage.insert(new Q.Score(), container);
+              
+        stage.insert(new Q.Score());
         stage.insert(new Q.Player(Q.tilePos(10,7)));
 
         stage.insert(new Q.Enemy(Q.tilePos(10,4)));
