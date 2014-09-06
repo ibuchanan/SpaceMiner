@@ -153,6 +153,12 @@ function updateLevelPreviews() {
         if (column === 2){
           return level.selections[2];
         }
+        if (column === 3) {
+          return level.selections[1];
+        }
+        if (column === 4) {
+          return level.selections[0];
+        }
       });
     });
     

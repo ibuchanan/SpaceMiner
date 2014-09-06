@@ -63,22 +63,46 @@ function levelMapCreate(levelMapId) {
   });
 
   Q.scene(levelMapId,function(stage) {
+    var level = Q.assets[levelMapId + ".lvl"];
+    var playerPositions = [];
+    var enemyPositions = [];
+    _.each(level, function(row, rowIndex) {
+      _.each(row, function(col, colIndex) {
+        if (col === 3) {
+          enemyPositions.push([rowIndex, colIndex]);
+          return;
+        } 
+        if (col === 4) {
+          playerPositions.push([rowIndex, colIndex]);
+        }
+      });
+    });
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
-    var levelMap = Q.assets[levelMapId + ".lvl"];
     map.setup();
     var score = new Q.Score();
     var box = stage.insert(new Q.UI.Container({
-        x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: "rgba(0,0,0,0.5)"
-      }));
+      x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: "rgba(0,0,0,0.5)"
+    }));
     box.insert(score);
-    //box.fit(10,5);
-    box.fit()
-    
-    stage.insert(new Q.Player(Q.tilePos(10,7)));
+    box.fit();
 
-    stage.insert(new Q.Enemy(Q.tilePos(10,4)));
-    stage.insert(new Q.Enemy(Q.tilePos(15,10)));
-    stage.insert(new Q.Enemy(Q.tilePos(5,10)));
+    if (playerPositions.length > 0) {
+      _.each(playerPositions, function(pos) {
+        stage.insert(new Q.Player(Q.tilePos(pos[1], pos[0])));
+      });
+    } else {
+      stage.insert(new Q.Player(Q.tilePos(10,7)));
+    }
+    
+    if (enemyPositions.length > 0) {
+      _.each(enemyPositions, function(pos) {
+        stage.insert(new Q.Enemy(Q.tilePos(pos[1], pos[0])));
+      });
+    } else {
+      stage.insert(new Q.Enemy(Q.tilePos(10,4)));
+      stage.insert(new Q.Enemy(Q.tilePos(15,10)));
+      stage.insert(new Q.Enemy(Q.tilePos(5,10)));      
+    } 
   });
 }
 
