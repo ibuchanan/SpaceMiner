@@ -21,7 +21,8 @@
             </div>
             <div class="col-md-8">
               <h2>Preview</h2>
-              <!-- {{> boardPreview}} -->
+             <img id="poppy" src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcS-eTmHxgicEfq4K-sEz_X52cq56uBP2l8cr_q8ivOavSIca5TYtQ"
+                data-toggle="popover" tabindex="50" data-content="testing" data-placement="left" />              
               <div class="previewContainer">
               </div>
             </div>
@@ -39,8 +40,7 @@
             </div>
             <div class="col-md-8">
               <h2>Preview</h2>
-              <!-- {{> boardPreview}} -->
-              <div class="previewContainer">
+              <div class="2previewContainer">
               </div>
             </div>
           </div>
@@ -100,14 +100,22 @@
       {{/each}}
     </div>
   </div>
-</template>
-
-<template name="boardPreview">
-  <div class="previewContainer">
-    {{#if hasBoardJson}}
-      {{#each boardMappedToSprites}}<div class="preview">{{#each this}}<img src="images/spriteParts/{{this}}" />{{/each}}</div>{{/each}}
-    {{else}}
-      Oops, we couldn't render your preview! Is your map array correct?
-    {{/if}}
-  </div>
+  
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title" id="myModalLabel">Select tile</h4>
+        </div>
+        <div class="modal-body">
+          selections...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>  
 </template>

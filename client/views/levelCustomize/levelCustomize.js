@@ -162,13 +162,31 @@ function updateLevelPreviews() {
       });
     });
     
-    $(".previewContainer").empty();  
-    _.each(sprites, function(row) {
+    $(".previewContainer").empty();
+    var imgIndex = 0;
+    _.each(sprites, function(row, rowIndex) {
       var div = $("<div class='preview'></div>");      
-      _.each(row, function(column) {
-        div.append($("<img src='images/spriteParts/" + column + "' />"));
-      });
+      _.each(row, function(column, colIndex) {        
+        var img = $("<img src='images/spriteParts/" + column + "' data-toggle='popover' tabindex='" + 
+                    imgIndex + "' data-placement='right' data-pos='" +
+          rowIndex + "," + colIndex + "' />");
+        div.append(img);
+        imgIndex++;
+      });      
       $(".previewContainer").append(div);
+    });
+    $("[data-toggle=popover]").popover({
+      trigger: 'manual',
+      title:'Select tile',
+      delay: {hide:4000},
+      html:true,
+      content: function() {
+        var pos = $(this).attr("data-pos");
+        pos = pos.split(',');
+        console.log(pos);
+        return "<button class='btn btn-xs'>Title</button><br /><button class='btn btn-xs'>Coin</button><br /><button class='btn btn-xs'>Gem</button><br />"
+          + "<button class='btn btn-xs'>Enemy</button><br /><button class='btn btn-xs'>Player</button>";
+      }
     });
   } catch (ex) {    
     console.log("error in updateLevelPreviews");
