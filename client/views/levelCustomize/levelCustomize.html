@@ -3,8 +3,7 @@
     <h1>Customize your level</h1>
     
     <ul class="nav nav-tabs" role="tablist">    
-      <li class="active"><a href="#sprites" role="tab" data-toggle="tab">Select sprites</a></li>
-      <li><a href="#map" role="tab" data-toggle="tab">Edit map</a></li>
+      <li class="active"><a href="#map" role="tab" data-toggle="tab">Edit map</a></li>
       <li><a href="#codeEnemy" role="tab" data-toggle="tab">Enemy collision</a></li>
       <li><a href="#codeCoin" role="tab" data-toggle="tab">Coin pick up</a></li>      
       <li><a href="#codeGem" role="tab" data-toggle="tab">Gem rescue</a></li>      
@@ -12,7 +11,7 @@
     </ul>
 
     <div class="tab-content">     
-      <div class="tab-pane active" id="sprites">
+      <div class="tab-pane active" id="map">
         <div class="container-fluid">
           <div class="row">
             <div class="col-md-4">
@@ -21,29 +20,28 @@
             </div>
             <div class="col-md-8">
               <h2>Preview</h2>  
-              <div class="previewContainer">
+              <div class="previewContainer"></div>
+              <hr />              
+              <div class="panel-group" id="codeMap">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">
+                      <a data-toggle="collapse" data-parent="#codeMap" href="#codeMapEditor">
+                        Advanced: Code Editor
+                      </a>
+                    </h3>
+                  </div>
+                  <div id="codeMapEditor" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="editor" id="levelBoard"></div>                      
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      <div class="tab-pane" id="map">
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-md-4">
-              <h2>Edit map</h2>
-              Now you can customize how your level is mapped out.              
-              <div class="editor" id="levelBoard"></div>
-            </div>
-            <div class="col-md-8">
-              <h2>Preview</h2>
-              <div class="2previewContainer">
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>      
       
       <div class="tab-pane" id="codeEnemy">
         Now you get to write some code to complete your level. This program, like many programs, is made up of <a href="todo">objects</a>. Objects contain <a href="todo">functions</a> and <a href="todo">properties</a>. There is an object called <code>game</code>. The <code>game</code> contains several functions: pause, unpause, reset, playSound, showMessage. It also has one property: player. Player has several functions: getScore, incScore, decScore, getLives, incLives, decLives.
