@@ -69,12 +69,11 @@ function levelMapCreate(levelMapId) {
   });
 
   Q.scene(levelMapId,function(stage) {
-    var level = Q.assets[levelMapId + ".lvl"];
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
     map.setup();
     var score = new Q.Score();
     var box = stage.insert(new Q.UI.Container({
-      x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: "rgba(0,0,0,0.5)"
+      x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
     }));
     box.insert(score);
     box.fit();
