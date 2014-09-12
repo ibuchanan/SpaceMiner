@@ -44,7 +44,7 @@ function levelMapCreate(levelMapId) {
       });
     },        
     setup: function() {
-      // Clone the top level arriw
+      // Clone the top level array
       var tiles = this.p.tiles = this.p.tiles.concat();
       var size = this.p.tileW;
       
@@ -70,22 +70,6 @@ function levelMapCreate(levelMapId) {
 
   Q.scene(levelMapId,function(stage) {
     var level = Q.assets[levelMapId + ".lvl"];
-    /*
-    var playerPositions = [];
-    var enemyPositions = [];
-    _.each(level, function(row, rowIndex) {
-      _.each(row, function(col, colIndex) {
-        if (col === 3) {
-          enemyPositions.push([rowIndex, colIndex]);
-          level[rowIndex][colIndex] = 0;
-        } 
-        if (col === 4) {
-          playerPositions.push([rowIndex, colIndex]);
-          level[rowIndex][colIndex] = 0;          
-        }
-      });
-    });
-    */
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
     map.setup();
     var score = new Q.Score();
@@ -94,26 +78,6 @@ function levelMapCreate(levelMapId) {
     }));
     box.insert(score);
     box.fit();
-
-    /*
-    if (playerPositions.length > 0) {
-      _.each(playerPositions, function(pos) {
-        stage.insert(new Q.Player(Q.tilePos(pos[1], pos[0])));
-      });
-    } else {
-      stage.insert(new Q.Player(Q.tilePos(10,7)));
-    }
-    
-    if (enemyPositions.length > 0) {
-      _.each(enemyPositions, function(pos) {
-        stage.insert(new Q.Enemy(Q.tilePos(pos[1], pos[0])));
-      });
-    } else {
-      stage.insert(new Q.Enemy(Q.tilePos(10,4)));
-      stage.insert(new Q.Enemy(Q.tilePos(15,10)));
-      stage.insert(new Q.Enemy(Q.tilePos(5,10)));      
-    }
-    */
   });
 }
 
