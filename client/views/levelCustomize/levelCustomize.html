@@ -20,9 +20,7 @@
               {{> sprites}}
             </div>
             <div class="col-md-8">
-              <h2>Preview</h2>
-             <img id="poppy" src="https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcS-eTmHxgicEfq4K-sEz_X52cq56uBP2l8cr_q8ivOavSIca5TYtQ"
-                data-toggle="popover" tabindex="50" data-content="testing" data-placement="left" />              
+              <h2>Preview</h2>  
               <div class="previewContainer">
               </div>
             </div>
@@ -89,7 +87,7 @@
             {{#each choices}}
             <div class="btn-group">
               <button type="button" class="btn btn-default">
-                <img src="images/spriteParts/{{this}}" data-parent="{{../_id}}" />
+                <img class="spriteChoice" src="images/spriteParts/{{this}}" data-parent="{{../_id}}" />
               </button>
               <br />
             </div>
@@ -101,19 +99,23 @@
     </div>
   </div>
   
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal fade" id="tileDialog" tabindex="-1" role="dialog" aria-labelledby="tileDialogLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-          <h4 class="modal-title" id="myModalLabel">Select tile</h4>
-        </div>
-        <div class="modal-body">
-          selections...
+          <h4 class="modal-title" id="tileDialogLabel">Select tile</h4>
+        </div>       
+        
+        <div class="modal-body">          
+          <img id="tileTile" class="tileSelector" data-spriteNum="1" />&nbsp;
+          <img id="tileCoin" class="tileSelector" data-spriteNum="0" />&nbsp;
+          <img id="tileGem" class="tileSelector" data-spriteNum="2" />&nbsp;
+          <img id="tileEnemy" class="tileSelector" data-spriteNum="3" />&nbsp;
+          <img id="tilePlayer" class="tileSelector" data-spriteNum="4" />&nbsp;
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </div>

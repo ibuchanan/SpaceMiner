@@ -102,6 +102,7 @@ _.extend(Template.levelCustomize, {
           editor.setHighlightActiveLine(true);
         });
 
+        /*
         var timeoutId = null;
         ace.edit("levelBoard").on('change', function() {
           if (timeoutId !== null) clearTimeout(timeoutId);
@@ -109,6 +110,7 @@ _.extend(Template.levelCustomize, {
             updateLevelPreviews();
           }, 1000);
         });
+        */
       }
     });
   },
@@ -116,12 +118,12 @@ _.extend(Template.levelCustomize, {
     var lev = Session.get("level");
   },
   events: {
-    'click img' : function(evt, template) {
+    'click .spriteChoice' : function(evt, template) {
       var parentDocId = $(evt.currentTarget).attr("data-parent");
       SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
       updateLevelPreviews();
     }, 
-    'click button.save': function(evt,template){    
+    'click button.save': function(evt,template) {
       var level = getLevelDto();
       var id = Session.get("level")._id;
       level.published = true;
@@ -131,6 +133,7 @@ _.extend(Template.levelCustomize, {
 });
 
 function updateLevelPreviews() {
+  console.log("Updating previews...");
   try {
     var level = getLevelDto();
     var board = [];
@@ -167,29 +170,41 @@ function updateLevelPreviews() {
     _.each(sprites, function(row, rowIndex) {
       var div = $("<div class='preview'></div>");      
       _.each(row, function(column, colIndex) {        
-        var img = $("<img src='images/spriteParts/" + column + "' data-toggle='popover' tabindex='" + 
-                    imgIndex + "' data-placement='right' data-pos='" +
-          rowIndex + "," + colIndex + "' />");
+        var img = $("<img src='images/spriteParts/" + column + "' class='tilePreview' data-pos='" +
+          rowIndex + "," + colIndex + "' id='tileSelect" + imgIndex + "'/>");
         div.append(img);
         imgIndex++;
       });      
       $(".previewContainer").append(div);
     });
-    $("[data-toggle=popover]").popover({
-      trigger: 'manual',
-      title:'Select tile',
-      delay: {hide:4000},
-      html:true,
-      content: function() {
-        var pos = $(this).attr("data-pos");
-        pos = pos.split(',');
-        console.log(pos);
-        return "<button class='btn btn-xs'>Title</button><br /><button class='btn btn-xs'>Coin</button><br /><button class='btn btn-xs'>Gem</button><br />"
-          + "<button class='btn btn-xs'>Enemy</button><br /><button class='btn btn-xs'>Player</button>";
-      }
+    
+    var spriteSrc = 'images/spriteParts/';
+    $("#tileTile").attr('src', spriteSrc + level.tile);
+    $("#tileCoin").attr('src', spriteSrc + level.selections[3]);
+    $("#tileGem").attr('src', spriteSrc + level.selections[2]);
+    $("#tileEnemy").attr('src', spriteSrc + level.selections[1]);    
+    $("#tilePlayer").attr('src', spriteSrc + level.selections[0]);    
+    
+    $('[class=tilePreview]').on('click', function() {
+      updateLevelPreviews.tileSelected = this;
+      $('#tileDialog').modal('show');
     });
-  } catch (ex) {    
+    
+    $('[class=tileSelector]').off('click');
+    $('[class=tileSelector]').on('click', function() {
+      var pos = $(updateLevelPreviews.tileSelected).attr('data-pos').split(',');
+      var row = Number(pos[0]),
+          col = Number(pos[1]);
+      var spriteNum = Number($(this).attr('data-spriteNum'));
+      board[row][col] = spriteNum;
+      var json = JSON.stringify(board);
+      ace.edit("levelBoard").getSession().setValue(json);
+      updateLevelPreviews();
+      $('#tileDialog').modal('hide');
+    });
+  } catch (ex) {
     console.log("error in updateLevelPreviews");
     console.log(ex);
   }
 }
+updateLevelPreviews.tileSelected = null;
