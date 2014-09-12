@@ -47,13 +47,19 @@ function levelMapCreate(levelMapId) {
       // Clone the top level arriw
       var tiles = this.p.tiles = this.p.tiles.concat();
       var size = this.p.tileW;
+      
+      var map = {
+        '0': 'Dot',
+        '2': 'Tower',
+        '3': 'Enemy',
+        '4': 'Player'
+      };
       for(var y=0;y<tiles.length;y++) {
         var row = tiles[y] = tiles[y].concat();
         for(var x =0;x<row.length;x++) {
-          var tile = row[x];
-
-          if(tile == 0 || tile == 2) {
-            var className = tile == 0 ? 'Dot' : 'Tower'
+          var tile = row[x];    
+          if (tile !== 1) {
+            var className = map[String(tile)];
             this.stage.insert(new Q[className](Q.tilePos(x,y)));
             row[x] = 0;
           }
@@ -64,19 +70,22 @@ function levelMapCreate(levelMapId) {
 
   Q.scene(levelMapId,function(stage) {
     var level = Q.assets[levelMapId + ".lvl"];
+    /*
     var playerPositions = [];
     var enemyPositions = [];
     _.each(level, function(row, rowIndex) {
       _.each(row, function(col, colIndex) {
         if (col === 3) {
           enemyPositions.push([rowIndex, colIndex]);
-          return;
+          level[rowIndex][colIndex] = 0;
         } 
         if (col === 4) {
           playerPositions.push([rowIndex, colIndex]);
+          level[rowIndex][colIndex] = 0;          
         }
       });
     });
+    */
     var map = stage.collisionLayer(new Q["Level" + levelMapId]());
     map.setup();
     var score = new Q.Score();
@@ -86,6 +95,7 @@ function levelMapCreate(levelMapId) {
     box.insert(score);
     box.fit();
 
+    /*
     if (playerPositions.length > 0) {
       _.each(playerPositions, function(pos) {
         stage.insert(new Q.Player(Q.tilePos(pos[1], pos[0])));
@@ -102,7 +112,8 @@ function levelMapCreate(levelMapId) {
       stage.insert(new Q.Enemy(Q.tilePos(10,4)));
       stage.insert(new Q.Enemy(Q.tilePos(15,10)));
       stage.insert(new Q.Enemy(Q.tilePos(5,10)));      
-    } 
+    }
+    */
   });
 }
 
@@ -475,22 +486,6 @@ _.extend(Template.home, {
       Q.scene("level2",function(stage) {
         var map = stage.collisionLayer(new Q.TowerManMap2());
         map.setup();
-        /**
-        var container = stage.insert(new Q.UI.Container({
-         
-          y: 48,
-          x: Q.width/2 
-        }));
-
-       Q.state.on("change.score",this,"score");
-        stage.insert(new Q.UI.Text({ 
-
-         label: "Score: " + Q.state.get("score"),
-         color: "white",
-         x: -207,
-         y: -30
-        }),container);
-        container.fit(2,2);**/
         stage.insert(new Q.Score());
         stage.insert(new Q.Player(Q.tilePos(10,7)));
 
