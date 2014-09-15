@@ -132,13 +132,34 @@ _.extend(Template.levelCustomize, {
   }
 });
 
+function unparseBoard(board) {
+  var boardString = _.map(board, function(row){
+    return _.map(row, function(column){
+      if (column === 0 || column === ' ') {
+        return ' ';
+      }
+      if (column === 1 || column === 't'){
+        return 't';
+      }
+      if (column === 2 || column === 'G'){
+        return 'G';
+      }
+      if (column === 3 || column === 'E') {
+        return 'E';
+      }
+      if (column === 4 || column === 'P') {
+        return 'P';
+      }
+    });
+  });  
+}
 function updateLevelPreviews() {
   console.log("Updating previews...");
   try {
     var level = getLevelDto();
     var board = [];
     try {
-      board = JSON.parse(level.board);
+      board = parseBoard(level.board);
     } catch (ex) {
       console.log("Error trying to parse board:");
       console.log(ex);
@@ -147,19 +168,19 @@ function updateLevelPreviews() {
     }
     var sprites = _.map(board, function(row){
       return _.map(row, function(column){
-        if (column === 0) {
+        if (column === 0 || column === ' ') {
           return level.selections[3];
         }
-        if (column === 1){
+        if (column === 1 || column === 't'){
           return level.tile;
         }
-        if (column === 2){
+        if (column === 2 || column === 'G'){
           return level.selections[2];
         }
-        if (column === 3) {
+        if (column === 3 || column === 'E') {
           return level.selections[1];
         }
-        if (column === 4) {
+        if (column === 4 || column === 'P') {
           return level.selections[0];
         }
       });
