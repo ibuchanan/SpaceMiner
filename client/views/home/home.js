@@ -2,6 +2,7 @@ var SPRITE_PLAYER = 1;
 var SPRITE_TILES = 2;
 var SPRITE_ENEMY = 4;
 var SPRITE_DOT = 8;
+var SPRITE_SHOT = 16;
 
 // Global facaces on top of the Quintus API
 // for students to program against in their code 
@@ -49,16 +50,16 @@ function levelMapCreate(levelMapId) {
       var size = this.p.tileW;
       
       var map = {
-        '0': 'Dot',
-        '2': 'Tower',
-        '3': 'Enemy',
-        '4': 'Player'
+        ' ': 'Dot',
+        'G': 'Tower',
+        'E': 'Enemy',
+        'P': 'Player'
       };
       for(var y=0;y<tiles.length;y++) {
         var row = tiles[y] = tiles[y].concat();
         for(var x =0;x<row.length;x++) {
           var tile = row[x];    
-          if (tile !== 1) {
+          if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             this.stage.insert(new Q[className](Q.tilePos(x,y)));
             row[x] = 0;
@@ -113,8 +114,25 @@ _.extend(Template.home, {
           var fileParts = src.split("."), fileName = fileParts[0];
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             var obj = JSON.parse(val)[0];
-            var board = JSON.parse(obj.board);
+            var board = obj.board;            
+            board =
+             'tttttttttttttttttttt\n' +
+             't  G    ttt     G  t\n' +
+             't ttttt      ttttt t\n' +
+             't tG E G E  G  EGt t\n' +
+             't ttttt      ttttt t\n' +
+             't     t  tt  tG    t\n' +
+             't  t  t  tt  t  t  t\n' +
+             't     t      t     t\n' +
+             't t              t t\n' +
+             't t tt tttttt tt t t\n' +
+             't  G   t GP t      t\n' +
+             't t tt t tt t tt t t\n' +
+             't                 Gt\n' +
+             'tttttttttttttttttttt';
+            board = parseBoard(board);
             Q.assets[key] = board;
+            
             // TODO fix hack
             try {
               var func = eval(obj.onEnemyHit);
@@ -226,8 +244,8 @@ _.extend(Template.home, {
           this._super({
             label: "000000",
             fontColor: "yellow",
-            x:0,
-            y:0
+            x:20,
+            y:10
           });
           Q.state.on("change.score", this, "scoreChange");
         },
@@ -246,10 +264,87 @@ _.extend(Template.home, {
             type: SPRITE_PLAYER,
             collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
           });
-          this.add("2d, towerManControls");
-        }
+          this.add("2d, towerManControls,laser");
+        },
       });
-
+    Q.Sprite.extend("Shot", {
+        init: function(p) {
+          this._super(p,{
+            sheet:"shot",
+            type: SPRITE_SHOT,
+            collisionMask: SPRITE_TILES | SPRITE_ENEMY,
+            speed : 200,
+          });
+          this.on('hit','erase');
+        },
+      step: function(dt){
+        this.stage.collide(this);
+        if(this.p.angle == 0){
+          this.p.x += this.p.speed * dt;
+        } 
+        else if(this.p.angle == 180){
+          this.p.x -= this.p.speed * dt;
+        }
+         else if(this.p.angle == -90){
+          this.p.y -= this.p.speed * dt;
+        }
+        else{
+          this.p.y += this.p.speed * dt;
+        }
+        
+        if(this.p.y > Q.el.height || this.p.y < 0){
+          this.destroy();
+        }
+      }, sensor: function() {
+          this.destroy();
+       },
+      erase: function(collision) {
+        console.log('collision');
+        this.destroy();
+      }  
+      });
+  Q.component("laser",{
+    added : function(){
+      this.entity.p.shots = [];
+      this.entity.p.canFire = true;
+      this.entity.on("step",'handleFiring');
+    },
+    extend:{
+      handleFiring: function(dt){
+        for(var i = this.p.shots.length-1;i > 0;i--){
+          if(this.p.shots[i].isDestroyed){
+            this.p.shots.splice(i,1);
+          }
+        }
+         if(Q.inputs['fire']){
+           this.fire();
+         }  
+      },
+      fire: function(){
+        var entity = this;
+          if(!this.p.canFire){
+            return;
+          }
+          if(this.p.direction == 'left'){
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:200}));
+          }
+          else if(this.p.direction == 'up'){
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:200}));
+          }
+          else if(this.p.direction == 'down'){
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:200}));
+          }
+          else{
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:200}));
+          }
+          this.p.shots.push(shot);
+          entity.p.canFire = false;
+          setTimeout(function(){
+            entity.p.canFire = true;
+        },1000);
+      }
+    } 
+  });
       // Create the Dot sprite
       Q.Sprite.extend("Dot", {
         init: function(p) {
@@ -286,6 +381,7 @@ _.extend(Template.home, {
           this.stage.dotCount++;
         }
       });
+    
 
 
       // Tower is just a dot with a different sheet - use the same
@@ -417,7 +513,7 @@ _.extend(Template.home, {
           this._super(p,{
             sheet:"enemy",
             type: SPRITE_ENEMY,
-            collisionMask: SPRITE_PLAYER | SPRITE_TILES
+            collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_SHOT
           });
 
           this.add("2d,enemyControls");
@@ -427,6 +523,9 @@ _.extend(Template.home, {
         hit: function(col) {
           if(col.obj.isA("Player")) {
             OnEnemyHit();
+          }
+          else if(col.obj.isA("Shot")){
+            this.destroy();
           }
         }
       });
@@ -457,9 +556,10 @@ _.extend(Template.home, {
         stage.insert(new Q.Enemy(Q.tilePos(5,10)));
       });
 
-      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, coin1.wav", function() {
+      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, coin1.wav, shot.json, basicShot.png",  function() {
         Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
         Q.compileSheets("sprites.png","sprites.json");
+        Q.compileSheets("basicShot.png","shot.json");
         Q.stageScene("level1");       
       });
     
