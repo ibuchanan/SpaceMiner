@@ -60,7 +60,8 @@ Meteor.startup(function () {
         Enemy: 2,
         Treasure: 3,
         Coin: 4,
-        Tiles: 5
+        Tiles: 5,
+        Shots: 6
       };
       var glob = Meteor.npmRequire("glob");      
       glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment(function (er, files) {

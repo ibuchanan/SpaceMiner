@@ -50,7 +50,7 @@ function levelMapCreate(levelMapId) {
       var size = this.p.tileW;
       
       var map = {
-        ' ': 'Dot',
+        '-': 'Dot',
         'G': 'Tower',
         'E': 'Enemy',
         'P': 'Player'

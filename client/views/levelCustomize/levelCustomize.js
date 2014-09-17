@@ -41,23 +41,20 @@ function getLevelDto() {
 _.extend(Template.levelCustomize, {
   rendered: function() {
     var board =
-      "[\n"
-    + " [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],\n"
-    + " [ 1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1 ],\n"
-    + " [ 1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1 ],\n"
-    + " [ 1,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,1 ],\n"
-    + " [ 1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1 ],\n"
-    + " [ 1,0,0,0,0,0,1,0,0,1,1,0,0,1,2,0,0,0,0,1 ],\n"
-    + " [ 1,0,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1 ],\n"
-    + " [ 1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1 ],\n"
-    + " [ 1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1 ],\n"
-    + " [ 1,0,1,0,1,1,0,1,1,1,1,1,1,0,1,1,0,1,0,1 ],\n"
-    + " [ 1,0,0,2,0,0,0,1,0,2,0,0,1,0,0,0,0,0,0,1 ],\n"
-    + " [ 1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1 ],\n"
-    + " [ 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1 ],\n"
-    + " [ 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ]\n"
-    + "]";    
-    
+   'tttttttttttttttttttt\n' +
+   't--G------------G--t\n' +
+   't-ttttt------ttttt-t\n' +
+   't-tG-E--------E-Gt-t\n' +
+   't-ttttt------ttttt-t\n' +
+   't-----t--tt--t-----t\n' +
+   't--t--t--tt--t--t--t\n' +
+   't-----t------t-----t\n' +
+   't-t--------------t-t\n' +
+   't-t-tt-tttttt-tt-t-t\n' +
+   't--G---t-G-------P-t\n' +
+   't-t-tt-t-tt-t-tt-t-t\n' +
+   't-----------------Gt\n' +
+   'tttttttttttttttttttt';    
     var level = {
       userId: Meteor.userId(),
       board: board,
@@ -65,9 +62,10 @@ _.extend(Template.levelCustomize, {
       selections: [
         'Player/dark.png',
         'Enemy/brainBlue.png',
-        'Coin/blue.png',
         'Treasure/dark.png',
-        'Tiles/tileAsteroidFull.png'
+        'Coin/blue.png',        
+        'Tiles/tileAsteroidFull.png',
+        'Shorts/basicShot.png'        
       ],
       tile: 'Tiles/tileAsteroidFull.png',
       onEnemyHit: 'game.reset();',
@@ -90,19 +88,20 @@ _.extend(Template.levelCustomize, {
         _.each(["levelBoard", "onEnemyHit", 
              "onCoinHit", "onGemHit"], function(editorSelector) {
           var editor = ace.edit(editorSelector);
+          editor.setFontSize(16);
           editor.setTheme("ace/theme/monokai");
           var session = editor.getSession();
-          session.setMode("ace/mode/javascript");
           if (editorSelector !== "levelBoard") {
             var val = levelDoc[editorSelector];
             session.setValue(levelDoc[editorSelector]);
+            session.setMode("ace/mode/javascript");            
           } else {
+            session.setMode("ace/mode/text");            
             session.setValue(levelDoc.board);
           }
           editor.setHighlightActiveLine(true);
         });
 
-        /*
         var timeoutId = null;
         ace.edit("levelBoard").on('change', function() {
           if (timeoutId !== null) clearTimeout(timeoutId);
@@ -110,7 +109,6 @@ _.extend(Template.levelCustomize, {
             updateLevelPreviews();
           }, 1000);
         });
-        */
       }
     });
   },
@@ -132,29 +130,7 @@ _.extend(Template.levelCustomize, {
   }
 });
 
-function unparseBoard(board) {
-  var boardString = _.map(board, function(row){
-    return _.map(row, function(column){
-      if (column === 0 || column === ' ') {
-        return ' ';
-      }
-      if (column === 1 || column === 't'){
-        return 't';
-      }
-      if (column === 2 || column === 'G'){
-        return 'G';
-      }
-      if (column === 3 || column === 'E') {
-        return 'E';
-      }
-      if (column === 4 || column === 'P') {
-        return 'P';
-      }
-    });
-  });  
-}
 function updateLevelPreviews() {
-  console.log("Updating previews...");
   try {
     var level = getLevelDto();
     var board = [];
@@ -168,21 +144,29 @@ function updateLevelPreviews() {
     }
     var sprites = _.map(board, function(row){
       return _.map(row, function(column){
-        if (column === 0 || column === ' ') {
-          return level.selections[3];
+        var mapped;
+        /*
+      selections: [
+        'Player/dark.png',
+        'Enemy/brainBlue.png',
+        'Treasure/dark.png',
+        'Coin/blue.png',        
+        'Tiles/tileAsteroidFull.png',
+        'Shorts/basicShot.png'        
+      ],
+        */        
+        if (column === '-') {
+          mapped = level.selections[3];
+        } else if (column === 'T' || column === 't'){
+          mapped = level.tile;
+        } else if (column === 'G' || column === 'g'){
+          mapped = level.selections[2];
+        } else if (column === 'E' || column === 'e') {
+          mapped = level.selections[1];
+        } else if (column === 'P' || column === 'p') {
+          mapped = level.selections[0];
         }
-        if (column === 1 || column === 't'){
-          return level.tile;
-        }
-        if (column === 2 || column === 'G'){
-          return level.selections[2];
-        }
-        if (column === 3 || column === 'E') {
-          return level.selections[1];
-        }
-        if (column === 4 || column === 'P') {
-          return level.selections[0];
-        }
+        return mapped;
       });
     });
     
