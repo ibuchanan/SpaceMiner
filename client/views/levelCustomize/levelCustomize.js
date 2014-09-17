@@ -103,12 +103,14 @@ _.extend(Template.levelCustomize, {
         });
 
         var timeoutId = null;
-        ace.edit("levelBoard").on('change', function() {
+        function onChange() {
           if (timeoutId !== null) clearTimeout(timeoutId);
           timeoutId = setTimeout(function() {
             updateLevelPreviews();
-          }, 1000);
-        });
+          });
+        }
+        ace.edit("levelBoard").on('change', onChange, 1000);
+        onChange();
       }
     });
   },
@@ -116,6 +118,13 @@ _.extend(Template.levelCustomize, {
     var lev = Session.get("level");
   },
   events: {
+    'click .tilesRow2': function() {
+      var editor = ace.edit('levelBoard');
+      var doc = editor.getSession().getDocument();
+      var AceRange = require('ace/range').Range;
+      var rng = new AceRange(1,0,1,20);
+      doc.replace(rng, "tttttttttttttttttttt");      
+    },
     'click .spriteChoice' : function(evt, template) {
       var parentDocId = $(evt.currentTarget).attr("data-parent");
       SpriteParts._collection.update({_id: parentDocId}, {$set: {selected: String(this)}});
