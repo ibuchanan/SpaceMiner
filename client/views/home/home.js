@@ -130,7 +130,7 @@ _.extend(Template.home, {
              't t tt t tt t tt t t\n' +
              't                 Gt\n' +
              'tttttttttttttttttttt';
-            board = parseBoard(board);
+            board = boardFromText(board);
             Q.assets[key] = board;
             
             // TODO fix hack

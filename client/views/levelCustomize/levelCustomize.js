@@ -144,7 +144,7 @@ function updateLevelPreviews() {
     var level = getLevelDto();
     var board = [];
     try {
-      board = parseBoard(level.board);
+      board = boardFromText(level.board);
     } catch (ex) {
       console.log("Error trying to parse board:");
       console.log(ex);
@@ -209,25 +209,11 @@ function updateLevelPreviews() {
       var pos = $(updateLevelPreviews.tileSelected).attr('data-pos').split(',');
       var row = Number(pos[0]),
           col = Number(pos[1]);
-      var spriteNum = Number($(this).attr('data-spriteNum'));
-      board[row][col] = spriteNum;
-      var json = JSON.stringify(board);
-      json = json.replace(/\[\[/g, "[\n [");
-      json = json.replace(/\],\[/g, "],\n [");
-      json = json.replace(/\]\]/g, "]\n]");
-      // We need to make this:
-      /*      
-      [[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],[1,0,0,2,3,0,0,0,0,0,0,0,0,0,0,3,2,0,0,1],[1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1],[1,0,1,2,3,0,0,0,0,0,0,0,0,0,0,3,2,1,0,1],[1,0,1,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1],[1,0,0,0,0,0,1,0,0,1,1,0,0,1,2,0,0,0,0,1],[1,0,0,1,0,0,1,0,0,1,1,0,0,1,0,0,1,0,0,1],[1,0,0,0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,0,1],[1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1],[1,0,1,0,1,1,0,1,1,1,1,1,1,0,1,1,0,1,0,1],[1,0,0,2,0,0,0,1,0,2,4,0,1,0,0,0,0,0,0,1],[1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1],[1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1],[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]]    
-      */
-      // into more like this:
-      /*
-      [
-       [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 ],
-       [1,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1 ],
-      ]
-      */
+      var spriteLetter = $(this).attr('data-spriteLetter');
+      board[row][col] = spriteLetter;
+      var text = boardToText(board);      
       var editor = ace.edit('levelBoard');
-      editor.getSession().setValue(json);
+      editor.getSession().setValue(text);
       editor.resize();
       updateLevelPreviews();
       $('#tileDialog').modal('hide');
