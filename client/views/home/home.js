@@ -191,7 +191,7 @@ _.extend(Template.home, {
    
       Q.component("towerManControls", {
         // default properties to add onto our entity
-        defaults: { speed: 100, direction: 'up' },
+        defaults: { speed: 200, direction: 'up' },
 
         // called when the component is added to
         // an entity
@@ -274,7 +274,7 @@ _.extend(Template.home, {
             sheet:"shot",
             type: SPRITE_SHOT,
             collisionMask: SPRITE_TILES | SPRITE_ENEMY,
-            speed : 200,
+            speed : 300,
           });
           this.on('hit','erase');
         },
@@ -328,16 +328,16 @@ _.extend(Template.home, {
             return;
           }
           if(this.p.direction == 'left'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:200}));
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:400}));
           }
           else if(this.p.direction == 'up'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:200}));
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:400}));
           }
           else if(this.p.direction == 'down'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:200}));
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:400}));
           }
           else{
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:200}));
+            var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:400}));
           }
           this.p.shots.push(shot);
           entity.p.canFire = false;
@@ -474,7 +474,7 @@ _.extend(Template.home, {
 
       });
       Q.component("enemyControls", {
-        defaults: { speed: 100, direction: 'left', switchPercent: 2 },
+        defaults: { speed: 210, direction: 'left', switchPercent: 2 },
 
         added: function() {
           var p = this.entity.p;
@@ -540,7 +540,11 @@ _.extend(Template.home, {
             OnEnemyHit();
           }
           else if(col.obj.isA("Shot")){
+            player.incScore(1000);
             this.destroy();
+            setTimeout(function(){
+              Q.stage().insert(new Q.Enemy(Q.tilePos(10,7)));
+            },5000);
           }
         }
       });
@@ -589,7 +593,7 @@ _.extend(Template.home, {
       }
     
       function OnGemHit() {
-        player.incScore(10000);
+        player.incScore(Q.state.get("score"));
         game.playSound('gem1.wav');  
          Q.state.inc("ammo", 1);
         console.log(Q.state.get("ammo"));
