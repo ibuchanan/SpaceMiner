@@ -9,7 +9,7 @@ var SPRITE_SHOT = 16;
 // sections.
 game = {
   reset: function() {
-    Q.state.reset({ score: 0, lives: 2, stage: 1});
+    Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
     Q.stageScene("level1");
   },
   pause: function() {
@@ -58,7 +58,8 @@ function levelMapCreate(levelMapId) {
       for(var y=0;y<tiles.length;y++) {
         var row = tiles[y] = tiles[y].concat();
         for(var x =0;x<row.length;x++) {
-          var tile = row[x];    
+          var tile = row[x];
+          if (tile === 't') row[x] = 1;
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             this.stage.insert(new Q[className](Q.tilePos(x,y)));
@@ -105,7 +106,7 @@ _.extend(Template.home, {
       // along with joypad controls for touch
       Q.input.keyboardControls();
       Q.input.joypadControls();
-      Q.state.reset({ score: 0, lives: 2, stage: 1});
+    Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
 
       Q.gravityX = 0;
       Q.gravityY = 0;
@@ -244,14 +245,14 @@ _.extend(Template.home, {
           this._super({
             label: "000000",
             fontColor: "yellow",
-            x:20,
+            x:50,
             y:10
           });
           Q.state.on("change.score", this, "scoreChange");
         },
         scoreChange: function(score) {
           if (score <= 99999) { 
-            score = ("00000" + score).slice(-5); 
+            score = ("" + score); 
           }
           this.p.label = score;
         }
@@ -264,7 +265,7 @@ _.extend(Template.home, {
             type: SPRITE_PLAYER,
             collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
           });
-          this.add("2d, towerManControls,laser");
+          this.add("2d, towerManControls, laser");
         },
       });
     Q.Sprite.extend("Shot", {
@@ -299,7 +300,7 @@ _.extend(Template.home, {
           this.destroy();
        },
       erase: function(collision) {
-        console.log('collision');
+        //console.log('collision');
         this.destroy();
       }  
       });
@@ -322,7 +323,8 @@ _.extend(Template.home, {
       },
       fire: function(){
         var entity = this;
-          if(!this.p.canFire){
+          if(!this.p.canFire||Q.state.get("ammo")<=0){
+            console.log(Q.state.get('ammo'));
             return;
           }
           if(this.p.direction == 'left'){
@@ -339,8 +341,10 @@ _.extend(Template.home, {
           }
           this.p.shots.push(shot);
           entity.p.canFire = false;
+          Q.state.dec("ammo", 1) ;
           setTimeout(function(){
-            entity.p.canFire = true;
+              entity.p.canFire = true; 
+              console.log(Q.state.get('ammo'));
         },1000);
       }
     } 
@@ -391,7 +395,18 @@ _.extend(Template.home, {
           this._super(Q._defaults(p,{
             sheet: 'tower'
           }));
-        }
+        },
+        sensor: function() {
+          // Destroy it and keep track of how many dots are left
+          this.destroy();
+          this.stage.dotCount--;
+          OnGemHit();
+          // If there are no more dots left, just restart the game
+          // TODO move to next level from page
+          if(this.stage.dotCount == 0) {
+            Q.stageScene("level2");
+          }
+        }  
       });
 
       // Return a x and y location from a row and column
@@ -534,7 +549,7 @@ _.extend(Template.home, {
         var map = stage.collisionLayer(new Q.TowerManMap());
     
         var levelMap = Q.assets["level.json"];
-        console.log(levelMap);
+        //console.log(levelMap);
         
         map.setup();
               
@@ -556,7 +571,7 @@ _.extend(Template.home, {
         stage.insert(new Q.Enemy(Q.tilePos(5,10)));
       });
 
-      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, coin1.wav, shot.json, basicShot.png",  function() {
+      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
         Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
         Q.compileSheets("sprites.png","sprites.json");
         Q.compileSheets("basicShot.png","shot.json");
@@ -574,8 +589,10 @@ _.extend(Template.home, {
       }
     
       function OnGemHit() {
-        player.incScore(1000);
-        game.playSound('coin1.wav');        
+        player.incScore(10000);
+        game.playSound('gem1.wav');  
+         Q.state.inc("ammo", 1);
+        console.log(Q.state.get("ammo"));
       }
     
       function OnPause() {
