@@ -54,7 +54,7 @@ _.extend(Template.levelCustomize, {
    't--G---t-G-------P-t\n' +
    't-t-tt-t-tt-t-tt-t-t\n' +
    't-----------------Gt\n' +
-   'tttttttttttttttttttt';    
+   'tttttttttttttttttttt';
     var level = {
       userId: Meteor.userId(),
       board: board,
@@ -85,7 +85,7 @@ _.extend(Template.levelCustomize, {
         var levelDoc = Levels.findOne(id);
         Session.set("level", levelDoc);
 
-        _.each(["levelBoard", "onEnemyHit", 
+        _.each(["levelBoard", "levelBoardCode", "onEnemyHit", 
              "onCoinHit", "onGemHit"], function(editorSelector) {
           var editor = ace.edit(editorSelector);
           editor.setFontSize(16);
@@ -93,8 +93,13 @@ _.extend(Template.levelCustomize, {
           var session = editor.getSession();
           if (editorSelector !== "levelBoard") {
             var val = levelDoc[editorSelector];
-            session.setValue(levelDoc[editorSelector]);
-            session.setMode("ace/mode/javascript");            
+            if (editorSelector !== "levelBoardCode") {
+              session.setValue(levelDoc[editorSelector]);
+            } else {
+              session.setMode("ace/mode/javascript");                          
+              var data = JSON.stringify(boardFromText(levelDoc.board));              
+              session.setValue(data);
+            }
           } else {
             session.setMode("ace/mode/text");            
             session.setValue(levelDoc.board);

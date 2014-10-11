@@ -115,22 +115,7 @@ _.extend(Template.home, {
           var fileParts = src.split("."), fileName = fileParts[0];
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             var obj = JSON.parse(val)[0];
-            var board = obj.board;            
-            board =
-             'tttttttttttttttttttt\n' +
-             't  G    ttt     G  t\n' +
-             't ttttt      ttttt t\n' +
-             't tG E G E  G  EGt t\n' +
-             't ttttt      ttttt t\n' +
-             't     t  tt  tG    t\n' +
-             't  t  t  tt  t  t  t\n' +
-             't     t      t     t\n' +
-             't t              t t\n' +
-             't t tt tttttt tt t t\n' +
-             't  G   t GP t      t\n' +
-             't t tt t tt t tt t t\n' +
-             't                 Gt\n' +
-             'tttttttttttttttttttt';
+            var board = obj.board;
             board = boardFromText(board);
             Q.assets[key] = board;
             
