@@ -50,8 +50,8 @@ Meteor.startup(function () {
   
     Meteor.methods({
       'levelSave': function(id, levelDto) {
-        createLevelRecord(level, function(levelDto) {
-            Levels.upsert(id, {$set: levelDto});          
+        createLevelRecord(levelDto, function(levelDtoPoweredUp) {
+            Levels.upsert(id, {$set: levelDtoPoweredUp});          
         });
       }
     });
