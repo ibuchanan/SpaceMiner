@@ -18,6 +18,45 @@ function createLevelRecord(levelDto, callback) {
   }));
 }
 
+function createLevelDefault() {
+  var board = 
+      'tttttttttttttttttttt\n' + 
+      't---------------G--t\n' + 
+      't-ttttt------ttttt-t\n' + 
+      't-tG-E--------E-Gt-t\n' + 
+      't-ttttt------ttttt-t\n' + 
+      't-----t--tt--t-----t\n' + 
+      't--t--t--tt--t--t--t\n' + 
+      't-----t------t-----t\n' + 
+      't-t--------------t-t\n' + 
+      't-t-tt-tttttt-tt-t-t\n' + 
+      't--G---t-G-------P-t\n' + 
+      't-t-tt-t-tt-t-tt-t-t\n' + 
+      't-----------------Gt\n' + 
+      'tttttttttttttttttttt\n'; 
+  var level = {
+    userId: 'admin',
+    board: board,
+    name: 'Space Miner',
+    onCoinHit: '',
+    onEnemyHit: '',
+    onGemHit: '',
+    published: true,
+    selections: [
+      'Player/dark.png',
+      'Enemy/brainBlue.png',
+      'Treasure/dark.png',
+      'Coin/blue.png',
+      'Shots/basicShot.png'
+    ],
+    'tile': 'Tiles/tileAsteroidFull.png'    
+  };
+  
+  createLevelRecord(level, function(levelDto) {
+    Levels.insert(levelDto);          
+  });    
+}
+
 Meteor.startup(function () {
     Router.map(function() {
       this.route('levelSprites/:id', {
@@ -57,7 +96,7 @@ Meteor.startup(function () {
     });
   
     if (Levels.find().count() === 0) {
-      createDefaultLevel();
+      createLevelDefault();
     }
   
     SpriteParts.remove({});
@@ -95,42 +134,3 @@ Meteor.startup(function () {
     API.addCollection(Levels, 'levels');
     API.start();    
 });
-
-function createDefaultLevel() {
-  var board = 
-      'tttttttttttttttttttt\n' + 
-      't---------------G--t\n' + 
-      't-ttttt------ttttt-t\n' + 
-      't-tG-E--------E-Gt-t\n' + 
-      't-ttttt------ttttt-t\n' + 
-      't-----t--tt--t-----t\n' + 
-      't--t--t--tt--t--t--t\n' + 
-      't-----t------t-----t\n' + 
-      't-t--------------t-t\n' + 
-      't-t-tt-tttttt-tt-t-t\n' + 
-      't--G---t-G-------P-t\n' + 
-      't-t-tt-t-tt-t-tt-t-t\n' + 
-      't-----------------Gt\n' + 
-      'tttttttttttttttttttt\n'; 
-  var level = {
-    userId: 'admin',
-    board: board,
-    name: 'Space Miner',
-    onCoinHit: '',
-    onEnemyHit: '',
-    onGemHit: '',
-    published: true,
-    selections: [
-      'Player/dark.png',
-      'Enemy/brainBlue.png',
-      'Treasure/dark.png',
-      'Coin/blue.png',
-      'Shots/basicShot.png'
-    ],
-    'tile': 'Tiles/tileAsteroidFull.png'    
-  };
-  
-  createLevelRecord(level, function(levelDto) {
-    Levels.insert(levelDto);          
-  });    
-}
