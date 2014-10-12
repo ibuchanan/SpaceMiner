@@ -560,12 +560,18 @@ _.extend(Template.home, {
         stage.insert(new Q.Enemy(Q.tilePos(5,10)));
       });
 
+      Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
+        console.log("Loaded basic resources...")
+      });
+    
+      /*
       Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
         Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
         Q.compileSheets("sprites.png","sprites.json");
         Q.compileSheets("basicShot.png","shot.json");
         Q.stageScene("level1");       
       });
+      */
     
       // Default handlers for events
       function OnEnemyHit() {
@@ -606,8 +612,9 @@ _.extend(Template.level, {
       var levelId = this._id;
       levelMapCreate(levelId);
       Q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
-        Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
+        Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});        
         Q.compileSheets(levelId + ".spr","sprites.json");
+        Q.compileSheets("basicShot.png","shot.json");        
         Q.stageScene(levelId);
         $("#towermanGame").focus();
       });

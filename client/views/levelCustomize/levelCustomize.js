@@ -139,6 +139,7 @@ _.extend(Template.levelCustomize, {
       var level = getLevelDto();
       var id = Session.get("level")._id;
       level.published = true;
+      console.log(level);
       Meteor.call('levelSave', id, level);
     }
   }
