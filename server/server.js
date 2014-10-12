@@ -127,7 +127,7 @@ function createDefaultLevel() {
       'Coin/blue.png',
       'Shots/basicShot.png'
     ],
-    'title': 'Tiles/tileAsteroidFull.png'    
+    'tile': 'Tiles/tileAsteroidFull.png'    
   };
   
   createLevelRecord(level, function(levelDto) {
