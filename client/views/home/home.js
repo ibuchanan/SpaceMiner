@@ -114,7 +114,17 @@ _.extend(Template.home, {
       evt.preventDefault();
       var levelId = Session.get('levelId');
       window.open('/levelCustomize/' + levelId, '_blank');
-    }
+    },
+    'click button.fork': function(evt, template) {
+      evt.preventDefault();
+      var levelId = Session.get('levelId');
+      var levelDoc = Levels.findOne({_id: levelId});
+      delete levelDoc._id;
+      levelDoc.published = false;
+      Levels.insert(levelDoc, function(err, forkedLevelId) {
+        window.open('/levelCustomize/' + forkedLevelId, '_blank');      
+      });
+    }    
   },
   rendered: function() {
       // Set up a basic Quintus object
