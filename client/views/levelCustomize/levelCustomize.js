@@ -40,83 +40,42 @@ function getLevelDto() {
 
 _.extend(Template.levelCustomize, {
   rendered: function() {
-    var board =
-   'tttttttttttttttttttt\n' +
-   't--G------------G--t\n' +
-   't-ttttt------ttttt-t\n' +
-   't-tG-E--------E-Gt-t\n' +
-   't-ttttt------ttttt-t\n' +
-   't-----t--tt--t-----t\n' +
-   't--t--t--tt--t--t--t\n' +
-   't-----t------t-----t\n' +
-   't-t--------------t-t\n' +
-   't-t-tt-tttttt-tt-t-t\n' +
-   't--G---t-G-------P-t\n' +
-   't-t-tt-t-tt-t-tt-t-t\n' +
-   't-----------------Gt\n' +
-   'tttttttttttttttttttt';
-    var level = {
-      userId: Meteor.userId(),
-      board: board,
-      name: 'N',
-      selections: [
-        'Player/dark.png',
-        'Enemy/brainBlue.png',
-        'Treasure/dark.png',
-        'Coin/blue.png',        
-        'Tiles/tileAsteroidFull.png',
-        'Shorts/basicShot.png'        
-      ],
-      tile: 'Tiles/tileAsteroidFull.png',
-      onEnemyHit: 'game.reset();',
-      onCoinHit:"player.incScore(100);\ngame.playSound('coin1.wav');",
-      onGemHit:'player.incScore(1000);',
-      spritesData: '',
-      tilesData: '',
-      published: false
-    };
-    
-    Levels.insert(level, function(err, id) {
-      if (err) {
-        console.log("Error inserting the Level:");
-        console.log(err);
-      } 
-      else {
-        var levelDoc = Levels.findOne(id);
-        Session.set("level", levelDoc);
+    var id = Router.current().params._id;    
+    Levels.update({_id: id}, {$set: {lastViewed: new Date()}}, function(err, count) {
+      var levelDoc = Router.current().data();
+      Session.set("level", levelDoc);
+      
+      _.each(["levelBoard", "levelBoardCode", "onEnemyHit", 
+              "onCoinHit", "onGemHit"], function(editorSelector) {
+                var editor = ace.edit(editorSelector);
+                editor.setFontSize(16);
+                editor.setTheme("ace/theme/monokai");
+                var session = editor.getSession();
+                if (editorSelector !== "levelBoard") {
+                  var val = levelDoc[editorSelector];
+                  if (editorSelector !== "levelBoardCode") {
+                    session.setValue(levelDoc[editorSelector]);
+                  } else {
+                    session.setMode("ace/mode/javascript");                          
+                    var data = JSON.stringify(boardFromText(levelDoc.board));              
+                    session.setValue(data);
+                  }
+                } else {
+                  session.setMode("ace/mode/text");         
+                  session.setValue(levelDoc.board);
+                }
+                editor.setHighlightActiveLine(true);
+              });
 
-        _.each(["levelBoard", "levelBoardCode", "onEnemyHit", 
-             "onCoinHit", "onGemHit"], function(editorSelector) {
-          var editor = ace.edit(editorSelector);
-          editor.setFontSize(16);
-          editor.setTheme("ace/theme/monokai");
-          var session = editor.getSession();
-          if (editorSelector !== "levelBoard") {
-            var val = levelDoc[editorSelector];
-            if (editorSelector !== "levelBoardCode") {
-              session.setValue(levelDoc[editorSelector]);
-            } else {
-              session.setMode("ace/mode/javascript");                          
-              var data = JSON.stringify(boardFromText(levelDoc.board));              
-              session.setValue(data);
-            }
-          } else {
-            session.setMode("ace/mode/text");            
-            session.setValue(levelDoc.board);
-          }
-          editor.setHighlightActiveLine(true);
+      var timeoutId = null;
+      function onChange() {
+        if (timeoutId !== null) clearTimeout(timeoutId);
+        timeoutId = setTimeout(function() {
+          updateLevelPreviews();
         });
-
-        var timeoutId = null;
-        function onChange() {
-          if (timeoutId !== null) clearTimeout(timeoutId);
-          timeoutId = setTimeout(function() {
-            updateLevelPreviews();
-          });
-        }
-        ace.edit("levelBoard").on('change', onChange, 1000);
-        onChange();
       }
+      ace.edit("levelBoard").on('change', onChange, 1000);
+      onChange();
     });
   },
   level: function() {
@@ -139,7 +98,6 @@ _.extend(Template.levelCustomize, {
       var level = getLevelDto();
       var id = Session.get("level")._id;
       level.published = true;
-      console.log(level);
       Meteor.call('levelSave', id, level);
     }
   }
@@ -190,7 +148,7 @@ function updateLevelPreviews() {
     _.each(sprites, function(row, rowIndex) {
       var div = $("<div class='preview'></div>");      
       _.each(row, function(column, colIndex) {        
-        var img = $("<img src='images/spriteParts/" + column + "' class='tilePreview' data-pos='" +
+        var img = $("<img src='/images/spriteParts/" + column + "' class='tilePreview' data-pos='" +
           rowIndex + "," + colIndex + "' id='tileSelect" + imgIndex + "'/>");
         div.append(img);
         imgIndex++;
@@ -198,7 +156,7 @@ function updateLevelPreviews() {
       $(".previewContainer").append(div);
     });
     
-    var spriteSrc = 'images/spriteParts/';
+    var spriteSrc = '/images/spriteParts/';
     $("#tileTile").attr('src', spriteSrc + level.tile);
     $("#tileCoin").attr('src', spriteSrc + level.selections[3]);
     $("#tileGem").attr('src', spriteSrc + level.selections[2]);

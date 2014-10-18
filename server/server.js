@@ -38,9 +38,9 @@ function createLevelDefault() {
     userId: 'admin',
     board: board,
     name: 'Space Miner',
-    onCoinHit: '',
-    onEnemyHit: '',
-    onGemHit: '',
+    onEnemyHit: 'game.reset();',
+    onGemHit: "player.incScore(player.getScore());\ngame.playSound('gem1.wav');\nplayer.incAmmo(1);",
+    onCoinHit: "player.incScore(100);\ngame.playSound('coin1.wav');",    
     published: true,
     selections: [
       'Player/dark.png',

@@ -4,7 +4,25 @@ var SPRITE_ENEMY = 4;
 var SPRITE_DOT = 8;
 var SPRITE_SHOT = 16;
 
-// Global facaces on top of the Quintus API
+// Default handlers for game events
+function OnEnemyHit() {      
+}
+
+function OnGemHit() {
+}
+
+function OnCoinHit() {
+}
+
+function OnPause() {
+  game.pause();
+}
+
+function OnUnpause() {
+  game.unpause();
+}
+
+// Global facades on top of the Quintus API
 // for students to program against in their code 
 // sections.
 game = {
@@ -28,14 +46,22 @@ game = {
 
 player = {
   incScore: function(amount) {
-    Q.state.inc("score", amount);
+    Q.state.inc('score', amount);
+  },
+  getScore: function() {
+    return Q.state.get('score');
   },
   decScore: function(amount) {
-    Q.state.dec("score", amount);
-  }
+    Q.state.dec('score', amount);
+  },
+  incAmmo: function(amount) {
+    Q.state.inc('ammo', amount);
+    console.log('Ammo count:' + Q.state.get('ammo'));    
+  }  
 };
 
 function levelMapCreate(levelMapId) {
+  Session.set('levelId', levelMapId);
   Q.TileLayer.extend("Level" + levelMapId,{
     init: function() {
       this._super({
@@ -86,7 +112,8 @@ _.extend(Template.home, {
   events: {
     'click button.customize': function(evt, template) {
       evt.preventDefault();
-      window.open('/levelCustomize', '_blank');      
+      var levelId = Session.get('levelId');
+      window.open('/levelCustomize/' + levelId, '_blank');
     }
   },
   rendered: function() {
@@ -106,34 +133,48 @@ _.extend(Template.home, {
       // along with joypad controls for touch
       Q.input.keyboardControls();
       Q.input.joypadControls();
-    Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
+      Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
 
       Q.gravityX = 0;
       Q.gravityY = 0;
   
       Q.loadAssetLevel = function(key,src,callback,errorCallback) {
           var fileParts = src.split("."), fileName = fileParts[0];
+          console.log('Loading: ');
+          console.log(key);
+          console.log(src);
           Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
             var obj = JSON.parse(val)[0];
             var board = obj.board;
             board = boardFromText(board);
             Q.assets[key] = board;
             
+            function makeFunc(rawCode) {
+              console.log(rawCode);
+              var funcCode = "(function() {\n" + rawCode + "\n})";
+              var func = eval(funcCode);
+              console.log(func);
+              if (_.isFunction(func)) {
+                return func;
+              }
+              return null;
+            }
+            
             // TODO fix hack
             try {
-              var func = eval(obj.onEnemyHit);
-              if (_.isFunction(func)) {
-                OnEnemyHit = func;
-              }
-
-              var func = eval(obj.onCoinHit);
-              if (_.isFunction(func)) {
+              var func = makeFunc(obj.onCoinHit);
+              if (func) {
                 OnCoinHit = func;
               }
-
-              var func = eval(obj).onGemHit;
-              if (_.isFunction(func)) {
-                OnGemHit = func;
+              
+              var func2 = makeFunc(obj.onEnemyHit);
+              if (func2) {
+                OnEnemyHit = func2;
+              }
+              
+              var func3 = makeFunc(obj.onGemHit);
+              if (func3) {
+                OnGemHit = func3;
               }              
             } catch (ex) {
               console.log("Error getting level functions:");
@@ -429,35 +470,6 @@ _.extend(Template.home, {
         }
 
       });
-      Q.TileLayer.extend("TowerManMap2",{
-        init: function() {
-          this._super({
-            type: SPRITE_TILES,
-            dataAsset: 'level2.json',
-            sheet:     'tiles',
-          });
-
-        },
-        
-        setup: function() {
-          // Clone the top level arriw
-          var tiles = this.p.tiles = this.p.tiles.concat();
-          var size = this.p.tileW;
-          for(var y=0;y<tiles.length;y++) {
-            var row = tiles[y] = tiles[y].concat();
-            for(var x =0;x<row.length;x++) {
-              var tile = row[x];
-
-              if(tile == 0 || tile == 2) {
-                var className = tile == 0 ? 'Dot' : 'Tower'
-                this.stage.insert(new Q[className](Q.tilePos(x,y)));
-                row[x] = 0;
-              }
-            }
-          }
-        }
-
-      });
       Q.component("enemyControls", {
         defaults: { speed: 210, direction: 'left', switchPercent: 2 },
 
@@ -534,69 +546,9 @@ _.extend(Template.home, {
         }
       });
 
-      Q.scene("level1",function(stage) {
-        var map = stage.collisionLayer(new Q.TowerManMap());
-    
-        var levelMap = Q.assets["level.json"];
-        //console.log(levelMap);
-        
-        map.setup();
-              
-        stage.insert(new Q.Score());
-        stage.insert(new Q.Player(Q.tilePos(10,7)));
-
-        stage.insert(new Q.Enemy(Q.tilePos(10,4)));
-        stage.insert(new Q.Enemy(Q.tilePos(15,10)));
-        stage.insert(new Q.Enemy(Q.tilePos(5,10)));
-      });
-      Q.scene("level2",function(stage) {
-        var map = stage.collisionLayer(new Q.TowerManMap2());
-        map.setup();
-        stage.insert(new Q.Score());
-        stage.insert(new Q.Player(Q.tilePos(10,7)));
-
-        stage.insert(new Q.Enemy(Q.tilePos(10,4)));
-        stage.insert(new Q.Enemy(Q.tilePos(15,10)));
-        stage.insert(new Q.Enemy(Q.tilePos(5,10)));
-      });
-
       Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
         console.log("Loaded basic resources...")
-      });
-    
-      /*
-      Q.load("sprites.png, sprites.json, level.json, level2.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
-        Q.sheet("tiles","tiles.png", { tileW: 32, tileH: 32 });
-        Q.compileSheets("sprites.png","sprites.json");
-        Q.compileSheets("basicShot.png","shot.json");
-        Q.stageScene("level1");       
-      });
-      */
-    
-      // Default handlers for events
-      function OnEnemyHit() {
-        game.reset();
-      }
-    
-      function OnCoinHit() {
-        player.incScore(100);
-        game.playSound('coin1.wav');
-      }
-    
-      function OnGemHit() {
-        player.incScore(Q.state.get("score"));
-        game.playSound('gem1.wav');  
-         Q.state.inc("ammo", 1);
-        console.log(Q.state.get("ammo"));
-      }
-    
-      function OnPause() {
-        game.pause();
-      }
-    
-      function OnUnpause() {
-        game.unpause();
-      }
+      });        
   }  
 })
 
