@@ -653,8 +653,8 @@ _.extend(Template.home, {
         }
       });
       
-      Q.load("sprites.json, tiles.png, shot.json, basicShot.png",  function() {
-      //Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, shot.json, basicShot.png",  function() {
+      //Q.load("sprites.json, tiles.png, shot.json, basicShot.png",  function() {
+      Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
         console.log("Loaded basic resources...")
       });        
   }  

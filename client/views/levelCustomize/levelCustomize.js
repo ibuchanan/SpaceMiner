@@ -4,6 +4,64 @@ _.extend(Template.sprites, {
   }  
 });
 
+function getLevelDoc() {
+  return Session.get("level");  
+}
+
+function getSpriteSelections() {
+  if (getSpriteSelections.firstTime) {
+    var currentSelections = getLevelDoc().selections;
+    console.log(currentSelections);
+    // TODO this is such a hack:
+    var index = 0;
+    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
+      console.log(part.selected);
+      if (part.selected.indexOf('tile') < 0) {
+        SpriteParts._collection.update({_id: part._id}, {$set: {selected: currentSelections[index]}});
+        index++;
+      }
+    });
+    getSpriteSelections.firstTime = false;    
+    return currentSelections;
+  } else {
+    var selections = [];
+    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
+      if (part.selected.indexOf('tile') > -1) {
+        // Don't use it
+      } else {
+        selections.push(part.selected);
+      }
+    });
+    return selections;
+  }
+}
+getSpriteSelections.firstTime = true;
+
+function getTileSelection() {  
+  if (getTileSelection.firstTime) {
+    var currentTile = getLevelDoc().tile;
+    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
+      if (part.selected.indexOf('tile') > -1) {
+        SpriteParts._collection.update({_id: part._id}, {$set: {selected: currentTile}});
+      }
+    });
+    getTileSelection.firstTime = false;
+    return currentTile;
+  }
+  else {
+    var tile = '';
+    SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
+      if (part.selected.indexOf('tile') > -1) {
+        tile = part.selected;
+      } else {
+        // do nothing
+      }
+    });
+    return tile;
+  }
+}
+getTileSelection.firstTime = true;
+
 function getLevelDto() {
   // Grab all the code snippets first
   var board = ace.edit("levelBoard").getSession().getValue();
@@ -12,24 +70,15 @@ function getLevelDto() {
   var onGemHit = ace.edit("onGemHit").getSession().getValue();
   
   var name = $('#levelName').val() || 'nameo';
-  var selections = [];
-  var tile = '';
-  SpriteParts.find({}, {sort: {sort: 1}}).forEach(function(part) {
-    if (part.selected.indexOf('tile') > -1) {
-      tile = part.selected;
-    } else {
-      selections.push(part.selected);
-    }        
-  });
-  
+    
   var userId = Meteor.userId();
   
   var level = {  
     userId: userId,
     board: board,
     name: name,
-    selections: selections,
-    tile: tile,
+    selections: getSpriteSelections(),
+    tile: getTileSelection(),
     onEnemyHit: onEnemyHit,
     onCoinHit: onCoinHit,
     onGemHit: onGemHit
@@ -46,26 +95,28 @@ _.extend(Template.levelCustomize, {
       Session.set("level", levelDoc);
       
       _.each(["levelBoard", "levelBoardCode", "onEnemyHit", 
-              "onCoinHit", "onGemHit"], function(editorSelector) {
-                var editor = ace.edit(editorSelector);
-                editor.setFontSize(16);
-                editor.setTheme("ace/theme/monokai");
-                var session = editor.getSession();
-                if (editorSelector !== "levelBoard") {
-                  var val = levelDoc[editorSelector];
-                  if (editorSelector !== "levelBoardCode") {
-                    session.setValue(levelDoc[editorSelector]);
-                  } else {
-                    session.setMode("ace/mode/javascript");                          
-                    var data = JSON.stringify(boardFromText(levelDoc.board));              
-                    session.setValue(data);
-                  }
-                } else {
-                  session.setMode("ace/mode/text");         
-                  session.setValue(levelDoc.board);
-                }
-                editor.setHighlightActiveLine(true);
-              });
+              "onCoinHit", "onGemHit"], 
+        function(editorSelector) {
+          var editor = ace.edit(editorSelector);
+          editor.setFontSize(16);
+          editor.setTheme("ace/theme/monokai");
+          var session = editor.getSession();
+          if (editorSelector !== "levelBoard") {
+            var val = levelDoc[editorSelector];
+            if (editorSelector !== "levelBoardCode") {
+              session.setMode("ace/mode/javascript");                    
+              session.setValue(levelDoc[editorSelector]);
+            } else {
+              session.setMode("ace/mode/javascript");                          
+              var data = JSON.stringify(boardFromText(levelDoc.board));              
+              session.setValue(data);
+            }
+          } else {
+            session.setMode("ace/mode/text");         
+            session.setValue(levelDoc.board);
+          }
+          editor.setHighlightActiveLine(true);
+        });
 
       var timeoutId = null;
       function onChange() {
