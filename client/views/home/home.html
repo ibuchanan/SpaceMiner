@@ -31,12 +31,23 @@
       <td>
         {{> levels}}
       </td>
-      <td>        
-        <div style='background: black; border:4px solid darkgray;'><canvas id='towermanGame' width="640" height="640"></canvas></div>
-        <div>
-          <button class='btn btn-success fork'>Fork Level</button>&nbsp;
-          <button class='btn btn-warning customize'>Customize Level</button>
-        </div>
+      <td> 
+          <h1>Select a level to play!</h1>
+          <div style='background: black; border:4px solid darkgray;'><canvas id='towermanGame' width="640" height="640"></canvas></div>
+          <div>
+            {{#if userSignedIn}}
+              {{#if userOwnsCurrentLevel}}
+                <button class='btn btn-warning customize'>Customize this level</button>&nbsp;
+              {{/if}}
+              {{#if levelLoaded}}
+                <button class='btn btn-success fork'>Fork Level</button>
+              {{/if}}
+            {{else}}
+              {{#if levelLoaded}}            
+                <span class='label label-info'>Sign in to be able to fork and customize this level!</span>
+              {{/if}}
+            {{/if}}
+          </div>
       </td>
     </tr>
   </table>

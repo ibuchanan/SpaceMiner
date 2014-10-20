@@ -109,6 +109,16 @@ function levelMapCreate(levelMapId) {
 }
 
 _.extend(Template.home, {
+  levelLoaded: function() {
+    return Session.get('levelId');
+  },
+  userSignedIn: function() {
+    return Meteor.userId() !== null;
+  },
+  userOwnsCurrentLevel: function() {
+    var level = Levels.findOne({_id: Session.get('levelId')});
+    return Meteor.userId() !== null && level.userId === Meteor.userId();
+  },
   events: {
     'click button.customize': function(evt, template) {
       evt.preventDefault();
@@ -129,6 +139,8 @@ _.extend(Template.home, {
   rendered: function() {
       // Set up a basic Quintus object
       // with the necessary modules and controls
+      delete Session.keys.levelId;
+    
       Q = window.Q = Quintus({ 
         development: true,
         audioSupported: ['wav'] })
