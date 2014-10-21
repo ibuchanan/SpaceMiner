@@ -89,6 +89,9 @@ function levelMapCreate(levelMapId) {
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             this.stage.insert(new Q[className](Q.tilePos(x,y)));
+            if (tile === 'E' || tile === 'P') {
+              this.stage.insert(new Q.Dot(Q.tilePos(x,y)));
+            }
             row[x] = 0;
           }
         }
@@ -101,7 +104,8 @@ function levelMapCreate(levelMapId) {
     map.setup();
     var score = new Q.Score();
     var box = stage.insert(new Q.UI.Container({
-      x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
+      //x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
+      x: 25, y: 400, fill: 'rgba(0,0,0,0.5)'      
     }));
     box.insert(score);
     box.fit();
@@ -560,35 +564,6 @@ _.extend(Template.home, {
         return { x: col*32 + 16, y: row*32 + 16 };
       }
 
-      Q.TileLayer.extend("TowerManMap",{
-        init: function() {
-          this._super({
-            type: SPRITE_TILES,
-            dataAsset: 'level.json',
-            sheet:     'tiles',
-          });
-
-        },
-        
-        setup: function() {
-          // Clone the top level arriw
-          var tiles = this.p.tiles = this.p.tiles.concat();
-          var size = this.p.tileW;
-          for(var y=0;y<tiles.length;y++) {
-            var row = tiles[y] = tiles[y].concat();
-            for(var x =0;x<row.length;x++) {
-              var tile = row[x];
-
-              if(tile == 0 || tile == 2) {
-                var className = tile == 0 ? 'Dot' : 'Tower'
-                this.stage.insert(new Q[className](Q.tilePos(x,y)));
-                row[x] = 0;
-              }
-            }
-          }
-        }
-
-      });
       Q.component("enemyControls", {
         defaults: { speed: 210, direction: 'left', switchPercent: 2 },
 
