@@ -59,6 +59,12 @@ player = {
     console.log('Ammo count:' + Q.state.get('ammo'));    
   }  
 };
+/*enemy = {
+  incSpeed: function() {
+     Q.Enemy.p.speed = this.p.speed + 10;
+    
+  }
+}; */
 
 function levelMapCreate(levelMapId) {
   Session.set('levelId', levelMapId);
@@ -105,7 +111,7 @@ function levelMapCreate(levelMapId) {
     var score = new Q.Score();
     var box = stage.insert(new Q.UI.Container({
       //x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
-      x: 25, y: 400, fill: 'rgba(0,0,0,0.5)'      
+      x: 25, y: 5, fill: 'rgba(0,0,0,0.5)'      
     }));
     box.insert(score);
     box.fit();
@@ -122,6 +128,9 @@ _.extend(Template.home, {
   userOwnsCurrentLevel: function() {
     var level = Levels.findOne({_id: Session.get('levelId')});
     return Meteor.userId() !== null && level.userId === Meteor.userId();
+  },
+  tplCommand: function() {
+    return "<% if (! _hidden) { %><span class=\"command\"><%= command %></span><%if (! resultHidden) {%><span class=\"prefix\"><%= this.resultPrefix %></span><span class=\"<%= _class %>\"><%= result %></span><% } } %>";
   },
   events: {
     'click button.customize': function(evt, template) {
@@ -140,7 +149,7 @@ _.extend(Template.home, {
       });
     }    
   },
-  rendered: function() {
+  rendered: function() {    
       // Set up a basic Quintus object
       // with the necessary modules and controls
       delete Session.keys.levelId;
@@ -340,7 +349,7 @@ _.extend(Template.home, {
    
       Q.component("towerManControls", {
         // default properties to add onto our entity
-        defaults: { speed: 200, direction: 'up' },
+        defaults: { speed:200, /*direction: 'up' */ },
 
         // called when the component is added to
         // an entity
@@ -417,87 +426,87 @@ _.extend(Template.home, {
           this.add("2d, towerManControls, laser");
         },
       });
-    Q.Sprite.extend("Shot", {
-        init: function(p) {
-          this._super(p,{
-            sheet:"shot",
-            type: SPRITE_SHOT,
-            collisionMask: SPRITE_TILES | SPRITE_ENEMY,
-            speed : 300,
-          });
-          this.on('hit','erase');
-        },
-      step: function(dt){
-        this.stage.collide(this);
-        if(this.p.angle == 0){
-          this.p.x += this.p.speed * dt;
-        } 
-        else if(this.p.angle == 180){
-          this.p.x -= this.p.speed * dt;
-        }
-         else if(this.p.angle == -90){
-          this.p.y -= this.p.speed * dt;
-        }
-        else{
-          this.p.y += this.p.speed * dt;
-        }
-        
-        if(this.p.y > Q.el.height || this.p.y < 0){
-          this.destroy();
-        }
-      }, sensor: function() {
-          this.destroy();
-       },
-      erase: function(collision) {
-        //console.log('collision');
-        this.destroy();
-      }  
-      });
-  Q.component("laser",{
-    added : function(){
-      this.entity.p.shots = [];
-      this.entity.p.canFire = true;
-      this.entity.on("step",'handleFiring');
-    },
-    extend:{
-      handleFiring: function(dt){
-        for(var i = this.p.shots.length-1;i > 0;i--){
-          if(this.p.shots[i].isDestroyed){
-            this.p.shots.splice(i,1);
+      Q.Sprite.extend("Shot", {
+          init: function(p) {
+            this._super(p,{
+              sheet:"shot",
+              type: SPRITE_SHOT,
+              collisionMask: SPRITE_TILES | SPRITE_ENEMY,
+              speed : 300,
+            });
+            this.on('hit','erase');
+          },
+        step: function(dt){
+          this.stage.collide(this);
+          if(this.p.angle == 0){
+            this.p.x += this.p.speed * dt;
+          } 
+          else if(this.p.angle == 180){
+            this.p.x -= this.p.speed * dt;
           }
-        }
-         if(Q.inputs['fire']){
-           this.fire();
-         }  
-      },
-      fire: function(){
-        var entity = this;
-          if(!this.p.canFire||Q.state.get("ammo")<=0){
-            console.log(Q.state.get('ammo'));
-            return;
-          }
-          if(this.p.direction == 'left'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:400}));
-          }
-          else if(this.p.direction == 'up'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:400}));
-          }
-          else if(this.p.direction == 'down'){
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:400}));
+           else if(this.p.angle == -90){
+            this.p.y -= this.p.speed * dt;
           }
           else{
-            var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:400}));
+            this.p.y += this.p.speed * dt;
           }
-          this.p.shots.push(shot);
-          entity.p.canFire = false;
-          Q.state.dec("ammo", 1) ;
-          setTimeout(function(){
-              entity.p.canFire = true; 
-              console.log(Q.state.get('ammo'));
-        },1000);
-      }
-    } 
-  });
+
+          if(this.p.y > Q.el.height || this.p.y < 0){
+            this.destroy();
+          }
+        }, sensor: function() {
+            this.destroy();
+         },
+        erase: function(collision) {
+          //console.log('collision');
+          this.destroy();
+        }  
+        });
+      Q.component("laser",{
+        added : function(){
+          this.entity.p.shots = [];
+          this.entity.p.canFire = true;
+          this.entity.on("step",'handleFiring');
+        },
+        extend:{
+          handleFiring: function(dt){
+            for(var i = this.p.shots.length-1;i > 0;i--){
+              if(this.p.shots[i].isDestroyed){
+                this.p.shots.splice(i,1);
+              }
+            }
+             if(Q.inputs['fire']){
+               this.fire();
+             }  
+          },
+          fire: function(){
+            var entity = this;
+              if(!this.p.canFire||Q.state.get("ammo")<=0){
+                console.log(Q.state.get('ammo'));
+                return;
+              }
+              if(this.p.direction == 'left'){
+                var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:400}));
+              }
+              else if(this.p.direction == 'up'){
+                var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:400}));
+              }
+              else if(this.p.direction == 'down'){
+                var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:400}));
+              }
+              else{
+                var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:400}));
+              }
+              this.p.shots.push(shot);
+              entity.p.canFire = false;
+              Q.state.dec("ammo", 1) ;
+              setTimeout(function(){
+                  entity.p.canFire = true; 
+                  console.log(Q.state.get('ammo'));
+            },1000);
+          }
+        } 
+      });
       // Create the Dot sprite
       Q.Sprite.extend("Dot", {
         init: function(p) {
@@ -565,7 +574,7 @@ _.extend(Template.home, {
       }
 
       Q.component("enemyControls", {
-        defaults: { speed: 210, direction: 'left', switchPercent: 2 },
+        defaults: {direction: 'left', switchPercent: 2 },
 
         added: function() {
           var p = this.entity.p;
@@ -618,6 +627,7 @@ _.extend(Template.home, {
         init: function(p) {
           this._super(p,{
             sheet:"enemy",
+            speed: 150,
             type: SPRITE_ENEMY,
             collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_SHOT
           });
@@ -632,9 +642,13 @@ _.extend(Template.home, {
           }
           else if(col.obj.isA("Shot")){
             player.incScore(1000);
+            //Q.Enemy.p.speed = this.p.speed + 10;
+            var speedUp = this.p.speed;
             this.destroy();
             setTimeout(function(){
-              Q.stage().insert(new Q.Enemy(Q.tilePos(10,7)));
+              var newEnemy = new Q.Enemy(Q.tilePos(10,7));
+              newEnemy.p.speed = speedUp + 50;
+              Q.stage().insert(newEnemy);
             },5000);
           }
         }
@@ -644,6 +658,15 @@ _.extend(Template.home, {
       Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
         console.log("Loaded basic resources...")
       });        
+    
+      var model = new Sandbox.Model({
+        iframe : true,  // evaluate commands inside a hidden iframe (default: false)
+        fallback : true // use global eval if iframe isn't available (default: true)
+      });
+      window.sandbox = new Sandbox.View({
+        el : $('#sandbox'),
+        model : model
+      });
   }  
 })
 
