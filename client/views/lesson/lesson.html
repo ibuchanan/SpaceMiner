@@ -50,7 +50,6 @@
 </template>
 
 <template name='steps'>
-  <h3>Enter this at the Code Console prompt:</h3>
   {{#each lesson.steps}}
     {{> step}}
   {{/each}}
@@ -58,6 +57,8 @@
 
 <template name='step'>
     {{#if current}}
+      <h3>{{pager.current}} / {{pager.total}}: {{title}}</h3>
+      <h4>Enter this code at the Code Console prompt:</h4>
       <p class='stepCode'><span class='stepPrompt'>&gt;&nbsp;</span>{{code}}</p>
       <p class='expectation'>
         <h4>After pressing enter, you should see this:</h4>
@@ -89,7 +90,5 @@
       {{#if nextAllowed}}
 <a class='btn btn-info next'>Next <span class='glyphicon glyphicon-step-forward'></span></a>
       {{/if}}
-      <hr />      
-      <b>Step {{pager.current}} of {{pager.total}}</b>
     {{/if}}
 </template>
