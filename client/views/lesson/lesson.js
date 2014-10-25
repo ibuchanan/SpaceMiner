@@ -10,7 +10,10 @@ function getLesson() {
 }
 
 Template.steps.helpers({
-  lesson: getLesson,
+    lesson: getLesson
+});
+
+Template.step.helpers({
   previousAllowed: function() {
     return this.index > 0;
   },
@@ -33,7 +36,7 @@ function lessonNavigate(currentIndex, newIndex, attemptedCurrent) {
     Lessons._collection.update({_id: id}, {$set: lesson});  
 }
 
-Template.steps.events({
+Template.step.events({
   'click .explanationShow': function() {
     $('.explanation').show();
   },

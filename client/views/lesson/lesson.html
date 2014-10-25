@@ -35,7 +35,7 @@
 
           <p>If you look just below, you'll see a console where you type code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the coding challenges!          
           </p>
-          <a class='btn btn-success challengeShow'>Code challenge</a>
+          <a class='btn btn-success challengeShow'>Code challenge <span class='fa fa-code'></span></a>
         </article>
         <section class='challenge'>
           {{> steps}}
@@ -52,6 +52,11 @@
 <template name='steps'>
   <h3>Enter this at the Code Console prompt:</h3>
   {{#each lesson.steps}}
+    {{> step}}
+  {{/each}}
+</template>
+
+<template name='step'>
     {{#if current}}
       <p class='stepCode'><span class='stepPrompt'>&gt;&nbsp;</span>{{code}}</p>
       <p class='expectation'>
@@ -66,14 +71,14 @@
           <div class="panel-heading">
             <h4 class="panel-title">
               <a data-toggle="collapse" data-parent="#accordion" href="#explanation">
-                <span class='glyphicon glyphicon-eye-open'></span> Click to see explanation and continue
+                <a class='btn btn-success'><span class='glyphicon glyphicon-eye-open'></span> Click to see explanation and continue</a>
               </a>
             </h4>
           </div>
           <div id="explanation" class="panel-collapse collapse">
             <div class="panel-body">
               {{{description}}}
-              <h4>Understand it? <a class='btn btn-success next'>Next</a></h4>        
+              <h4>Understand it? <a class='btn btn-success next'>Next <span class='fa fa-long-arrow-right'></span></a></h4>        
             </div>
           </div>
         </div>
@@ -87,5 +92,4 @@
       <hr />      
       <b>Step {{pager.current}} of {{pager.total}}</b>
     {{/if}}
-  {{/each}}
 </template>
