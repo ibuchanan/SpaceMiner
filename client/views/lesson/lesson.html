@@ -1,50 +1,91 @@
 <template name='lesson'> 
-  <h2>Lesson 1: Make your browser remember things with variables</h2>
-  
-  <h3>Types of memory</h3>
-  <p>
-    In order to fix the browser's malfunctioning memory, you need to learn a little bit about how computers remember things. Just like your brain, your computer, and by extension your web browser, has <b>memory</b>. Computers have several types of memory. One of the most important is called Random Access Memory (RAM). Computers store information in RAM that they need to know right now. This usually includes everything that is currently running on your computer or device, and the operating system itself. So, the web browser you are using right now is running in your computer's RAM.</p>
-  
- <p>Another type of memory is represented by drive space. This is typically in the form of a hard drive, memory stick or card. When you download a file, such as pictures, videos, or documents, from the internet, this is usually where your computer saves the information. If you downloaded a picture from a photo sharing site, and then open it to show a friend later, your computer will copy it from the drive space into RAM for the time period that you have the picture and picture viewing program open.</p>
-  
- <p>While not a perfect analogy, you can roughly think of RAM as short-term memory and drive space as long-term memory.</p>
-  
- <h3>Add your own information to memory</h3>
+  <div class='container-fluid'>
+    <section class='row'>
+      <section class='left col-xs-12 col-sm-12 col-md-4 col-lg-5'>
+        <article class='lesson'>
+          <h1>Lesson 1: Make your browser remember things with variables</h1>
+          <h2>Types of memory</h2>
+          <p>
+            In order to fix the browser's malfunctioning memory, you need to learn a little bit about how computers remember things. Just like your brain, your computer, and by extension your web browser, has <b>memory</b>. Computers have several types of memory. One of the most important is called Random Access Memory (RAM). Computers store information in RAM that they need to know right now. This usually includes everything that is currently running on your computer or device, and the operating system itself. So, the web browser you are using right now is running in your computer's RAM.</p>
 
-  <blockquote>TODO: tutorialize this question:</blockquote>
-  
-   <section class='question'>
-     <heading>What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?</heading>
-     <ul>
-       <li>Drive space
-         <span class='feedback'>If the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
-       </li>
-       <li class='y'>RAM
-         <span class='feedback'>That's right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
-       </li>         
-     </ul>
-  </section>
- 
-  <h4>Do this: Make your browser remember your favorite color</h4>
-  
-  <p>If you look just below, you'll see a console where you type code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in:</p>
-  
-  {{> steps}}
-  
-  <p>
-    <iframe src='/lesson.html' style='width:600px;height:600px'></iframe>
-  </p>
+           <p>Another type of memory is represented by drive space. This is typically in the form of a hard drive, memory stick or card. When you download a file, such as pictures, videos, or documents, from the internet, this is usually where your computer saves the information. If you downloaded a picture from a photo sharing site, and then open it to show a friend later, your computer will copy it from the drive space into RAM for the time period that you have the picture and picture viewing program open.
+          </p>
+
+           <p>
+             While not a perfect analogy, you can roughly think of RAM as short-term memory and drive space as long-term memory.
+          </p>
+
+          <h3>Add your own information to memory</h3>
+
+          <blockquote>TODO: tutorialize this question:</blockquote>
+
+          <section class='question'>
+            <heading>What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?</heading>
+            <ul>
+              <li>Drive space
+                <span class='feedback'>If the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
+              </li>
+              <li class='y'>RAM
+                <span class='feedback'>That's right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
+              </li>         
+            </ul>
+          </section>
+
+          <h4>Do this: Make your browser remember your favorite color</h4>
+
+          <p>If you look just below, you'll see a console where you type code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the coding challenges!          
+          </p>
+          <a class='btn btn-success challengeShow'>Code challenge</a>
+        </article>
+        <section class='challenge'>
+          {{> steps}}
+        </section>
+      </section>
+      <section class='right col-xs-12 col-sm-12 col-md-8 col-lg-7'>
+        <h2>Code Console</h2>
+        <iframe src='/lesson.html' style='width:600px;height:600px'></iframe>
+      </section>
+    </section>
+  </div>
 </template>
 
 <template name='steps'>
-  <h3>Type this:</h3>  
+  <h3>Enter this at the Code Console prompt:</h3>
   {{#each lesson.steps}}
     {{#if current}}
-    <blockquote>{{code}}</blockquote>
-    <div class='well'>
-      {{{description}}}
-    </div>
-    <a class='btn btn-success next'>Next</a>
+      <p class='stepCode'><span class='stepPrompt'>&gt;&nbsp;</span>{{code}}</p>
+      <p class='expectation'>
+        <h4>After pressing enter, you should see this:</h4>
+<pre class="output">
+<span class="command">{{code}}</span>
+<span class="prefix">  =&gt; </span>{{#if expectation.error}}<span class="error">"{{expectation.error}}"</span>{{/if}}{{#if expectation.type}}<span class="value {{expectation.type}}">{{expectation.value}}</span>{{/if}}
+</pre>  
+      </p>
+      <div class="panel-group" id="accordion">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#explanation">
+                <span class='glyphicon glyphicon-eye-open'></span> Click to see explanation and continue
+              </a>
+            </h4>
+          </div>
+          <div id="explanation" class="panel-collapse collapse">
+            <div class="panel-body">
+              {{{description}}}
+              <h4>Understand it? <a class='btn btn-success next'>Next</a></h4>        
+            </div>
+          </div>
+        </div>
+      </div>
+      {{#if previousAllowed}}
+<a class='btn btn-info previous'><span class='glyphicon glyphicon-step-backward'></span> Previous</a>
+      {{/if}}
+      {{#if nextAllowed}}
+<a class='btn btn-info next'>Next <span class='glyphicon glyphicon-step-forward'></span></a>
+      {{/if}}
+      <hr />      
+      <b>Step {{pager.current}} of {{pager.total}}</b>
     {{/if}}
-  {{/each}}  
+  {{/each}}
 </template>
