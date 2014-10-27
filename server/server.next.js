@@ -36,7 +36,7 @@ function createLevelDefault() {
       'tttttttttttttttttttt\n'; 
   var level = {
     userId: 'admin',
-    board: board,
+    board,
     name: 'Space Miner',
     onEnemyHit: 'game.reset();',
     onGemHit: "player.incScore(player.getScore());\ngame.playSound('gem1.wav');\nplayer.incAmmo(1);",
@@ -76,10 +76,10 @@ function createLessonsDefault() {
     return {
       //_id: lessonId + '-' + id,
       name: lessonId + '-' + id,      
-      code: code,
-      title: title,
-      expectation: expectation,      
-      description: description,
+      code,
+      title,
+      expectation,      
+      description,
       current: step.index === 0,
       attempted: false,
       index: step.index
@@ -87,34 +87,28 @@ function createLessonsDefault() {
   }
   step.index = -1;
   
-  function sec() {
-    var paragraphs = _.rest(arguments, 1);
-    var section = {
-      title : arguments[0],
-      paragraphs: paragraphs
+  function sec(title, ...paragraphs) {
+    return {
+      title,
+      paragraphs
     };
-    return section;
   }
   
-  function question(title) {
-    var choices = _.rest(arguments, 1);
+  function question(title, ...choices) {
     var correctAnswer = _.findWhere(choices, {correct:true});
-    console.log(correctAnswer);
     var correctIndex = _.indexOf(choices, correctAnswer);
-    console.log(correctIndex);
     return {
-      title: title,
-      choices: choices,
-      correctIndex: correctIndex
+      title,
+      choices,
+      correctIndex
     };
   }
   
-  function choice(text, feedback, correct) {
-    correct = correct || false;
+  function choice(text, feedback, correct=false) {
     return {
-      text: text,
-      feedback: feedback,
-      correct: correct
+      text,
+      feedback,
+      correct
     };
   }
   
@@ -131,7 +125,7 @@ function createLessonsDefault() {
     ],    
     questions: [
       question('What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?',
-        choice('Long-term storage', 'If the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.'),
+               choice('Long-term storage', 'Probably not. Here\'s why: if the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.'),
         choice('RAM', 'That\'s right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.', true)
       )
     ],
@@ -152,16 +146,14 @@ function createLessonsDefault() {
     ]    
   };
   Lessons.insert(lesson);
-  
-  
 }
 
-Meteor.startup(function () {
+Meteor.startup(function() {
     Router.map(function() {
       this.route('levelSprites/:id', {
         where: 'server',
         action: function() {
-          id = this.params.id.split('.')[0];
+          var id = this.params.id.split('.')[0];
           var level = Levels.findOne(id);
           var img = new Buffer(level.spritesData, 'base64');         
           this.response.writeHead(200, {
@@ -174,7 +166,7 @@ Meteor.startup(function () {
       this.route('levelTiles/:id', {
         where: 'server',
         action: function() {
-          id = this.params.id.split('.')[0];
+          var id = this.params.id.split('.')[0];
           var level = Levels.findOne(id);
           var img = new Buffer(level.tilesData, 'base64');         
           this.response.writeHead(200, {
@@ -187,8 +179,8 @@ Meteor.startup(function () {
     });
   
     Meteor.methods({
-      'levelSave': function(id, levelDto) {
-        createLevelRecord(levelDto, function(levelDtoPoweredUp) {
+      'levelSave': (id, levelDto)=> {
+        createLevelRecord(levelDto, (levelDtoPoweredUp)=> {
             Levels.upsert(id, {$set: levelDtoPoweredUp});          
         });
       }
@@ -214,16 +206,16 @@ Meteor.startup(function () {
         Shots: 6
       };
       var glob = Meteor.npmRequire("glob");      
-      glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment(function (er, files) {
-        spriteParts = _.chain(files)
-          .map(function(file){ 
+      glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
+        var spriteParts = _.chain(files)
+          .map((file)=> { 
             return file.replace("/home/action/Towerman/public/images/spriteParts/", "");
           })
-          .groupBy(function(file) {
+          .groupBy((file)=> {
             return file.substring(0, file.indexOf("/"));          
           })
           .value();        
-          _.each(spriteParts, function(parts, category) {
+          _.each(spriteParts, (parts, category)=> {
               SpriteParts.insert({
                 part: category,
                 choices: parts,
@@ -232,9 +224,9 @@ Meteor.startup(function () {
               });
           });
       }));
-    }
+    }  
   
-    API = new CollectionAPI({});
+    var API = new CollectionAPI({});
     API.addCollection(Levels, 'levels');
     API.addCollection(Lessons, 'lessons');
     API.start();    

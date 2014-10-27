@@ -13,12 +13,12 @@
           
           {{#each lesson.questions}}
             {{> question}}          
-          {{/each}}
-          
+          {{/each}}         
 
-          <p>If you look just below, you'll see a console where you type code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the coding challenges!          
+          <h2>Code Challenge!</h2>
+          <p>Now, you're ready to write some code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the code challenge!
           </p>
-          <a class='btn btn-success challengeShow'>Code challenge <span class='fa fa-code'></span></a>
+          <a class='btn btn-success challengeShow'>Take code challenge <span class='fa fa-code'></span></a>
         </article>
         <section class='challenge'>
           {{> steps}}
@@ -43,9 +43,7 @@
       {{/each}}
     </div>
     &nbsp;<button class='btn btn-success check'>Check answer <span class='fa fa-check'></span></button>
-    <div>
-      <span class='feedback'></span>
-    </div>    
+    <div class='feedback'></div>
   </section>
 </template>
 

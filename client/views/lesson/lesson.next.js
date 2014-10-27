@@ -20,9 +20,15 @@ Template.question.rendered = function() {
 Template.question.events({
   'click .check': function() {
     var val = $('.question .btn-group .btn[class*="active"] input').val();
-    var index = parseInt(val);
-    var correct = this.correctIndex == parseInt(index);
-    $('.feedback').html(this.choices[index].feedback);
+    if (val) {
+      var index = parseInt(val);
+      var correct = this.correctIndex == parseInt(index);
+      var icon = correct ? 'fa fa-check' : 'fa fa-ban';
+      var bg = correct ? 'seagreen' : 'indianred';
+      $('.feedback').html(`<div style='padding: 4px; color: white; background-color: ${bg}'><span class='${icon}'></span>&nbsp;` + this.choices[index].feedback + '</div>');
+      $('.feedback').hide();
+      $('.feedback').fadeIn('slow');
+    }
   }
 });
 

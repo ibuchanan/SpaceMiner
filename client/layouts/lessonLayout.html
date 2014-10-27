@@ -1,0 +1,111 @@
+<template name='lessonLayout'>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <style type='text/css'>
+body, html {
+  margin: 0;
+  height:100%;
+}
+    
+iframe {
+    padding: 0;
+    margin: 0;
+    border: none;
+}    
+
+@media (min-width: 768px){
+  .left {
+    position: absolute;
+    top: 0px;
+    bottom: 0;
+    left: 0;
+    overflow-y: scroll; 
+  }
+  
+  .right {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+  }
+}
+
+.left {
+  height:100%;
+}
+
+.right {
+  height:100%;
+}    
+    
+.challenge {
+  display: none;
+}    
+
+.stepCode {
+  background-color: #333;
+  color: #f7f7f7;
+  font-family: Consolas, 'Andale Mono', 'Courier New', Courier, monospace;
+  padding-left: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.stepPrompt {
+  color: rgb(204, 204, 204);  
+}    
+    
+.output {   
+  display: block;
+  white-space: pre;
+  width: 100%;
+  padding: 0;
+  border: 0 none;
+  padding-left: 20px;
+  padding-bottom: 20px;
+  background-color: #333;
+}
+    
+.output .command {
+  color: #ccc;
+}
+
+.output .error {
+  color: #f77;
+}
+
+.output span {
+  color: #fff
+}
+    
+.output .prefix {
+  color: #777;
+}    
+
+.output .string {
+  color: #99f;
+}
+    
+.output .number {
+  color: #7f7;
+}
+    
+.output .boolean {
+  color: #fff;
+}  
+
+.output .undefined {
+  color: #777;
+}
+    
+.explanation {
+  display: none;
+}
+    
+.feedback {
+  margin-top: 5px;
+  display: none;
+}
+  </style>
+  {{> yield}}
+</template>
