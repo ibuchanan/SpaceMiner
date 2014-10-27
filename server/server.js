@@ -69,10 +69,13 @@ function createLessonsDefault() {
       error: message
     };
   }
+  var lessonId = 'variables';
+  
   function step(code, title, id, expectation, description) {
     step.index++;
     return {
-      id: id,
+      //_id: lessonId + '-' + id,
+      name: lessonId + '-' + id,      
       code: code,
       title: title,
       expectation: expectation,      
@@ -84,9 +87,54 @@ function createLessonsDefault() {
   }
   step.index = -1;
   
+  function sec() {
+    var paragraphs = _.rest(arguments, 1);
+    var section = {
+      title : arguments[0],
+      paragraphs: paragraphs
+    };
+    return section;
+  }
+  
+  function question(title) {
+    var choices = _.rest(arguments, 1);
+    var correctAnswer = _.findWhere(choices, {correct:true});
+    console.log(correctAnswer);
+    var correctIndex = _.indexOf(choices, correctAnswer);
+    console.log(correctIndex);
+    return {
+      title: title,
+      choices: choices,
+      correctIndex: correctIndex
+    };
+  }
+  
+  function choice(text, feedback, correct) {
+    correct = correct || false;
+    return {
+      text: text,
+      feedback: feedback,
+      correct: correct
+    };
+  }
+  
   var lesson = {
-    name: 'variables',
+    _id: lessonId,
     title: 'Make your game remember things with variables',
+    sections: [
+      sec('Types of memory', 
+        "In order to fix the browser's malfunctioning memory, you need to learn a little bit about how computers remember things. Just like your brain, your computer, and by extension your web browser, has <b>memory</b>. Computers use two major types of memory, one for short-term needs, and one for long-term needs. For short-term memory, computers use a type of memory called <b>Random Access Memory (RAM)</b>. Computers store information in RAM that they need to know right now. This usually includes everything that is currently running on your computer or device, and the operating system itself. So, the web browser you are using right now is running in your computer's RAM", 
+        "Another type of memory is long-term storage. This is typically in the form of a hard drive, memory stick or card, or cloud-based system that lets you save information on a computer running somewhere on the internet. When you download a file, such as pictures, videos, or documents, from the internet, your computer or other device usually saves the file into long-term storage. We refer to it as <i>long-term</i> because once you save information in a device's long-term stroage, you can safely turn the device off completely, then turn it back on and still have the information right where you left it. Normally it doesn't matter how long the device is turned off before you turn it back on again, so long as nobody else deleted it or the device doesn't otherwise stop working."),
+      sec('How long-term storage and RAM relate', 
+        "To understand how long-term storage and RAM are related, here is something to think about. Popular games like Minecraft use a combination of RAM and long-term storage. When you play Minecraft, everything you see on the screen is loaded into your computer's RAM. But, since Minecraft is so big, all the information cannot possibly fit into your computer's RAM at one time. Instead, the Minecraft game servers keep lots of information in their own long-term storage until they detect that you or someone else needs to use it. Then they will load that information from long-term storage into their own RAM and send it over the internet to you, where your computer will copy it into it's own RAM. This is a simplification of what happens.", 
+        "Another example is that all the photos that people take and share with Instagram or Facebook tend to hang around for years unless you delete them. But, unless someone is looking at pictures taken years ago, then no computers in the world will have that information in RAM right now. However, if you browse to one of those old photos, Facebook will locate it in long-term storage, load it into its own RAM, then send the information to you over the internet where your own device can copy it into its own RAM. Facebook will likely forget about it after that for years to come.")
+    ],    
+    questions: [
+      question('What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?',
+        choice('Long-term storage', 'If the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.'),
+        choice('RAM', 'That\'s right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.', true)
+      )
+    ],
     steps: [
       step('faveColor', 'Your first line of code, I do declare', 'undeclared-variable', error('ReferenceError: faveColor is not defined'), 'You get this error because you first need to tell your computer to recognize <code>faveColor</code> as a <b>variable</b>. A variable lets you store information in the computer\'s RAM. This is easy to do. To learn how, click next...'),
       step('var faveColor', 'Use the var keyword to declare a variable in memory', 'declare-variable', value(undefined), 'You just used your first JavaScript language keyword, <code>var</code> to tell the computer to reserve a place in memory named <code>faveColor</code>, but right now it is like an emoty brain cell waiting to be filled with information. The response <code>undefined</code> is a type of <b>value</b> that represents a variable that does not have any other assigned value. To get the computer to remember your favorite color, you have to learn about another type of value, and then about <b>variable assignment</b>. Keep going...'),
@@ -101,9 +149,11 @@ function createLessonsDefault() {
     Next: <code class='label label-primary'>faveColor = prompt("What's your favorite color?")</code>
     <br />
       */
-    ]
+    ]    
   };
   Lessons.insert(lesson);
+  
+  
 }
 
 Meteor.startup(function () {

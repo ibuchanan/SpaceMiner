@@ -3,35 +3,18 @@
     <section class='row'>
       <section class='left col-xs-12 col-sm-12 col-md-4 col-lg-5'>
         <article class='lesson'>
-          <h1>Lesson 1: Make your browser remember things with variables</h1>
-          <h2>Types of memory</h2>
-          <p>
-            In order to fix the browser's malfunctioning memory, you need to learn a little bit about how computers remember things. Just like your brain, your computer, and by extension your web browser, has <b>memory</b>. Computers have several types of memory. One of the most important is called Random Access Memory (RAM). Computers store information in RAM that they need to know right now. This usually includes everything that is currently running on your computer or device, and the operating system itself. So, the web browser you are using right now is running in your computer's RAM.</p>
-
-           <p>Another type of memory is represented by drive space. This is typically in the form of a hard drive, memory stick or card. When you download a file, such as pictures, videos, or documents, from the internet, this is usually where your computer saves the information. If you downloaded a picture from a photo sharing site, and then open it to show a friend later, your computer will copy it from the drive space into RAM for the time period that you have the picture and picture viewing program open.
-          </p>
-
-           <p>
-             While not a perfect analogy, you can roughly think of RAM as short-term memory and drive space as long-term memory.
-          </p>
-
-          <h3>Add your own information to memory</h3>
-
-          <blockquote>TODO: tutorialize this question:</blockquote>
-
-          <section class='question'>
-            <heading>What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?</heading>
-            <ul>
-              <li>Drive space
-                <span class='feedback'>If the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
-              </li>
-              <li class='y'>RAM
-                <span class='feedback'>That's right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.</span>
-              </li>         
-            </ul>
-          </section>
-
-          <h4>Do this: Make your browser remember your favorite color</h4>
+          <h1>{{lesson.title}}</h1>
+          {{#each lesson.sections}}
+            <h2>{{title}}</h2>
+            {{#each paragraphs}}
+            <p>{{{this}}}</p>
+            {{/each}}
+          {{/each}}
+          
+          {{#each lesson.questions}}
+            {{> question}}          
+          {{/each}}
+          
 
           <p>If you look just below, you'll see a console where you type code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the coding challenges!          
           </p>
@@ -47,6 +30,23 @@
       </section>
     </section>
   </div>
+</template>
+
+<template name='question'>
+  <section class='question'>
+    <h3>{{title}}</h3>
+    <div class="btn-group" data-toggle="buttons">
+      {{#each addIndex choices}}
+      <label class="btn btn-default choice">
+        <input type='radio' name='choices' id='choice{{index}}' value='{{index}}' /> {{{value.text}}}
+      </label>
+      {{/each}}
+    </div>
+    &nbsp;<button class='btn btn-success check'>Check answer <span class='fa fa-check'></span></button>
+    <div>
+      <span class='feedback'></span>
+    </div>    
+  </section>
 </template>
 
 <template name='steps'>

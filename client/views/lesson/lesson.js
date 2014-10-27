@@ -1,3 +1,11 @@
+function getLesson() {
+  return Lessons.findOne({_id:'variables'});
+}
+
+Template.lesson.helpers({
+  lesson: getLesson
+});
+
 Template.lesson.events({
   'click .challengeShow': function() {
     $('.lesson').hide();
@@ -5,9 +13,18 @@ Template.lesson.events({
   }
 });
 
-function getLesson() {
-  return Lessons.findOne({name:'variables'});
+Template.question.rendered = function() {
+  $('.choice').button();
 }
+
+Template.question.events({
+  'click .check': function() {
+    var val = $('.question .btn-group .btn[class*="active"] input').val();
+    var index = parseInt(val);
+    var correct = this.correctIndex == parseInt(index);
+    $('.feedback').html(this.choices[index].feedback);
+  }
+});
 
 Template.steps.helpers({
     lesson: getLesson
