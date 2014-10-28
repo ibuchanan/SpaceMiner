@@ -31,10 +31,12 @@ iframe {
 }
 
 .left {
+  top: 50px;
   height:100%;
 }
 
 .right {
+  top: 50px;
   height:100%;
 }    
     
@@ -106,6 +108,43 @@ iframe {
   margin-top: 5px;
   display: none;
 }
+
+.popquiz {
+  padding: 4px;
+  background-color: #eee;
+  border-color: #ddd;
+  border-width: 1px;
+  border-radius: 4px 4px 0 0;
+  box-shadow: none;
+}
+  
+.popquiz .title {
+  font-weight: 700;
+  color: #959595;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}   
   </style>
+  <div class="navbar navbar-default" role="navigation">
+      <div class="navbar-header">
+          <a class="navbar-brand" href="#">Space Miner!</a>
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+          </button>
+      </div>
+      <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              {{> loginButtons }} <!-- here -->
+          </ul>
+      </div>
+  </div>  
+  <div>
   {{> yield}}
+  </div>
 </template>

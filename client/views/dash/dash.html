@@ -1,0 +1,14 @@
+<template name='dash'>
+  <div class='container-fluid'>
+    <div class='row'>
+    {{#each stepFeedback}}
+      <div class='col-md-2'>
+        <h3>{{key}}</h3>
+        {{#each value}}
+          {{key}}: {{value}}<br />
+        {{/each}}
+      </div>
+    {{/each}}
+    </div>
+  </div>
+</template>

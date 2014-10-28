@@ -11,9 +11,12 @@
             {{/each}}
           {{/each}}
           
-          {{#each lesson.questions}}
-            {{> question}}          
-          {{/each}}         
+          <section class='popquiz'>
+            <div class='title'><span class='fa fa-graduation-cap'></span> Pop Quiz</div>
+            {{#each lesson.questions}}
+              {{> question}}          
+            {{/each}}
+          </section>
 
           <h2>Code Challenge!</h2>
           <p>Now, you're ready to write some code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the code challenge!
@@ -34,7 +37,7 @@
 
 <template name='question'>
   <section class='question'>
-    <h3>{{title}}</h3>
+    <h4>{{title}}</h4>
     <div class="btn-group" data-toggle="buttons">
       {{#each addIndex choices}}
       <label class="btn btn-default choice">
@@ -77,9 +80,21 @@
           <div id="explanation" class="panel-collapse collapse">
             <div class="panel-body">
               {{{description}}}
-              <h4>Understand it? <a class='btn btn-success next'>Next <span class='fa fa-long-arrow-right'></span></a></h4>        
+              <hr />
+              <h4>Got it?</h4>
+              <div class='btn-group' data-toggle='buttons'>
+                <label class='btn btn-danger understand not'>
+                  <input type='radio' name='understand' value='not' /> Not exactly <span class='fa fa-frown-o'></span>
+                </label>
+                <label class='btn btn-warning understand almost'>
+                  <input type='radio' name='understand' value='almost' /> Almost there <span class='fa fa-meh-o'></span>
+                </label>
+                <label class='btn btn-success understand yes'>
+                  <input type='radio' name='understand' value='yes' /> Got it! <span class='fa fa-smile-o'></span>
+                </label> 
+              </div>
             </div>
-          </div>
+          </div>        
         </div>
       </div>
       {{#if previousAllowed}}

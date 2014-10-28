@@ -41,7 +41,7 @@ Template.step.helpers({
     return this.index > 0;
   },
   nextAllowed: function() {
-    return this.attempted && this.index < getLesson().steps.length - 1;
+    return this.index < getLesson().steps.length - 1;
   },
   pager: function() {
     return {current: this.index + 1, total: getLesson().steps.length};
@@ -68,5 +68,32 @@ Template.step.events({
   },
   'click .next': function() {
     lessonNavigate(this.index, this.index + 1, true);
-  }
+  },
+  'click .not': function() {
+    var feedback = {
+      lessonStepName: this.name,
+      userId: Meteor.userId(),
+      date: new Date(),
+      sense: 'not'
+    }
+    StepFeedback.insert(feedback);
+  },
+  'click .almost': function() {
+    var feedback = {
+      lessonStepName: this.name,
+      userId: Meteor.userId(),
+      date: new Date(),
+      sense: 'almost'
+    }
+    StepFeedback.insert(feedback);
+  },
+  'click .yes': function() {
+    var feedback = {
+      lessonStepName: this.name,
+      userId: Meteor.userId(),
+      date: new Date(),
+      sense: 'yes'
+    }
+    StepFeedback.insert(feedback);
+  }  
 });

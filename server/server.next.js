@@ -124,8 +124,8 @@ function createLessonsDefault() {
         "Another example is that all the photos that people take and share with Instagram or Facebook tend to hang around for years unless you delete them. But, unless someone is looking at pictures taken years ago, then no computers in the world will have that information in RAM right now. However, if you browse to one of those old photos, Facebook will locate it in long-term storage, load it into its own RAM, then send the information to you over the internet where your own device can copy it into its own RAM. Facebook will likely forget about it after that for years to come.")
     ],    
     questions: [
-      question('What type of memory do you think your browser uses when it needs to use when it asks you your name in order to display it back to you immediately?',
-               choice('Long-term storage', 'Probably not. Here\'s why: if the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.'),
+      question('What type of memory do you think your browser uses when it asks you your name in order to display it back to you immediately?',
+        choice('Long-term storage', 'Probably not. Here\'s why: if the browser wanted to remember your name forever and ever, this would be correct! But, since the browser is simply remembering your name long enough to display it back to you immediately, it only needs to store your name in RAM. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.'),
         choice('RAM', 'That\'s right! Since the browser is only remembering your name long enough to display it back to you immediately, it only needs to keep it in Random Access Memory, or RAM, for a short period of time. However, in a later lesson, we will show you have to make your browser remember your name with drive space forever.', true)
       )
     ],
@@ -229,5 +229,5 @@ Meteor.startup(function() {
     var API = new CollectionAPI({});
     API.addCollection(Levels, 'levels');
     API.addCollection(Lessons, 'lessons');
-    API.start();    
+    API.start();
 });

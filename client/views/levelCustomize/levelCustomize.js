@@ -88,6 +88,7 @@ function getLevelDto() {
 }
 
 _.extend(Template.levelCustomize, {
+  
   rendered: function() {
     var id = Router.current().params._id;    
     Levels.update({_id: id}, {$set: {lastViewed: new Date()}}, function(err, count) {
