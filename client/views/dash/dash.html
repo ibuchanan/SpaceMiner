@@ -1,12 +1,15 @@
 <template name='dash'>
-  <div class='container-fluid'>
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <h1><span class='fa fa-signal'></span> Learnlocity</h1>
+  <hr />
+  <div class='container-fluid' style='margin-top: 20px'>
     <div class='row'>
     {{#each stepFeedback}}
-      <div class='col-md-2'>
-        <h3>{{key}}</h3>
+      <div class='col-md-2' style='border: 1px solid lightgray; border-top: none; text-align: center'>
         {{#each value}}
-          {{key}}: {{value}}<br />
+        <div class='{{klass key}}' style='padding: 10px; font-size: 150%'><span class='fa fa-lg {{icon key}}'></span> {{value}}</div>
         {{/each}}
+        <h4>{{key}}</h4>
       </div>
     {{/each}}
     </div>

@@ -59,6 +59,17 @@ function lessonNavigate(currentIndex, newIndex, attemptedCurrent) {
     Lessons._collection.update({_id: id}, {$set: lesson});  
 }
 
+function feedbackInsert(step, sense) {
+    var feedback = {
+      lessonStepName: step.name,
+      lessonStepTitle: step.title,
+      userId: Meteor.userId(),
+      date: new Date(),
+      sense
+    };
+    StepFeedback.insert(feedback);
+}
+
 Template.step.events({
   'click .explanationShow': function() {
     $('.explanation').show();
@@ -70,30 +81,12 @@ Template.step.events({
     lessonNavigate(this.index, this.index + 1, true);
   },
   'click .not': function() {
-    var feedback = {
-      lessonStepName: this.name,
-      userId: Meteor.userId(),
-      date: new Date(),
-      sense: 'not'
-    }
-    StepFeedback.insert(feedback);
+    feedbackInsert(this, 'not');
   },
   'click .almost': function() {
-    var feedback = {
-      lessonStepName: this.name,
-      userId: Meteor.userId(),
-      date: new Date(),
-      sense: 'almost'
-    }
-    StepFeedback.insert(feedback);
+    feedbackInsert(this, 'almost');
   },
   'click .yes': function() {
-    var feedback = {
-      lessonStepName: this.name,
-      userId: Meteor.userId(),
-      date: new Date(),
-      sense: 'yes'
-    }
-    StepFeedback.insert(feedback);
+    feedbackInsert(this, 'yes');
   }  
 });

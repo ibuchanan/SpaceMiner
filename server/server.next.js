@@ -21,26 +21,28 @@ function createLevelRecord(levelDto, callback) {
 function createLevelDefault() {
   var board = 
       'tttttttttttttttttttt\n' + 
-      't---------------G--t\n' + 
+      't-EG------------G--t\n' + 
       't-ttttt------ttttt-t\n' + 
-      't-tG-E--------E-Gt-t\n' + 
+      't-tG------------Gt-t\n' + 
       't-ttttt------ttttt-t\n' + 
       't-----t--tt--t-----t\n' + 
       't--t--t--tt--t--t--t\n' + 
       't-----t------t-----t\n' + 
       't-t--------------t-t\n' + 
       't-t-tt-tttttt-tt-t-t\n' + 
-      't--G---t-G-------P-t\n' + 
+      't--G------P-----G--t\n' + 
       't-t-tt-t-tt-t-tt-t-t\n' + 
-      't-----------------Gt\n' + 
+      't--G------------G--t\n' + 
       'tttttttttttttttttttt\n'; 
   var level = {
+    _id: 'starter',
     userId: 'admin',
     board,
     name: 'Space Miner',
     onEnemyHit: 'game.reset();',
     onGemHit: "player.incScore(player.getScore());\ngame.playSound('gem1.wav');\nplayer.incAmmo(1);",
-    onCoinHit: "player.incScore(100);\ngame.playSound('coin1.wav');",    
+    onCoinHit: "player.incScore(100);\ngame.playSound('coin1.wav');",
+    onWon: "controls.alert('You won! Great job, but now it gets harder ;-)');\nvar name;\nprompt('By the way, what is your first name?');\ncontrols.alert(name + ', you are ready to move on!');",
     published: true,
     selections: [
       'Player/dark.png',
@@ -186,7 +188,8 @@ Meteor.startup(function() {
       }
     });
   
-    if (Levels.find().count() === 0) {
+    Levels.remove({name:'Space Miner'});
+    if (Levels.find({_id:'starter'}).count() === 0) {
       createLevelDefault();
     }
   
@@ -195,6 +198,7 @@ Meteor.startup(function() {
       createLessonsDefault();
     }  
   
+    //StepFeedback.remove({});
     SpriteParts.remove({});
     if (SpriteParts.find().count() === 0) {
       var spritePartSort = {

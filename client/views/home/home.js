@@ -5,21 +5,64 @@ var SPRITE_DOT = 8;
 var SPRITE_SHOT = 16;
 
 // Default handlers for game events
-function OnEnemyHit() {      
+OnEnemyHit = function() {      
 }
 
-function OnGemHit() {
+OnGemHit = function() {
 }
 
-function OnCoinHit() {
+OnCoinHit = function() {
 }
 
-function OnPause() {
+OnPause = function() {
   game.pause();
 }
 
-function OnUnpause() {
+OnUnpause = function() {
   game.unpause();
+}
+
+onLevelComplete = function() {
+//function onLevelComplete() {
+  try {
+    $('#towermanGame').hide();
+    if (!challengeAlreadySolved('variables')) challenge('variables');
+    else OnWon();
+  } catch(ex) {
+    console.log(ex);  
+  }
+  Q.stageScene('');  
+}
+
+OnWon = function() {  
+}
+
+challenges = {
+  variables : function() {
+    var name;
+    controls.prompt("Congratulations! What is your name?", function(result) {
+      // Do nothing with result
+      if (name === undefined) {
+        controls.prompt("I am sorry, but I do not think your name was stored in memory. What is your name?", 
+          function(result) {
+            // Do nothing with result
+            if (name === undefined) {
+              controls.alert("Unfortunately, your name is still undefined in my memory. Please learn to fix my buggy code so I can store your name in memory and congratulate you properly!", function() {
+                window.location = '/lesson';
+              });
+            }
+        });
+      }
+    });
+  }
+}
+
+function challengeAlreadySolved(challengeName) {
+  return Challenges.findOne({userId: Meteor.userId(), challenge: challengeName}) !== undefined;
+}
+
+function challenge(challengeName) {
+  challenges.variables();
 }
 
 // Global facades on top of the Quintus API
@@ -38,9 +81,6 @@ game = {
   },
   playSound: function(soundName) {
     Q.audio.play(soundName);
-  },
-  showMessage: function(message) {
-
   }
 };
 
@@ -59,6 +99,17 @@ player = {
     console.log('Ammo count:' + Q.state.get('ammo'));    
   }  
 };
+
+controls = {
+  alert: function(message, callback) {
+    callback = callback || function() {};
+    bootbox.alert(message, callback);
+  },
+  prompt: function(question, callback) {
+    bootbox.prompt(question, callback);
+  }
+};
+
 /*enemy = {
   incSpeed: function() {
      Q.Enemy.p.speed = this.p.speed + 10;
@@ -307,7 +358,12 @@ _.extend(Template.home, {
               var func3 = makeFunc(obj.onGemHit);
               if (func3) {
                 OnGemHit = func3;
-              }              
+              }
+              
+              var func4 = makeFunc(obj.onWon);
+              if (func4) {
+                OnWon = func4;
+              }
             } catch (ex) {
               console.log("Error getting level functions:");
               console.log(ex);
@@ -531,8 +587,8 @@ _.extend(Template.home, {
           OnCoinHit();
           // If there are no more dots left, just restart the game
           // TODO move to next level from page
-          if(this.stage.dotCount == 0) {
-            Q.stageScene("level2");
+          if(this.stage.dotCount === 0) {
+            onLevelComplete();
           }
         },
 
@@ -657,15 +713,6 @@ _.extend(Template.home, {
       //Q.load("sprites.json, tiles.png, shot.json, basicShot.png",  function() {
       Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
         console.log("Loaded basic resources...")
-      });        
-    
-      var model = new Sandbox.Model({
-        iframe : true,  // evaluate commands inside a hidden iframe (default: false)
-        fallback : true // use global eval if iframe isn't available (default: true)
-      });
-      window.sandbox = new Sandbox.View({
-        el : $('#sandbox'),
-        model : model
       });
   }  
 })
