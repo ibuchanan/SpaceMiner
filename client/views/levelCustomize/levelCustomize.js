@@ -128,6 +128,7 @@ _.extend(Template.levelCustomize, {
       }
       ace.edit("levelBoard").on('change', onChange, 1000);
       onChange();
+      $('#levelName').val(levelDoc.name);
     });
   },
   level: function() {
@@ -150,7 +151,9 @@ _.extend(Template.levelCustomize, {
       var level = getLevelDto();
       var id = Session.get("level")._id;
       level.published = true;
-      Meteor.call('levelSave', id, level);
+      Meteor.call('levelSave', id, level, function(err) {
+        window.location='/' + id;
+      });
     }
   }
 });

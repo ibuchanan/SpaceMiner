@@ -10,7 +10,7 @@
 <template name="home">
   <div class="navbar navbar-default" role="navigation">
       <div class="navbar-header">
-          <a class="navbar-brand" href="#">Space Miner!</a>
+          <a class="navbar-brand" href="/"><span class='fa fa-fighter-jet'></span> Space Miner!</a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
               <span class="sr-only">Toggle navigation</span>
               <span class="icon-bar"></span>
@@ -20,7 +20,11 @@
       </div>
       <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Home</a></li>
+              <li><a href="/play">Play <span class='fa fa-gamepad'></span></a></li>
+              <li><a href="/members">Members <span class='fa fa-users'></span></a></li>        
+              {{#if userSignedIn}}            
+              <li><a href="/build">Build World <span class='fa fa-globe'></span></a></li>
+              {{/if}}
           </ul>
           <ul class="nav navbar-nav navbar-right">
               {{> loginButtons }} <!-- here -->
@@ -29,22 +33,22 @@
   </div>  
   {{> levels}}
   <div id='gamePanel'>
-    <button class='btn btn-primary btn-sm levelsShow'><span class='fa fa-chevron-left'></span> All levels</button> <button class='btn btn-warning btn-sm gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button><button class='btn btn-success btn-sm gamePlay {{hideIfPlaying}}'><span class='fa fa-play'></span> Play</button> <button class='btn btn-danger btn-sm gameReset'><span class='fa fa-refresh'></span> Reset</button>
-    <div id='gameContainer'><canvas id='game' width="640" height="640" class='game'></canvas>          
-      <div>
-        {{#if userSignedIn}}
-        {{#if userOwnsCurrentLevel}}
-        <button class='btn btn-warning customize'>Customize this level</button>&nbsp;
-        {{/if}}
+    <div class="btn-group btn-group-sm">
+      <button class='btn btn-primary levelsShow'><span class='fa fa-chevron-left'></span> All levels</button>    
+      <button class='btn btn-warning gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button>
+      <button class='btn btn-success gamePlay {{hideIfPlaying}}'><span class='fa fa-play'></span> Play</button> 
+      <button class='btn btn-danger gameReset'><span class='fa fa-refresh'></span> Reset</button>
+      {{#if userSignedIn}}
         {{#if levelLoaded}}
-        <button class='btn btn-success fork'>Fork Level</button>
+          {{#if userOwnsCurrentLevel}}
+          <button class='btn btn-warning customize'><span class='fa fa-gears'></span> Customize</button>
+          {{/if}}
+          <button class='btn btn-success fork'><span class='fa fa-code-fork'></span> Fork Level</button>
         {{/if}}
-        {{else}}
-        {{#if levelLoaded}}          
-        <span class='label label-info'>Sign in to be able to fork and customize this level!</span>
-        {{/if}}
-        {{/if}}           
-      </div>
+      {{/if}}
+    </div>
+    <div id='gameContainer'>
+      <canvas id='game' width="640" height="640" class='game'></canvas>
     </div>
   </div>
 </template>

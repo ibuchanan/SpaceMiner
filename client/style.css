@@ -1,9 +1,14 @@
 body { 
   padding:0px; padding-top: 0px; margin:0px; background-color:mintcream;
+  background-image: url(/images/stars.gif);
 }
 
 h2{
   color:#D3D3D3;
+}
+
+.navbar-brand {
+  font-size: 150%;
 }
 
 .editor {
@@ -32,8 +37,6 @@ h2{
 
 .levels {
   padding: 10px;
-  height: 400;
-  overflow: scroll;
 }
 
 .levelPlay {
@@ -47,6 +50,7 @@ h2{
 }
 
 #gameContainer {
+  margin-top: 5px;
   display: none;
 }
 

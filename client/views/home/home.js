@@ -262,6 +262,7 @@ _.extend(Template.home, {
     },
     'click .gameReset': function() {
       game.reset();
+      gameShow(true);
       gameFocus();
     },
     'click button.customize': function(evt, template) {
@@ -610,21 +611,22 @@ _.extend(Template.home, {
              }  
           },
           fire: function(){
+            var shot;
             var entity = this;
               if(!this.p.canFire||Q.state.get("ammo")<=0){
                 return;
               }
               if(this.p.direction == 'left'){
-                var shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:400}));
+                shot = Q.stage().insert(new Q.Shot({x:this.p.x-4,y:this.p.y,angle:180,speed:400}));
               }
               else if(this.p.direction == 'up'){
-                var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:400}));
+                shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y-2,angle:-90,speed:400}));
               }
               else if(this.p.direction == 'down'){
-                var shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:400}));
+                shot = Q.stage().insert(new Q.Shot({x:this.p.x,y:this.p.y+2,angle:90,speed:400}));
               }
               else{
-                var shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:400}));
+                shot = Q.stage().insert(new Q.Shot({x:this.p.x+2,y:this.p.y,speed:400}));
               }
               this.p.shots.push(shot);
               entity.p.canFire = false;
@@ -807,24 +809,6 @@ var bsBackgrounds = [
   'primary', 'success', 'info', 'warning', 'danger'
 ];
 
-var icons = [
-  'fa-bomb',
-  'fa-automobile',
-  'fa-bullseye',
-  'fa-bell',
-  'fa-bug',
-  'fa-bus',
-  'fa-cab',
-  'fa-car',
-  'fa-cube',
-  'fa-fighter-jet',
-  'fa-flask',
-  'fa-globe',
-  'fa-music',
-  'fa-rocket',
-  'fa-space-shuttle'
-]
-
 function randomElement(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
@@ -832,9 +816,6 @@ function randomElement(array) {
 Template.level.helpers({
   randomBackgroundColor: function() {
     return randomElement(bsBackgrounds);
-  },
-  randomIcon: function() {
-    return 'fa ' + randomElement(icons);
   },
   preview: function() {
     var images = '';
