@@ -27,3 +27,7 @@ h2{
   height: 400;
   overflow: scroll;
 }
+
+#gameContainer {
+  display: none;
+}

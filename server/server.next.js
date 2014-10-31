@@ -60,23 +60,25 @@ function createLevelDefault() {
 }
 
 function createLessonsDefault() {
+  
   function value(val) {
     return {
       value: val === undefined ? 'undefined' : val,
       type: typeof val
     };
   }
+  
   function error(message) {
     return {
       error: message
     };
   }
+  
   var lessonId = 'variables';
   
   function step(code, title, id, expectation, description) {
     step.index++;
     return {
-      //_id: lessonId + '-' + id,
       name: lessonId + '-' + id,      
       code,
       title,
@@ -112,6 +114,17 @@ function createLessonsDefault() {
       feedback,
       correct
     };
+  } 
+ 
+  function finish(name, title, code, instruction, completion, assertion) {
+    return {
+      name,
+      title,
+      code,
+      instruction,
+      completion,
+      assertion
+    };
   }
   
   var lesson = {
@@ -145,7 +158,8 @@ function createLessonsDefault() {
     Next: <code class='label label-primary'>faveColor = prompt("What's your favorite color?")</code>
     <br />
       */
-    ]    
+    ],
+    finish: finish('fix-broken-congrats', 'Fix the broken congrats message!', 'var winnerName;\nprompt("Congratulations! What is your name?");\nalert("Great job, " + winnerName + "!");', 'Now that you have learned about variables, try to fix the broken code that asked for your name when you beat the level before:', "return winnerName", "_.isString(val)")
   };
   Lessons.insert(lesson);
 }

@@ -25,7 +25,7 @@ OnUnpause = function() {
 onLevelComplete = function() {
 //function onLevelComplete() {
   try {
-    $('#towermanGame').hide();
+    $('#gameContainer').hide();
     if (!challengeAlreadySolved('variables')) challenge('variables');
     else OnWon();
   } catch(ex) {
@@ -39,23 +39,26 @@ OnWon = function() {
 
 challenges = {
   variables : function() {
-    var name;
-    controls.prompt("Congratulations! What is your name?", function(result) {
-      // Do nothing with result
-      if (name === undefined) {
-        controls.prompt("I am sorry, but I do not think your name was stored in memory. What is your name?", 
-          function(result) {
-            // Do nothing with result
-            if (name === undefined) {
-              controls.alert("Unfortunately, your name is still undefined in my memory. Please learn to fix my buggy code so I can store your name in memory and congratulate you properly!", function() {
-                window.location = '/lesson';
-              });
-            }
-        });
-      }
+    levelClone(function(err, newLevelId) {
+      // TODO handle err
+      var name;
+      controls.prompt("<h1><span class='fa fa-smile-o'></span> Congratulations, you win!</h1>What is your name?", function(result) {
+        // Do nothing with result
+        if (name === undefined) {
+          controls.prompt("<h1><span class='fa fa-meh-o'></span> Sorry</h1>I do not think your name was stored in memory. What is your name?", 
+            function(result) {
+              // Do nothing with result
+              if (name === undefined) {
+                controls.confirm("<h1><span class='fa fa-frown-o'></span> Ooops!</h1> Your name is still undefined in memory! Will you <i><b>please fix</b></i> my buggy code so I can store your name in memory to congratulate you properly?", function(result) {
+                  if (result) window.location = '/lesson/variables/' + newLevelId;
+                });
+              }
+          });
+        }
+      });
     });
   }
-}
+};
 
 function challengeAlreadySolved(challengeName) {
   return Challenges.findOne({userId: Meteor.userId(), challenge: challengeName}) !== undefined;
@@ -107,6 +110,9 @@ controls = {
   },
   prompt: function(question, callback) {
     bootbox.prompt(question, callback);
+  },
+  confirm: function(question, callback) {
+    bootbox.confirm(question, callback);
   }
 };
 
@@ -169,6 +175,26 @@ function levelMapCreate(levelMapId) {
   });
 }
 
+function levelClone(callback) {
+  var levelId = Session.get('levelId');
+  var doc = Levels.findOne({_id: levelId});
+  delete doc._id;
+  doc.published = false;
+  Levels.insert(doc, callback);
+}
+
+function levelPlay(levelId) {
+  $('#gameContainer').show();      
+  levelMapCreate(levelId);
+  Q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
+    Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});        
+    Q.compileSheets(levelId + ".spr","sprites.json");
+    Q.compileSheets("basicShot.png","shot.json");        
+    Q.stageScene(levelId);
+    $("#game").focus();
+  }, {reload:true});  
+}
+
 _.extend(Template.home, {
   levelLoaded: function() {
     return Session.get('levelId');
@@ -200,7 +226,7 @@ _.extend(Template.home, {
       });
     }    
   },
-  rendered: function() {    
+  rendered: function() {
       // Set up a basic Quintus object
       // with the necessary modules and controls
       delete Session.keys.levelId;
@@ -209,7 +235,7 @@ _.extend(Template.home, {
         development: true,
         audioSupported: ['wav'] })
         .include("Audio, Sprites, Scenes, Input, 2D, UI")
-        .setup("towermanGame", {
+        .setup('game', {
           width: 640, height: 480, scaleToFit: true
          })
         .enableSound()
@@ -678,7 +704,6 @@ _.extend(Template.home, {
         }
       });
 
-
       Q.Sprite.extend("Enemy", {
         init: function(p) {
           this._super(p,{
@@ -712,7 +737,9 @@ _.extend(Template.home, {
       
       //Q.load("sprites.json, tiles.png, shot.json, basicShot.png",  function() {
       Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
-        console.log("Loaded basic resources...")
+        console.log("Loaded basic resources...");
+        var levelId = Router.current().params.levelId;
+        if (levelId) levelPlay(levelId);        
       });
   }  
 })
@@ -726,16 +753,7 @@ _.extend(Template.levels, {
 _.extend(Template.level, {
   events: {
     'click button.levelPlay': function(evt, template) {
-      var levelId = this._id;
-      levelMapCreate(levelId);
-      Q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
-        console.log("Called after all loaded...");
-        Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});        
-        Q.compileSheets(levelId + ".spr","sprites.json");
-        Q.compileSheets("basicShot.png","shot.json");        
-        Q.stageScene(levelId);
-        $("#towermanGame").focus();
-      }, {reload:true});        
+      levelPlay(this._id);
     } 
   }
 })

@@ -51,9 +51,13 @@
 </template>
 
 <template name='steps'>
-  {{#each lesson.steps}}
-    {{> step}}
-  {{/each}}
+  {{#if notFinished}}
+    {{#each lesson.steps}}
+      {{> step}}
+    {{/each}}
+  {{else}}
+    {{> finish}}
+  {{/if}}
 </template>
 
 <template name='step'>
@@ -103,5 +107,19 @@
       {{#if nextAllowed}}
 <a class='btn btn-info next'>Next <span class='glyphicon glyphicon-step-forward'></span></a>
       {{/if}}
+      {{#if last}}
+<a class='btn btn-primary finish'>Finish <span class='fa fa-star'></span></a>
+      {{/if}}
     {{/if}}
+</template>
+
+<template name='finish'>
+  <button class='btn btn-primary challengesShow'><span class='fa fa-backward'></span> Show challenges again</button>
+  <hr /> 
+  <h2>Solve the challenge</h2>
+  <h3>{{finish.title}}</h3>
+  <p>{{finish.instruction}}</p>
+  <div class='editor' id='finishCode'></div>
+   <br />
+   <button class='btn btn-primary test'>Test</button>&nbsp;<button class='btn btn-success save'>Save and continue</button>
 </template>
