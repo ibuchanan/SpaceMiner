@@ -27,38 +27,33 @@
           </ul>
       </div>
   </div>  
-  <table border="0" cellpadding="10">
-    <tr valign='top'>
-      <td>
-        {{> levels}}
-      </td>
-      <td> 
-        <h1>Select a level to play!</h1>
-        <div style='background: black; border:4px solid darkgray;' id='gameContainer'><canvas id='game' width="640" height="640"></canvas>          
-          <div>
-            {{#if userSignedIn}}
-              {{#if userOwnsCurrentLevel}}
-              <button class='btn btn-warning customize'>Customize this level</button>&nbsp;
-              {{/if}}
-              {{#if levelLoaded}}
-                <button class='btn btn-success fork'>Fork Level</button>
-              {{/if}}
-            {{else}}
-              {{#if levelLoaded}}          
-              <span class='label label-info'>Sign in to be able to fork and customize this level!</span>
-              {{/if}}
-            {{/if}}
-          </div>
-        </div>
-      </td>
-    </tr>
-  </table>
+  {{> levels}}
+  <div id='gamePanel'>
+    <button class='btn btn-primary btn-sm levelsShow'><span class='fa fa-chevron-left'></span> All levels</button> <button class='btn btn-warning btn-sm gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button><button class='btn btn-success btn-sm gamePlay {{hideIfPlaying}}'><span class='fa fa-play'></span> Play</button> <button class='btn btn-danger btn-sm gameReset'><span class='fa fa-refresh'></span> Reset</button>
+    <div id='gameContainer'><canvas id='game' width="640" height="640" class='game'></canvas>          
+      <div>
+        {{#if userSignedIn}}
+        {{#if userOwnsCurrentLevel}}
+        <button class='btn btn-warning customize'>Customize this level</button>&nbsp;
+        {{/if}}
+        {{#if levelLoaded}}
+        <button class='btn btn-success fork'>Fork Level</button>
+        {{/if}}
+        {{else}}
+        {{#if levelLoaded}}          
+        <span class='label label-info'>Sign in to be able to fork and customize this level!</span>
+        {{/if}}
+        {{/if}}           
+      </div>
+    </div>
+  </div>
 </template>
 
 <template name="levels">
-  <div>
-    <h2>Levels</h2>
-    <div class="levels">
+  <div id='levelsContainer'>
+    <h1>Play any level!</h1>
+    <button class='btn btn-sm btn-success gameShow'>Back to game <span class='fa fa-chevron-right'></span></button>
+    <div class="levels container-fluid">
     {{#each levels}}
       {{> level}}
     {{/each}}
@@ -67,5 +62,5 @@
 </template>
 
 <template name="level">
-  <div class="well well-small"><button class="btn btn-info btn-lg levelPlay">{{name}}</button></div>
+  <button class="col-md-2 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}<br/>{{{preview}}}</button>
 </template>

@@ -71,16 +71,28 @@ function challenge(challengeName) {
 // Global facades on top of the Quintus API
 // for students to program against in their code 
 // sections.
+var paused = false;
+var pausedDep = new Deps.Dependency;
 game = {
   reset: function() {
     Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
-    Q.stageScene("level1");
+    Q.stageScene(Session.get('levelId'));
+    paused = false;
+    pausedDep.changed();
   },
   pause: function() {
     Q.pauseGame();
+    paused = true;
+    pausedDep.changed();
   },
-  unpause: function() {
+  isPaused: function() {
+    pausedDep.depend();
+    return paused;
+  },
+  unpause: function() {    
     Q.unpauseGame();
+    paused = false;
+    pausedDep.changed();
   },
   playSound: function(soundName) {
     Q.audio.play(soundName);
@@ -99,7 +111,6 @@ player = {
   },
   incAmmo: function(amount) {
     Q.state.inc('ammo', amount);
-    console.log('Ammo count:' + Q.state.get('ammo'));    
   }  
 };
 
@@ -183,19 +194,40 @@ function levelClone(callback) {
   Levels.insert(doc, callback);
 }
 
+function levelsShow(hideGame) {
+  if (hideGame) $('#gamePanel').fadeOut('fast');
+  $('#levelsContainer').fadeIn('fast');  
+}
+
+function gameShow(hideLevels) {
+  $('#gameContainer').show();
+  if (hideLevels) $('#levelsContainer').fadeOut('fast');  
+  $('#gamePanel').fadeIn('fast');
+}
+
+function gameFocus() {
+  $("#game").focus();
+}
+
 function levelPlay(levelId) {
-  $('#gameContainer').show();      
   levelMapCreate(levelId);
   Q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
     Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});        
     Q.compileSheets(levelId + ".spr","sprites.json");
     Q.compileSheets("basicShot.png","shot.json");        
-    Q.stageScene(levelId);
-    $("#game").focus();
+    Q.stageScene(levelId);    
+    gameFocus();
+    gameShow(true);
   }, {reload:true});  
 }
 
-_.extend(Template.home, {
+Template.home.helpers({
+  hideIfPaused: function() {    
+    return game.isPaused() ? 'hideElement' : ''
+  },
+  hideIfPlaying: function() {
+    return !game.isPaused() ? 'hideElement' : ''
+  },
   levelLoaded: function() {
     return Session.get('levelId');
   },
@@ -208,8 +240,30 @@ _.extend(Template.home, {
   },
   tplCommand: function() {
     return "<% if (! _hidden) { %><span class=\"command\"><%= command %></span><%if (! resultHidden) {%><span class=\"prefix\"><%= this.resultPrefix %></span><span class=\"<%= _class %>\"><%= result %></span><% } } %>";
-  },
+  }  
+});
+
+_.extend(Template.home, {
   events: {
+    'click .levelsShow': function() {
+      game.pause();
+      levelsShow(true);
+    },
+    'click .gameShow': function() {
+      gameFocus();
+      gameShow(true);
+    },
+    'click .gamePause': function() {
+      game.pause();
+    },
+    'click .gamePlay': function() {
+      game.unpause();
+      gameFocus();
+    },
+    'click .gameReset': function() {
+      game.reset();
+      gameFocus();
+    },
     'click button.customize': function(evt, template) {
       evt.preventDefault();
       var levelId = Session.get('levelId');
@@ -296,9 +350,6 @@ _.extend(Template.home, {
           var loadedCallback = function(key,obj,force) {
             if(errors) { return; }
 
-            console.log('Key:' + key);
-            console.log(Q.assets[key] != false);
-            
             // Prevent double callbacks (I'm looking at you Firefox, canplaythrough
             if(!Q.assets[key]||force) {
 
@@ -337,7 +388,6 @@ _.extend(Template.home, {
               /* Call the appropriate loader function */
               /* passing in our per-asset callback */
               /* Dropping our asset by name into Q.assets */
-              console.log("calling again the asset load function for loadAsset" + assetType);
               Q["loadAsset" + assetType](key,itm,
                                          function(key,obj,force) {
                                            force = force || options.reload;
@@ -359,10 +409,8 @@ _.extend(Template.home, {
             Q.assets[key] = board;
             
             function makeFunc(rawCode) {
-              console.log(rawCode);
               var funcCode = "(function() {\n" + rawCode + "\n})";
               var func = eval(funcCode);
-              console.log(func);
               if (_.isFunction(func)) {
                 return func;
               }
@@ -564,7 +612,6 @@ _.extend(Template.home, {
           fire: function(){
             var entity = this;
               if(!this.p.canFire||Q.state.get("ammo")<=0){
-                console.log(Q.state.get('ammo'));
                 return;
               }
               if(this.p.direction == 'left'){
@@ -584,7 +631,6 @@ _.extend(Template.home, {
               Q.state.dec("ammo", 1) ;
               setTimeout(function(){
                   entity.p.canFire = true; 
-                  console.log(Q.state.get('ammo'));
             },1000);
           }
         } 
@@ -737,7 +783,6 @@ _.extend(Template.home, {
       
       //Q.load("sprites.json, tiles.png, shot.json, basicShot.png",  function() {
       Q.load("sprites.json, tiles.png, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
-        console.log("Loaded basic resources...");
         var levelId = Router.current().params.levelId;
         if (levelId) levelPlay(levelId);        
       });
@@ -756,4 +801,47 @@ _.extend(Template.level, {
       levelPlay(this._id);
     } 
   }
-})
+});
+
+var bsBackgrounds = [
+  'primary', 'success', 'info', 'warning', 'danger'
+];
+
+var icons = [
+  'fa-bomb',
+  'fa-automobile',
+  'fa-bullseye',
+  'fa-bell',
+  'fa-bug',
+  'fa-bus',
+  'fa-cab',
+  'fa-car',
+  'fa-cube',
+  'fa-fighter-jet',
+  'fa-flask',
+  'fa-globe',
+  'fa-music',
+  'fa-rocket',
+  'fa-space-shuttle'
+]
+
+function randomElement(array) {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+Template.level.helpers({
+  randomBackgroundColor: function() {
+    return randomElement(bsBackgrounds);
+  },
+  randomIcon: function() {
+    return 'fa ' + randomElement(icons);
+  },
+  preview: function() {
+    var images = '';
+    for(var i = 0; i < this.selections.length-1; i++) {
+      images += "<img src='/images/spriteParts/" + this.selections[i] + "' height='32' width='32' alt='' />&nbsp;";
+      if (i==1) images += "<img src='/images/spriteParts/" + this.tile + "' height='32' width='32' alt='' />&nbsp;";
+    }
+    return images;
+  }
+});

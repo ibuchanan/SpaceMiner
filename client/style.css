@@ -22,12 +22,34 @@ h2{
   text-align: center;
 }
 
+#levelsContainer {
+  text-align:center;  
+}
+
+.hideElement {
+  display: none;
+}
+
 .levels {
   padding: 10px;
   height: 400;
   overflow: scroll;
 }
 
+.levelPlay {
+  margin: 5px;
+  padding: 10px;    
+}
+
+#gamePanel {
+  display: none;
+  text-align: center;
+}
+
 #gameContainer {
   display: none;
+}
+
+.game {
+  background: black; border:4px solid darkgray;
 }

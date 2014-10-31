@@ -139,7 +139,7 @@ Template.finish.events({
               else bootbox.alert("Sorry! There was en error saving. Please try again.");
             });
           }
-        });  
+        });
       } else {
         bootbox.alert('Hmm. Something isn\'t right. Keep trying...');
       }
