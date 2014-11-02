@@ -57,3 +57,7 @@ h2{
 .game {
   background: black; border:4px solid darkgray;
 }
+
+#gameReturn {
+  display: none;
+}

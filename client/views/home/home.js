@@ -31,7 +31,7 @@ onLevelComplete = function() {
   } catch(ex) {
     console.log(ex);  
   }
-  Q.stageScene('');  
+  Q.stageScene('');
 }
 
 OnWon = function() {  
@@ -68,74 +68,24 @@ function challenge(challengeName) {
   challenges.variables();
 }
 
-// Global facades on top of the Quintus API
-// for students to program against in their code 
-// sections.
-var paused = false;
-var pausedDep = new Deps.Dependency;
-game = {
-  reset: function() {
-    Q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
-    Q.stageScene(Session.get('levelId'));
-    paused = false;
-    pausedDep.changed();
-  },
-  pause: function() {
-    Q.pauseGame();
-    paused = true;
-    pausedDep.changed();
-  },
-  isPaused: function() {
-    pausedDep.depend();
-    return paused;
-  },
-  unpause: function() {    
-    Q.unpauseGame();
-    paused = false;
-    pausedDep.changed();
-  },
-  playSound: function(soundName) {
-    Q.audio.play(soundName);
-  }
-};
+// Default instances for API objects
+game = new Game();
+player = new Player();
+controls = new Controls();
 
-player = {
-  incScore: function(amount) {
-    Q.state.inc('score', amount);
-  },
-  getScore: function() {
-    return Q.state.get('score');
-  },
-  decScore: function(amount) {
-    Q.state.dec('score', amount);
-  },
-  incAmmo: function(amount) {
-    Q.state.inc('ammo', amount);
-  }  
-};
+function playInit(levelMapId) {
+  Session.set('levelId', levelMapId);
+  game = new Game(Q, levelMapId);
+  $('.currentGameName').text(game.name());
+  player = new Player(Q);
+}
 
-controls = {
-  alert: function(message, callback) {
-    callback = callback || function() {};
-    bootbox.alert(message, callback);
-  },
-  prompt: function(question, callback) {
-    bootbox.prompt(question, callback);
-  },
-  confirm: function(question, callback) {
-    bootbox.confirm(question, callback);
-  }
-};
-
-/*enemy = {
-  incSpeed: function() {
-     Q.Enemy.p.speed = this.p.speed + 10;
-    
-  }
-}; */
+function levelsPanelUpdate() {
+  $('#gameReturn').show();
+}
 
 function levelMapCreate(levelMapId) {
-  Session.set('levelId', levelMapId);
+  playInit(levelMapId);
   Q.TileLayer.extend("Level" + levelMapId,{
     init: function() {
       this._super({
@@ -215,9 +165,9 @@ function levelPlay(levelId) {
     Q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});        
     Q.compileSheets(levelId + ".spr","sprites.json");
     Q.compileSheets("basicShot.png","shot.json");        
-    Q.stageScene(levelId);    
     gameFocus();
     gameShow(true);
+    Q.stageScene(levelId);
   }, {reload:true});  
 }
 
@@ -246,6 +196,7 @@ Template.home.helpers({
 _.extend(Template.home, {
   events: {
     'click .levelsShow': function() {
+      levelsPanelUpdate();
       game.pause();
       levelsShow(true);
     },
@@ -788,20 +739,18 @@ _.extend(Template.home, {
         var levelId = Router.current().params.levelId;
         if (levelId) levelPlay(levelId);        
       });
-  }  
-})
-
-_.extend(Template.levels, {
-  levels: function() {
-    return Levels.find({published:true});
   }
 });
 
-_.extend(Template.level, {
-  events: {
-    'click button.levelPlay': function(evt, template) {
-      levelPlay(this._id);
-    } 
+Template.levels.helpers({
+  levels: function() {
+    return Levels.find({published:true});
+  }
+});  
+
+Template.level.events({
+  'click button.levelPlay': function(evt, template) {
+    levelPlay(this._id);
   }
 });
 
@@ -824,5 +773,11 @@ Template.level.helpers({
       if (i==1) images += "<img src='/images/spriteParts/" + this.tile + "' height='32' width='32' alt='' />&nbsp;";
     }
     return images;
+  }
+});
+
+Template.game.helpers({
+  name: function() {
+    return game.name();
   }
 });

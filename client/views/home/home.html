@@ -22,17 +22,38 @@
           <ul class="nav navbar-nav">
               <li><a href="/play">Play <span class='fa fa-gamepad'></span></a></li>
               <li><a href="/members">Members <span class='fa fa-users'></span></a></li>        
-              {{#if userSignedIn}}            
+              {{#if currentUser}}            
               <li><a href="/build">Build World <span class='fa fa-globe'></span></a></li>
               {{/if}}
           </ul>
           <ul class="nav navbar-nav navbar-right">
-              {{> loginButtons }} <!-- here -->
+              {{> loginButtons }}
           </ul>
       </div>
   </div>  
   {{> levels}}
+  {{> game}}
+</template>
+
+<template name="levels">
+  <div id='levelsContainer'>
+    <h1>Conqeur all worlds!</h1>
+    <button class='btn btn-sm btn-info gameShow' id='gameReturn'>Return to <span class='currentGameName'></span> <span class='fa fa-chevron-right'></span></button>
+    <div class="levels container-fluid">
+    {{#each levels}}
+      {{> level}}
+    {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="level">
+  <button class="col-md-2 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}<br/>{{{preview}}}</button>
+</template>
+
+<template name='game'>
   <div id='gamePanel'>
+    <h1 class='currentGameName'>{{name}}</h1>
     <div class="btn-group btn-group-sm">
       <button class='btn btn-primary levelsShow'><span class='fa fa-chevron-left'></span> All levels</button>    
       <button class='btn btn-warning gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button>
@@ -50,21 +71,5 @@
     <div id='gameContainer'>
       <canvas id='game' width="640" height="640" class='game'></canvas>
     </div>
-  </div>
-</template>
-
-<template name="levels">
-  <div id='levelsContainer'>
-    <h1>Play any level!</h1>
-    <button class='btn btn-sm btn-success gameShow'>Back to game <span class='fa fa-chevron-right'></span></button>
-    <div class="levels container-fluid">
-    {{#each levels}}
-      {{> level}}
-    {{/each}}
-    </div>
-  </div>
-</template>
-
-<template name="level">
-  <button class="col-md-2 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}<br/>{{{preview}}}</button>
+  </div>  
 </template>
