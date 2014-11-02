@@ -145,14 +145,14 @@ function levelClone(callback) {
 }
 
 function levelsShow(hideGame) {
-  if (hideGame) $('#gamePanel').fadeOut('fast');
-  $('#levelsContainer').fadeIn('fast');  
+  if (hideGame) $('#gamePanel').fadeOut('slow');
+  $('#levelsContainer').fadeIn('slow');  
 }
 
 function gameShow(hideLevels) {
   $('#gameContainer').show();
-  if (hideLevels) $('#levelsContainer').fadeOut('fast');  
-  $('#gamePanel').fadeIn('fast');
+  if (hideLevels) $('#levelsContainer').fadeOut('slow');
+  $('#gamePanel').fadeIn('slow');
 }
 
 function gameFocus() {
