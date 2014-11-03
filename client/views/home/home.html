@@ -59,7 +59,7 @@
       <button class='btn btn-warning gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button>
       <button class='btn btn-success gamePlay {{hideIfPlaying}}'><span class='fa fa-play'></span> Play</button> 
       <button class='btn btn-danger gameReset'><span class='fa fa-refresh'></span> Reset</button>
-      {{#if userSignedIn}}
+      {{#if currentUser}}
         {{#if levelLoaded}}
           {{#if userOwnsCurrentLevel}}
           <button class='btn btn-warning customize'><span class='fa fa-gears'></span> Customize</button>

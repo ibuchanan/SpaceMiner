@@ -1,9 +1,10 @@
-this.Game = class {
+var paused = false;
+var pausedDep = new Deps.Dependency; 
+
+this.Game = class {  
   constructor(q, levelId) {
     this.q = q;
     this.levelId = levelId;
-    this._paused = false;
-    this._pausedDep = new Deps.Dependency;    
   }  
   name() {
     // TODO decouple Levels ?
@@ -15,22 +16,22 @@ this.Game = class {
     this.q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
     console.log(this.levelId);
     this.q.stageScene(this.levelId);
-    this._paused = false;
-    this._pausedDep.changed();
+    paused = false;
+    pausedDep.changed();
   }
   pause() {
     this.q.pauseGame();
-    this._paused = true;
-    this._pausedDep.changed();
+    paused = true;
+    pausedDep.changed();
   }  
-  isPaused() {
-    this._pausedDep.depend();
-    return this._paused;
+  static isPaused() {
+    pausedDep.depend();
+    return paused;
   }
   unpause() {    
     this.q.unpauseGame();
-    this._paused = false;
-    this._pausedDep.changed();
+    paused = false;
+    pausedDep.changed();
   }  
   playSound(soundName) {
     this.q.audio.play(soundName);

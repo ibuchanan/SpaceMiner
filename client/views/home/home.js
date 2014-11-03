@@ -145,11 +145,13 @@ function levelClone(callback) {
 }
 
 function levelsShow(hideGame) {
+  $('#levelsContainer').hide();
   if (hideGame) $('#gamePanel').fadeOut('slow');
   $('#levelsContainer').fadeIn('slow');  
 }
 
 function gameShow(hideLevels) {
+  $('#gamePanel').hide();
   $('#gameContainer').show();
   if (hideLevels) $('#levelsContainer').fadeOut('slow');
   $('#gamePanel').fadeIn('slow');
@@ -170,29 +172,6 @@ function levelPlay(levelId) {
     Q.stageScene(levelId);
   }, {reload:true});  
 }
-
-Template.home.helpers({
-  hideIfPaused: function() {    
-    return game.isPaused() ? 'hideElement' : ''
-  },
-  hideIfPlaying: function() {
-    return !game.isPaused() ? 'hideElement' : ''
-  },
-  levelLoaded: function() {
-    return Session.get('levelId');
-  },
-  userSignedIn: function() {
-    return Meteor.userId() !== null;
-  },
-  userOwnsCurrentLevel: function() {
-    var level = Levels.findOne({_id: Session.get('levelId')});
-    return Meteor.userId() !== null && level.userId === Meteor.userId();
-  },
-  tplCommand: function() {
-    return "<% if (! _hidden) { %><span class=\"command\"><%= command %></span><%if (! resultHidden) {%><span class=\"prefix\"><%= this.resultPrefix %></span><span class=\"<%= _class %>\"><%= result %></span><% } } %>";
-  }  
-});
-
 _.extend(Template.home, {
   events: {
     'click .levelsShow': function() {
@@ -670,5 +649,18 @@ Template.level.helpers({
 Template.game.helpers({
   name: function() {
     return game.name();
-  }
+  },
+  levelLoaded: function() {
+    return Session.get('levelId');
+  },  
+  userOwnsCurrentLevel: function() {
+    var level = Levels.findOne({_id: Session.get('levelId')});
+    return Meteor.userId() !== null && level.userId === Meteor.userId();
+  },  
+  hideIfPaused: function() {    
+    return Game.isPaused() ? 'hideElement' : ''
+  },
+  hideIfPlaying: function() {
+    return !Game.isPaused() ? 'hideElement' : ''
+  }  
 });
