@@ -1,4 +1,4 @@
-class Game {
+this.Game = class {
   constructor(q, levelId) {
     this.q = q;
     this.levelId = levelId;
@@ -37,7 +37,7 @@ class Game {
   }
 }
 
-class Player { 
+this.Player = class { 
   constructor(q) {
     this.q = q;
   }  
@@ -55,7 +55,7 @@ class Player {
   }  
 }
 
-class Controls {
+this.Controls = class {
   alert(message, callback) {
     callback = callback || function() {};
     bootbox.alert(message, callback);
@@ -73,7 +73,4 @@ class Controls {
      Q.Enemy.p.speed = this.p.speed + 10;
     
   }
-}; */
-window.Game = Game;
-window.Player = Player
-window.Controls = Controls;
+};
