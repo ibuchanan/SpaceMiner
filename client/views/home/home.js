@@ -51,24 +51,19 @@ function levelClone(callback) {
   Levels.insert(doc, callback);
 }
 
+var gameOpen = new ReactiveVar(false);
+
+var signals = AutoSignal.register('home', {
+  gameOpened: function() {
+    gameOpen.set(true);
+  },
+  gameHidden: function() {
+    gameOpen.set(false);
+  }
+});
+
 Template.home.created = function() {
   Session.set('levelId', '');
-  Session.set('gameVisible', false);
-    
-  Bus.signal('gameCompleted').add(function(game) {
-    console.log('gameCompleted:');
-    console.log(game);
-  });
-
-  Bus.signal('gameLoadStarted').add(function(game) {
-    console.log('gameLoadStarted:');
-    console.log(game);
-  });
-
-  Bus.signal('gameLoadCompleted').add(function(game) {
-    console.log('gameLoadCompleted:');
-    console.log(game);
-  });  
 };
 
 Template.home.helpers({
@@ -84,14 +79,12 @@ Template.levels.helpers({
   levelId: function() {
     return Session.get('levelId');
   },
-  hideIfGameVisible: function() {
-    return Session.get('gameVisible') === true ? 'hideElement' : '';
-  }
+  hideIfGameVisible: hideIfTrue(gameOpen)
 });
 
 Template.levels.events({
   'click .gameShow': function() {
-    Session.set('gameVisible', true);
+    signals.gameOpened.dispatch();
   }
 });
 
@@ -101,7 +94,8 @@ Template.level.events({
     var id = this._id;
     Meteor.setTimeout(function() {
       Session.set('levelId', id);
-      Session.set('gameVisible', true);      
+      signals.gameOpened.dispatch();
+      //Session.set('gameVisible', true);      
     }, 1000);
   }
 });

@@ -1,9 +1,3 @@
-var SPRITE_PLAYER = 1;
-var SPRITE_TILES = 2;
-var SPRITE_ENEMY = 4;
-var SPRITE_DOT = 8;
-var SPRITE_SHOT = 16;
-
 // Default handlers for game events
 OnEnemyHit = function() {      
 }
@@ -32,10 +26,19 @@ var gamePausedDep = new Deps.Dependency;
 var gameDep = new Deps.Dependency;
 
 var gameCompleted = Bus.signal('gameCompleted'); // todo clean this up...
-
 var gameLoading = new ReactiveVar(false);
 
+var gameOpen = new ReactiveVar(false);
+
 var signals = AutoSignal.register('game', {
+  gameOpened: function() {
+    gameOpen.set(true);
+  },
+  gameHidden: function() {
+    gameOpen.set(false);
+    game.pause();
+    gamePausedDep.changed();
+  },
   gameLoadStarted: function() {
     gameLoading.set(true);
   },
@@ -44,14 +47,31 @@ var signals = AutoSignal.register('game', {
   }
 });
 
-Template.game.rendered = function() {  
-  var levelId = this.data;
-  signals.gameLoadStarted.dispatch(levelId);
+var buttons = ['levelsShow', 'gamePause', 'gamePlay', 'gameReset', 'customize', 'fork'];
+
+function argify(args) {
+  if (_.isString(args)) args = { level : args };
+  return args;
+}
+var levelId = 'starter';
+
+Template.game.created = function() {
+  var args = argify(this.data);
+  levelId = args.level;
+  if (args.buttons && _.isArray(args.buttons)) {
+    buttons = args.buttons;
+  }
+};
+
+Template.game.rendered = function() {    
+  var args = argify(this.data);
+  signals.gameLoadStarted.dispatch(args.level);
+  gameOpen.set(true); // Manual since we could not hear the event published from the home module
   configureQuintus(function(q) {
-    game = new Game(q, levelId);
+    game = new Game(q, args.level);
     gameDep.changed();
     gamePausedDep.changed();
-    levelPlay(q, levelId);
+    levelPlay(q, args.level);
   });
 };
 
@@ -61,46 +81,36 @@ Template.game.helpers({
     gameDep.depend();
     return game.name();
   },
+  allowed: function(button) {
+    var allowButton = _.indexOf(buttons, button);
+    return showIfTrue(allowButton > -1);
+  },
   userOwnsCurrentLevel: function() {
-    var level = Levels.findOne({_id: Session.get('levelId')});
+    var level = Levels.findOne({_id: levelId});
     return Meteor.userId() !== null && level.userId === Meteor.userId();
   },
-  hideIfGameNotVisible: function() {
-    return Session.get('gameVisible') !== true ? 'hideElement' : '';
-  },
+  showIfGameOpen: showIfTrue(gameOpen),
   hideIfGameComplete: function() {
-    return Session.get('gameComplete') === true ? 'hideElement' : '';
+    return hideIfTrue(Session.get('gameComplete'));
   },
   showIfGameComplete: function() {
-    return Session.get('gameComplete') === true ? '' : 'hideElement';
+    return showIfTrue(Session.get('gameComplete'));
   },
-  hideIfGameLoading: function() {
-    return gameLoading.get() === true ? 'hideElement' : '';
-  },
-  showIfGameLoading: function() {
-    return gameLoading.get() === true ? '' : 'hideElement';
-  },
+  hideIfGameLoading: hideIfTrue(gameLoading),
+  showIfGameLoading: showIfTrue(gameLoading),
   hideIfPaused: function() {
     gamePausedDep.depend();
-    return game.isPaused() ? 'hideElement' : '';
+    return hideIfTrue(game.isPaused());
   },
   hideIfPlaying: function() {
     gamePausedDep.depend();
-    return !game.isPaused() ? 'hideElement' : '';
+    return hideIfTrue(!game.isPaused());
   }
 });
 
-// TODO use Postal.js for this, or something...
-
-function levelsShow() {
-  Session.set('gameVisible', false);
-}
-
 Template.game.events({
   'click .levelsShow': function() {
-    game.pause();
-    gamePausedDep.changed();
-    levelsShow();
+    signals.gameHidden.dispatch();    
   },
   'click .gamePause': function() {    
     game.pause();
@@ -121,12 +131,10 @@ Template.game.events({
   },
   'click button.customize': function(evt, template) {
     evt.preventDefault();
-    var levelId = Session.get('levelId');
     window.open('/levelCustomize/' + levelId, '_blank');
   },
   'click button.fork': function(evt, template) {
     evt.preventDefault();
-    var levelId = Session.get('levelId');
     var levelDoc = Levels.findOne({_id: levelId});
     delete levelDoc._id;
     levelDoc.published = false;
@@ -135,6 +143,12 @@ Template.game.events({
     });
   }  
 });
+
+var SPRITE_PLAYER = 1;
+var SPRITE_TILES = 2;
+var SPRITE_ENEMY = 4;
+var SPRITE_DOT = 8;
+var SPRITE_SHOT = 16;
 
 function levelPlay(q, levelId) {
   levelMapCreate(q, levelId);
@@ -159,7 +173,7 @@ function levelMapCreate(q, levelMapId) {
         sheet: 'tiles'
       });
     },        
-    setup: function() {
+    setup: function() {      
       // Clone the top level array
       var tiles = this.p.tiles = this.p.tiles.concat();
       var size = this.p.tileW;
@@ -201,7 +215,7 @@ function levelMapCreate(q, levelMapId) {
   });      
 }
 
-function configureQuintus(callback) {
+function configureQuintus(callback) {  
   function configureCanvas(q) {
     q.setup('game', {
       width: 640, height: 480, scaleToFit: true
@@ -212,15 +226,6 @@ function configureQuintus(callback) {
     q.input.joypadControls();
     q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
   }
-  // Set up a basic Quintus object
-  // with the necessary modules and controls
-  /*
-  if (window.Q !== undefined) {
-    configureCanvas(Q);
-    callback(Q);
-    return Q;
-  }
-  */
   
   Q = window.Q = Quintus({
     development: true,

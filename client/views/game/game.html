@@ -1,18 +1,18 @@
 <template name='game'>
-  <div id='gamePanel' class='{{hideIfGameNotVisible}}'>
+  <div id='gamePanel' class='{{showIfGameOpen}}'>
     <h1 class='currentGameName'>{{name}}</h1>
     <div class='{{hideIfGameLoading}}'>
       <div class="btn-group btn-group-sm">
-        <button class='btn btn-primary levelsShow'><span class='fa fa-chevron-left'></span> All levels</button>    
-        <button class='btn btn-warning gamePause {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>
-        <button class='btn btn-success gamePlay {{hideIfPlaying}} {{hideIfGameComplete}}'><span class='fa fa-play'></span> Play</button> 
-        <button class='btn btn-danger gameReset {{hideIfGameComplete}}'><span class='fa fa-refresh'></span> Reset</button>
-        <button class='btn btn-success gameReset {{showIfGameComplete}}'><span class='fa fa-play'></span> Play again!</button>
+        <button class='btn btn-primary levelsShow {{allowed "levelsShow"}}'><span class='fa fa-chevron-left'></span> All levels</button>    
+        <button class='btn btn-warning gamePause {{allowed "gamePause"}} {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>
+        <button class='btn btn-success gamePlay {{allowed "gamePlay"}} {{hideIfPlaying}} {{hideIfGameComplete}}'><span class='fa fa-play'></span> Play</button> 
+        <button class='btn btn-danger gameReset {{allowed "gameReset"}} {{hideIfGameComplete}}'><span class='fa fa-refresh'></span> Reset</button>
+        <button class='btn btn-success gameReset {{allowed "gameReset"}} {{showIfGameComplete}}'><span class='fa fa-play'></span> Play again!</button>
         {{#if currentUser}}
           {{#if userOwnsCurrentLevel}}
-          <button class='btn btn-warning customize'><span class='fa fa-gears'></span> Customize</button>
+          <button class='btn btn-warning customize {{allowed "customize"}}'><span class='fa fa-gears'></span> Customize</button>
           {{/if}}
-          <button class='btn btn-success fork'><span class='fa fa-code-fork'></span> Fork Level</button>
+          <button class='btn btn-success fork {{allowed "fork"}}'><span class='fa fa-code-fork'></span> Fork Level</button>
         {{/if}}
       </div>
       <div id='gameContainer' class='{{hideIfGameComplete}}'>
