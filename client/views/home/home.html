@@ -32,13 +32,17 @@
       </div>
   </div>  
   {{> levels}}
-  {{> game}}
+  {{#if levelId}}
+    {{> game levelId}}
+  {{/if}}
 </template>
 
 <template name="levels">
-  <div id='levelsContainer'>
+  <div id='levelsContainer' class='{{hideIfGameVisible}}'>
     <h1>Conquer all worlds!</h1>
-    <button class='btn btn-sm btn-info gameShow' id='gameReturn'>Return to <span class='currentGameName'></span> <span class='fa fa-chevron-right'></span></button>
+    {{#if levelId}}
+      <button class='btn btn-sm btn-info gameShow'>Resume current game <span class='fa fa-chevron-right'></span></button>
+    {{/if}}
     <div class="levels container-fluid">
     {{#each levels}}
       {{> level}}
@@ -49,27 +53,4 @@
 
 <template name="level">
   <button class="col-md-2 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}<br/>{{{preview}}}</button>
-</template>
-
-<template name='game'>
-  <div id='gamePanel'>
-    <h1 class='currentGameName'>{{name}}</h1>
-    <div class="btn-group btn-group-sm">
-      <button class='btn btn-primary levelsShow'><span class='fa fa-chevron-left'></span> All levels</button>    
-      <button class='btn btn-warning gamePause {{hideIfPaused}}'><span class='fa fa-pause'></span> Pause</button>
-      <button class='btn btn-success gamePlay {{hideIfPlaying}}'><span class='fa fa-play'></span> Play</button> 
-      <button class='btn btn-danger gameReset'><span class='fa fa-refresh'></span> Reset</button>
-      {{#if currentUser}}
-        {{#if levelLoaded}}
-          {{#if userOwnsCurrentLevel}}
-          <button class='btn btn-warning customize'><span class='fa fa-gears'></span> Customize</button>
-          {{/if}}
-          <button class='btn btn-success fork'><span class='fa fa-code-fork'></span> Fork Level</button>
-        {{/if}}
-      {{/if}}
-    </div>
-    <div id='gameContainer'>
-      <canvas id='game' width="640" height="640" class='game'></canvas>
-    </div>
-  </div>  
 </template>

@@ -9,8 +9,8 @@ function createLevelRecord(levelDto, callback) {
 
   sprite.toBuffer('PNG', Meteor.bindEnvironment(function (err, buffer) {
     levelDto.spritesData = buffer.toString('base64');
-    var tiles = gm(base + 'tileLeft.png').options({imageMagick:true})
-    .append(root + levelDto.tile, base + 'tileRight.png', true);
+    var tiles = gm(base + 'DoNotEraseTileLeft.png').options({imageMagick:true})
+    .append(root + levelDto.tile, base + 'DoNotEraseTileRight.png', true);
     tiles.toBuffer('PNG', Meteor.bindEnvironment(function(err2, buffer2) {
       levelDto.tilesData = buffer2.toString('base64');
       callback(levelDto);
@@ -45,13 +45,13 @@ function createLevelDefault() {
     onWon: "controls.alert('You won! Great job, but now it gets harder ;-)');\nvar name;\nprompt('By the way, what is your first name?');\ncontrols.alert(name + ', you are ready to move on!');",
     published: true,
     selections: [
-      'Player/dark.png',
-      'Enemy/brainBlue.png',
-      'Treasure/dark.png',
-      'Coin/blue.png',
-      'Shots/basicShot.png'
+      'player/dark.png',
+      'enemy/brainBlue.png',
+      'gem/pinkGem.png',
+      'coin/blue.png',
+      'shot/basicShot.png'
     ],
-    'tile': 'Tiles/tileAsteroidFull.png'    
+    tile: 'tile/plasma.png'
   };
   
   createLevelRecord(level, function(levelDto) {
@@ -216,12 +216,12 @@ Meteor.startup(function() {
     SpriteParts.remove({});
     if (SpriteParts.find().count() === 0) {
       var spritePartSort = {
-        Player: 1,
-        Enemy: 2,
-        Treasure: 3,
-        Coin: 4,
-        Tiles: 5,
-        Shots: 6
+        player: 1,
+        enemy: 2,
+        gem: 3,
+        coin: 4,
+        tile: 5,
+        shot: 6
       };
       var glob = Meteor.npmRequire("glob");      
       glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
@@ -243,9 +243,15 @@ Meteor.startup(function() {
           });
       }));
     }  
+
+    WebApp.connectHandlers.use(function (req, res, next) {
+      res.setHeader('access-control-allow-origin', '*');      
+      return next();
+    });
   
     var API = new CollectionAPI({});
     API.addCollection(Levels, 'levels');
     API.addCollection(Lessons, 'lessons');
+    API.addCollection(SpriteParts, 'spriteParts');  
     API.start();
 });

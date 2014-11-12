@@ -14,6 +14,7 @@ boilerplate-generator@1.0.1
 bootstrap-3@0.0.0
 callback-hook@1.0.1
 check@1.0.2
+codeadventure:js-signals@0.1.1
 coffeescript@1.0.4
 collection-api@0.0.0
 ctl-helper@1.0.4
@@ -80,4 +81,5 @@ underscore@1.0.1
 url@1.0.2
 webapp-hashing@1.0.1
 webapp@1.1.4
+xorax:multiple-callbacks@0.1.4
 zvictor:mongodb-server-aggregation@1.0.4

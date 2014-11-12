@@ -1,6 +1,7 @@
 body { 
   padding:0px; padding-top: 0px; margin:0px; background-color:mintcream;
   background-image: url(/images/stars.gif);
+  /*background-image: url(http://a1star.com/images/starsglow1.gif);*/
 }
 
 h2{
@@ -45,19 +46,24 @@ h2{
 }
 
 #gamePanel {
-  display: none;
   text-align: center;
 }
 
 #gameContainer {
   margin-top: 5px;
-  display: none;
 }
 
 .game {
   background: black; border:4px solid darkgray;
 }
 
-#gameReturn {
-  display: none;
+.gameLoading {
+  margin-top: 5px;
+  border:4px solid darkgray;
+  width:640px;
+  height:640px;
+  display:inline-block;
+  min-width:640px;
+  min-height:640px;
+  background-image:url(http://a1star.com/images/starsglow1.gif);  
 }
