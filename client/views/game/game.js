@@ -615,7 +615,9 @@ function configureQuintus(callback) {
 }
 
 gameFocus = function() {
-  $("#game").focus();
+  Meteor.setTimeout(function() {
+    $("#game").focus();  
+  }, 125);
 }
 
 gameShow = function() {
