@@ -65,5 +65,8 @@ h2{
   display:inline-block;
   min-width:640px;
   min-height:640px;
-  background-image:url(http://a1star.com/images/starsglow1.gif);  
+  /*background-image:url(http://a1star.com/images/starsglow1.gif);  */  
+  /*background-image:url(http://media.giphy.com/media/13TDSwIbJEyARa/giphy.gif);*/
+  background-image:url(http://media.giphy.com/media/ygAaR0n5RsyAM/giphy.gif);
+  background-size: 640px 640px;
 }

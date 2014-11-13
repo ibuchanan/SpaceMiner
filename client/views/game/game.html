@@ -7,7 +7,7 @@
         <button class='btn btn-warning gamePause {{allowed "gamePause"}} {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>
         <button class='btn btn-success gamePlay {{allowed "gamePlay"}} {{hideIfPlaying}} {{hideIfGameComplete}}'><span class='fa fa-play'></span> Play</button> 
         <button class='btn btn-danger gameReset {{allowed "gameReset"}} {{hideIfGameComplete}}'><span class='fa fa-refresh'></span> Reset</button>
-        <button class='btn btn-success gameReset {{allowed "gameReset"}} {{showIfGameComplete}}'><span class='fa fa-play'></span> Play again!</button>
+        <button class='btn btn-primary gameReset {{allowed "gameReset"}} {{showIfGameComplete}}'><span class='fa fa-play'></span> Play again!</button>
         {{#if currentUser}}
           {{#if userOwnsCurrentLevel}}
           <button class='btn btn-warning customize {{allowed "customize"}}'><span class='fa fa-gears'></span> Customize</button>
