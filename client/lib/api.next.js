@@ -1,18 +1,101 @@
+var boardFromText = function(board) {
+  return _.map(board.split('\n'), function(row) {
+    return row.split('');
+  });
+};
+
 this.Game = class {  
-  constructor(q, levelId) {
+  constructor(q, world) {
     this.q = q;
-    this.levelId = levelId;
+    this.levelId = "";
+    this.world = world;
+    if (_.isString(world)) this.levelId = world;
+    if (_.isObject(world)) { 
+      this.levelId = world._id;
+      this.resetState();
+    } else {
+      this.world = Game.getDefaults();
+    }
     this.paused = false;
   }
-  name() {
+  static getDefaults() {
+    var worldSprites = boardFromText(
+`tegccccccccccccgtc
+ctttttcccccctttttc
+ctgccccccccccccgtc
+ctttttcccccctttttc
+ccccctccttcctccccc
+cctcctccttcctcctcc
+ccccctcccccctccccc
+ctcccccccccccccctc
+ctcttcttttttcttctc
+ccgccccccpcccccgcc
+ctcttctcttctcttctc
+ccgccccccccccccgcc`);
+
+    return {
+      worldName : "Nemesis",
+      explorerName : "Ninja Coder",
+      numberOfLives : 1,
+      enableEnemyRespawn : true,
+      sprites: {
+        tile: "fiery.png",
+        enemy: "brainBlue.png",
+        coin: "gold.png",
+        gem: "emerald.png",
+        player: "light.png"
+      },
+      world: worldSprites,
+      worldRows: [],
+      enemy: {
+        respawnDelay: 5000,
+        increaseSpeedBy: 50
+      },
+      collisions: {
+        coin: {
+          scoreInc: 100,
+          soundPlay: 'coin1.wav'
+        },
+        gem: {
+          scoreInc: 500,
+          ammoInc: 1,
+          soundPlay: 'gem1.wav'
+        }
+      }
+    };    
+  }
+  worldName() {
     // TODO decouple Levels ?
-    var level = Levels.findOne({_id: this.levelId});
-    if (level) return level.name;
-    return 'No game loaded...';
+    if (!this.world) return "No world loaded...";
+    return this.world.worldName;
+  }  
+  enableEnemyRespawn() {
+    return this.world.enableEnemyRespawn;
+  }
+  enemy() {
+    return this.world.enemy;
+  }
+  collisions() {
+    return this.world.collisions;
+  }
+  explorerName() {
+    return this.world.explorerName;
+  }
+  numberOfLives() {
+    return this.world.numberOfLives;
+  }
+  livesRemaining() {
+    return this.q.state.get('lives') > 0;
+  }
+  livesDec() {
+    this.q.state.dec('lives', 1);
   }
   reset() {
-    this.q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
+    this.resetState();
     this.q.stageScene(this.levelId);
+  }
+  resetState() {
+    this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives() });
   }
   pause() {
     this.q.pauseGame();
@@ -25,8 +108,28 @@ this.Game = class {
   isPaused() {
     return this.paused;
   }
-  playSound(soundName) {
+  soundPlay(soundName) {
     this.q.audio.play(soundName);
+  }
+  onCoinCollision() {
+    // todo HACK
+    player.scoreInc(this.collisions().coin.scoreInc);
+    this.soundPlay(this.collisions().coin.soundPlay);
+  }
+  onGemCollision() {
+    player.scoreInc(this.collisions().gem.scoreInc);
+    player.ammoInc(this.collisions().gem.ammoInc);
+    this.soundPlay(this.collisions().gem.soundPlay);
+  }  
+  onEnemyCollision(hitPlayer) {
+    this.livesDec();
+    hitPlayer.destroy();
+    if (this.livesRemaining()) {
+      var resurrectedPlayer = new this.q.Player(this.q.tilePos(10,7));
+      this.q.stage().insert(resurrectedPlayer);
+    } else {
+      this.reset();
+    }
   }
 }
 
@@ -34,100 +137,16 @@ this.Player = class {
   constructor(q) {
     this.q = q;
   }  
-  incScore(amount) {
+  scoreInc(amount) {
     this.q.state.inc('score', amount);
   }  
-  getScore() {
-    return this.q.state.get('score');
-  }  
-  decScore(amount) {
+  scoreDec(amount) {
     this.q.state.dec('score', amount);
   }  
-  incAmmo(amount) {
-    this.q.state.inc('ammo', amount);
-  }  
-}
-
-this.Controls = class {
-  alert(message, callback) {
-    callback = callback || function() {};
-    bootbox.alert(message, callback);
-  }
-  prompt(question, callback) {
-    bootbox.prompt(question, callback);
-  }
-  confirm(question, callback) {
-    bootbox.confirm(question, callback);
-  }
-}
-
-/*enemy = {
-  incSpeed: function() {
-     Q.Enemy.p.speed = this.p.speed + 10;
-    
-  }
-};
-
-
-/*
-var paused = false;
-var pausedDep = new Deps.Dependency; 
-
-this.Game = class {  
-  constructor(q, levelId) {
-    this.q = q;
-    this.levelId = levelId;
-  }  
-  name() {
-    // TODO decouple Levels ?
-    var level = Levels.findOne({_id: this.levelId});
-    if (level) return level.name;
-    return 'No game in progress';
-  }
-  reset() {
-    this.q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
-    console.log(this.levelId);
-    this.q.stageScene(this.levelId);
-    paused = false;
-    pausedDep.changed();
-  }
-  pause() {
-    this.q.pauseGame();
-    paused = true;
-    pausedDep.changed();
-  }  
-  static isPaused() {
-    pausedDep.depend();
-    return paused;
-  }
-  isPausedInst() {
-    return 
-  }
-  unpause() {    
-    this.q.unpauseGame();
-    paused = false;
-    pausedDep.changed();
-  }  
-  playSound(soundName) {
-    this.q.audio.play(soundName);
-  }
-}
-*/
-
-this.Player = class { 
-  constructor(q) {
-    this.q = q;
-  }  
-  incScore(amount) {
-    this.q.state.inc('score', amount);
-  }  
-  getScore() {
+  scoreGet() {
     return this.q.state.get('score');
   }  
-  decScore(amount) {
-    this.q.state.dec('score', amount);
-  }  
-  incAmmo(amount) {
+  ammoInc(amount) {
     this.q.state.inc('ammo', amount);
   }  
 }

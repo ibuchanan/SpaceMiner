@@ -112,6 +112,19 @@ Template.level.helpers({
   randomBackgroundColor: function() {
     return randomElement(bsBackgrounds);
   },
+  phase: function() {
+    if (this.phase  && this.phase === 'test') {
+      return '&nbsp;<span class="label label-warning">Help test</span>';
+    }    
+    return '';
+  },
+  version: function() {
+    if (this.phase && this.phase !== 'test') {
+      return '&nbsp;<span style="font-size:75%;color:eggshell;">v' + this.version + '</span>';
+    }
+    else if (this.phase && this.phase === 'test') return ''
+    return '&nbsp;<span style="font-size:75%;color:eggshell;">v1</span>';
+  },
   preview: function() {
     var images = '';
     for(var i = 0; i < this.selections.length-1; i++) {

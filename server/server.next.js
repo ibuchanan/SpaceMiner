@@ -40,9 +40,9 @@ function createLevelDefault() {
     board,
     name: 'Space Miner',
     onEnemyHit: 'game.reset();',
-    onGemHit: "player.incScore(player.getScore());\ngame.playSound('gem1.wav');\nplayer.incAmmo(1);",
-    onCoinHit: "player.incScore(100);\ngame.playSound('coin1.wav');",
-    onWon: "controls.alert('You won! Great job, but now it gets harder ;-)');\nvar name;\nprompt('By the way, what is your first name?');\ncontrols.alert(name + ', you are ready to move on!');",
+    onGemHit: "player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
+    onCoinHit: "player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
+    onWon: "controls.alert('You won!');",
     published: true,
     selections: [
       'player/dark.png',
@@ -51,7 +51,20 @@ function createLevelDefault() {
       'coin/blue.png',
       'shot/basicShot.png'
     ],
-    tile: 'tile/plasma.png'
+    tile: 'tile/plasma.png',
+    phase: 'inception',
+    buildStepCurrent: 0,
+    buildStepUpdateCounts: {
+      '1': 0,
+      '2': 0,
+      '3': 0,
+      '4': 0,
+      '5': 0,
+      '6': 0,
+      '7': 0,
+      '8': 0
+    },
+    version: 1
   };
   
   createLevelRecord(level, function(levelDto) {

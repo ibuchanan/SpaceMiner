@@ -137,7 +137,11 @@ iframe {
       </div>
       <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-              <li class="active"><a href="#">Home</a></li>
+            <li><a href="/home">Play <span class='fa fa-gamepad'></span></a></li>
+            <li><a href="/members">Members <span class='fa fa-users'></span></a></li>        
+            {{#if currentUser}}            
+            <li><a href="/build">Build World <span class='fa fa-globe'></span></a></li>
+            {{/if}}
           </ul>
           <ul class="nav navbar-nav navbar-right">
               {{> loginButtons }} <!-- here -->

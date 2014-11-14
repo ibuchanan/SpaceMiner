@@ -1,26 +1,26 @@
 // Default handlers for game events
-OnEnemyHit = function() {      
+this.OnEnemyHit = function() {
 }
 
-OnGemHit = function() {
+this.OnGemHit = function() {
 }
 
-OnCoinHit = function() {
+this.OnCoinHit = function() {
 }
 
-OnPause = function() {
+this.OnPause = function() {
   game.pause();
 }
 
-OnUnpause = function() {
+this.OnUnpause = function() {
   game.unpause();
 }
 
-OnWon = function() {  
+this.OnWon = function() {  
 }
 
-game = new Game();
-player = new Player();
+this.game = new Game();
+this.player = new Player();
 
 var gamePausedDep = new Deps.Dependency;
 var gameDep = new Deps.Dependency;
@@ -68,18 +68,33 @@ Template.game.rendered = function() {
   signals.gameLoadStarted.dispatch(args.level);
   gameOpen.set(true); // Manual since we could not hear the event published from the home module
   configureQuintus(function(q) {
-    game = new Game(q, args.level);
-    gameDep.changed();
-    gamePausedDep.changed();
-    levelPlay(q, args.level);
+    levelPlay(q, args.level, function(q, world) {
+      game = new Game(q, world);
+      gameDep.changed();
+      gamePausedDep.changed();
+      gameShow();
+      signals.gameLoadCompleted.dispatch(args.level);
+      q.stageScene(args.level);
+      gameFocus();      
+    });
   });
 };
 
 Template.game.helpers({
   name: function() {
-    if (gameLoading.get() === true) return 'Loading...';
+    if (gameLoading.get() === true) return 'Teleporting...';
     gameDep.depend();
-    return game.name();
+    return game.worldName();
+  },
+  explorerName: function() {
+    if (gameLoading.get() === true) return '...';
+    gameDep.depend();
+    return game.explorerName();
+  },
+  enemiesRespawn: function() {
+    if (gameLoading.get() === true) return '...';
+    gameDep.depend();    
+    return game.enableEnemyRespawn() ? 'true' : 'false';
   },
   allowed: function(button) {
     var allowButton = _.indexOf(buttons, button);
@@ -138,6 +153,7 @@ Template.game.events({
     var levelDoc = Levels.findOne({_id: levelId});
     delete levelDoc._id;
     levelDoc.published = false;
+    levelDoc.phase = 'forked';
     Levels.insert(levelDoc, function(err, forkedLevelId) {
       window.open('/levelCustomize/' + forkedLevelId, '_blank');      
     });
@@ -150,16 +166,15 @@ var SPRITE_ENEMY = 4;
 var SPRITE_DOT = 8;
 var SPRITE_SHOT = 16;
 
-function levelPlay(q, levelId) {
+function levelPlay(q, levelId, callback) {
   levelMapCreate(q, levelId);
   q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
     q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
     q.compileSheets(levelId + ".spr","sprites.json");
     q.compileSheets("basicShot.png","shot.json");
-    gameShow();
-    signals.gameLoadCompleted.dispatch(levelId);
-    q.stageScene(levelId);
-    gameFocus();
+    // TODO remove hack
+    var world = q.assets[levelId + 'World'];
+    callback(q, world);    
   }, {reload:true});  
 }
 
@@ -215,16 +230,118 @@ function levelMapCreate(q, levelMapId) {
   });      
 }
 
+function getDefaults() {
+  return Game.getDefaults();
+}
+      
+function parseWorldDefinitionFromScript(worldScript, defaults) {
+  try {
+    var funcCode = createOverrideFuncCode(worldScript, defaults);
+    var func = eval('(' + funcCode + ')'); // yep, "eval can be harmful"
+    var obj = {};
+    if (_.isFunction(func)) {
+      obj = func(defaults);
+      return obj;      
+    } else {
+      throw "parseWorldDefinitionFromScript could not parse function from code: " + funcScript;
+    }
+  } catch (ex) {
+    console.log('parseWorldDefinitionFromScript:');
+    console.log(ex);
+  }
+  return {};
+}
+
+function __merge__(obj1, obj2) {
+  for (var p in obj2) {
+    try {
+      // Property in destination object set; update its value.
+      if (obj2[p].constructor === Object) {
+        obj1[p] = __merge__(obj1[p], obj2[p]);
+      } else {
+        obj1[p] = obj2[p];
+      }
+    } catch(e) {
+      // Property in destination object not set; create it and set its value.
+      obj1[p] = obj2[p];
+    }
+  }
+  return obj1;
+}
+
+function createOverrideFuncCode(worldScript, defaults) {
+  var script = 'function(defaults) {\n' +
+      '  var __obj__ = {};\n';
+  
+  script += '\n  /* Begin user code */\n\n  ' + worldScript +'\n\n  /* End user code */\n'; 
+  
+  _.each(defaults, function(value, key) {
+    if (value.constructor === Object) {
+      script += `\n  try { __obj__.${key} = __merge__(defaults.${key}, ${key}); }\n`
+    } else {
+      script += `\n  try { __obj__.${key} = ${key}; }\n`
+    }
+    script += `  catch(e) { __obj__.${key} = defaults.${key}; }\n`;
+  });
+  
+  script += '\n  return __obj__;\n}';
+  
+  return script;
+}
+
+function createBoardFromWorld(world, worldDefault) {
+  // TODO map to uppercase and - characters  
+  if (!_.isArray(world) || world.length === 0) {
+    return worldDefault;
+  }
+  var worldCopy = JSON.parse(JSON.stringify(worldDefault));
+  
+  function copyRow(rowSource, rowTarget) {
+    rowSource.forEach(function(cell, index) {
+      rowTarget[index] = cell;
+    });
+  }
+  
+  if (_.isArray(world[0])) {
+    world.forEach(function(row, rowIndex) {
+      copyRow(row, worldCopy[rowIndex]);
+    });
+  } else {
+    copyRow(world, worldCopy[0]);
+  }
+  
+  // Now assure left and right borders are all tiles
+  worldCopy.forEach(function(row) {
+    row.push('t');
+    row.unshift('t');
+  });
+  
+  // And, the top and bottom rows are all tiles
+  var borderRow = 'tttttttttttttttttttt'.split('');
+  worldCopy.push(borderRow);
+  worldCopy.unshift(borderRow);
+
+  return worldCopy;
+}
+
+function makeFunc(rawCode) {
+  var funcCode = "(function() {\n" + rawCode + "\n})";
+  var func = eval(funcCode);
+  if (_.isFunction(func)) {
+    return func;
+  }
+  return null;
+}
+
 function configureQuintus(callback) {  
   function configureCanvas(q) {
     q.setup('game', {
-      width: 640, height: 480, scaleToFit: true
+      width: 640, height: 448, scaleToFit: true
     })
     .enableSound()
     .controls(true);
     q.input.keyboardControls();
     q.input.joypadControls();
-    q.state.reset({ score: 0, ammo: 0, lives: 2, stage: 1});
   }
   
   Q = window.Q = Quintus({
@@ -239,21 +356,35 @@ function configureQuintus(callback) {
   Q.gravityY = 0;
 
   Q.loadAssetLevel = function(key,src,callback,errorCallback) {
-    var fileParts = src.split("."), fileName = fileParts[0];
-    Q.loadAssetOther(key, "/collectionapi/levels/" + fileName, function(key, val) {
+    var fileParts = src.split("."), worldName = fileParts[0];
+    Q.loadAssetOther(key, "/collectionapi/levels/" + worldName, function(key, val) {
       var obj = JSON.parse(val)[0];
       var board = obj.board;
       board = boardFromText(board);
-      Q.assets[key] = board;
-
-      function makeFunc(rawCode) {
-        var funcCode = "(function() {\n" + rawCode + "\n})";
-        var func = eval(funcCode);
-        if (_.isFunction(func)) {
-          return func;
+      
+      /* Now check if this is a level that has a 'script' instead */
+      
+      var defaults = getDefaults();
+      if (_.has(obj, 'script') && _.isString(obj.script)) {
+        var world = parseWorldDefinitionFromScript(obj.script, defaults);        
+        // TODO remove hack
+        world._id = worldName;
+        Q.assets[worldName + 'World'] = world;
+        var worldSprites = world.world;
+        if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
+          worldSprites = _.map(world.worldRows, function(row) {
+            if (_.isString(row)) return row.split('');
+            return [];
+          });
         }
-        return null;
+        board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
+      } else {
+        defaults._id = worldName;
+        defaults.worldName = obj.name;
+        Q.assets[worldName + 'World'] = defaults;
       }
+      
+      Q.assets[key] = board;
 
       // TODO fix hack
       try {
@@ -481,7 +612,7 @@ function configureQuintus(callback) {
       // Destroy it and keep track of how many dots are left
       this.destroy();
       this.stage.dotCount--;
-      OnCoinHit();
+      game.onCoinCollision();
       // If there are no more dots left, just restart the game
       // TODO move to next level from page
       if(this.stage.dotCount === 0) {
@@ -509,7 +640,7 @@ function configureQuintus(callback) {
       // Destroy it and keep track of how many dots are left
       this.destroy();
       this.stage.dotCount--;
-      OnGemHit();
+      game.onGemCollision();      
       // If there are no more dots left, just restart the game
       // TODO move to next level from page
       if(this.stage.dotCount == 0) {
@@ -587,19 +718,24 @@ function configureQuintus(callback) {
     },
 
     hit: function(col) {
+      function die(self) {
+        self.destroy();
+        if (game.enableEnemyRespawn()) {
+          setTimeout(function(){
+            var newEnemy = new Q.Enemy(Q.tilePos(10,7));
+            var speedUp = self.p.speed;
+            newEnemy.p.speed = speedUp + game.enemy().increaseSpeedBy;
+            Q.stage().insert(newEnemy);
+          },game.enemy().respawnDelay);
+        }
+      }      
       if(col.obj.isA("Player")) {
-        OnEnemyHit();
+        die(this);
+        game.onEnemyCollision(col.obj);
       }
       else if(col.obj.isA("Shot")){
-        player.incScore(1000);
-        //Q.Enemy.p.speed = this.p.speed + 10;
-        var speedUp = this.p.speed;
-        this.destroy();
-        setTimeout(function(){
-          var newEnemy = new Q.Enemy(Q.tilePos(10,7));
-          newEnemy.p.speed = speedUp + 50;
-          Q.stage().insert(newEnemy);
-        },5000);
+        player.scoreInc(1000);
+        die(this);
       }
     }
   });
@@ -614,13 +750,13 @@ function configureQuintus(callback) {
   return Q;
 }
 
-gameFocus = function() {
+this.gameFocus = function() {
   Meteor.setTimeout(function() {
     $("#game").focus();  
   }, 125);
 }
 
-gameShow = function() {
+this.gameShow = function() {
   Session.set('gameVisible', true);
   Session.set('gameComplete', false);
 }

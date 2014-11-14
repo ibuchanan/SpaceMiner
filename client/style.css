@@ -1,5 +1,6 @@
-body { 
+body {   
   padding:0px; padding-top: 0px; margin:0px; background-color:mintcream;
+  background-color: #000000;
   background-image: url(/images/stars.gif);
   /*background-image: url(http://a1star.com/images/starsglow1.gif);*/
 }
@@ -19,7 +20,7 @@ h2{
 
 .previewContainer {
   width: 640;
-  height: 480;
+  height: 448;
   display: inline-block;
 }
 
@@ -61,12 +62,17 @@ h2{
   margin-top: 5px;
   border:4px solid darkgray;
   width:640px;
-  height:640px;
+  height:448px;
   display:inline-block;
   min-width:640px;
-  min-height:640px;
+  min-height:448px;
   /*background-image:url(http://a1star.com/images/starsglow1.gif);  */  
   /*background-image:url(http://media.giphy.com/media/13TDSwIbJEyARa/giphy.gif);*/
   background-image:url(http://media.giphy.com/media/ygAaR0n5RsyAM/giphy.gif);
-  background-size: 640px 640px;
+  background-size: 640px 448px;
+}
+
+.version1 {
+  font-size: 50%
+  color: gray;    
 }

@@ -1,8 +1,10 @@
 <template name='game'>
   <div id='gamePanel' class='{{showIfGameOpen}}'>
     <h1 class='currentGameName'>{{name}}</h1>
+    <h4>Explored by: {{explorerName}}</h4>
+    <h5>Enemies respawn: {{enemiesRespawn}}</h5>
     <div class='{{hideIfGameLoading}}'>
-      <div class="btn-group btn-group-sm">
+      <div class='btn-group btn-group-sm'>
         <button class='btn btn-primary levelsShow {{allowed "levelsShow"}}'><span class='fa fa-chevron-left'></span> All levels</button>    
         <button class='btn btn-warning gamePause {{allowed "gamePause"}} {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>
         <button class='btn btn-success gamePlay {{allowed "gamePlay"}} {{hideIfPlaying}} {{hideIfGameComplete}}'><span class='fa fa-play'></span> Play</button> 
@@ -16,7 +18,7 @@
         {{/if}}
       </div>
       <div id='gameContainer' class='{{hideIfGameComplete}}'>
-        <canvas id='game' width="640" height="640" class='game'></canvas>
+        <canvas id='game' width='640' height='448' class='game'></canvas>
       </div>
     </div>
     <div class='{{showIfGameLoading}}' style='text-align:center'>
