@@ -1,21 +1,4 @@
 // Default handlers for game events
-this.OnEnemyHit = function() {
-}
-
-this.OnGemHit = function() {
-}
-
-this.OnCoinHit = function() {
-}
-
-this.OnPause = function() {
-  game.pause();
-}
-
-this.OnUnpause = function() {
-  game.unpause();
-}
-
 this.OnWon = function() {  
 }
 
@@ -388,21 +371,6 @@ function configureQuintus(callback) {
 
       // TODO fix hack
       try {
-        var func = makeFunc(obj.onCoinHit);
-        if (func) {
-          OnCoinHit = func;
-        }
-
-        var func2 = makeFunc(obj.onEnemyHit);
-        if (func2) {
-          OnEnemyHit = func2;
-        }
-
-        var func3 = makeFunc(obj.onGemHit);
-        if (func3) {
-          OnGemHit = func3;
-        }
-
         var func4 = makeFunc(obj.onWon);
         if (func4) {
           OnWon = func4;
