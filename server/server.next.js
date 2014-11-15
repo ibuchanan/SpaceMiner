@@ -20,20 +20,20 @@ function createLevelRecord(levelDto, callback) {
 
 function createLevelDefault() {
   var board = 
-      'tttttttttttttttttttt\n' + 
-      't-EG------------G--t\n' + 
-      't-ttttt------ttttt-t\n' + 
-      't-tG------------Gt-t\n' + 
-      't-ttttt------ttttt-t\n' + 
-      't-----t--tt--t-----t\n' + 
-      't--t--t--tt--t--t--t\n' + 
-      't-----t------t-----t\n' + 
-      't-t--------------t-t\n' + 
-      't-t-tt-tttttt-tt-t-t\n' + 
-      't--G------P-----G--t\n' + 
-      't-t-tt-t-tt-t-tt-t-t\n' + 
-      't--G------------G--t\n' + 
-      'tttttttttttttttttttt\n'; 
+`tttttttttttttttttttt
+t-EG------------G--t
+t-ttttt------ttttt-t
+t-tG------------Gt-t
+t-ttttt------ttttt-t
+t-----t--tt--t-----t
+t--t--t--tt--t--t--t
+t-----t------t-----t
+t-t--------------t-t
+t-t-tt-tttttt-tt-t-t
+t--G------P-----G--t
+t-t-tt-t-tt-t-tt-t-t
+t--G------------G--t
+tttttttttttttttttttt`;
   var level = {
     _id: 'starter',
     userId: 'admin',
