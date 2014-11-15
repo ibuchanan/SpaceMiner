@@ -227,6 +227,14 @@ function configureCORS() {
   });
 }
 
+function configureCollectionAPI() {      
+  var API = new CollectionAPI({});
+  API.addCollection(Levels, 'levels');
+  API.addCollection(Lessons, 'lessons');
+  API.addCollection(SpriteParts, 'spriteParts');  
+  API.start();
+}
+
 Meteor.startup(function() {
     Router.map(function() {
       this.route('levelSprites/:id', {
@@ -266,11 +274,6 @@ Meteor.startup(function() {
     });
   
     cleanDbAndCreateDefaultRecords();
-    configureCORS();  
-  
-    var API = new CollectionAPI({});
-    API.addCollection(Levels, 'levels');
-    API.addCollection(Lessons, 'lessons');
-    API.addCollection(SpriteParts, 'spriteParts');  
-    API.start();
+    configureCORS();
+    configureCollectionAPI();
 });
