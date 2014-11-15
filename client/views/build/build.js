@@ -18,6 +18,7 @@ Template.build.helpers({
 })
 
 Template.build.rendered = function() { 
+  
   function finishWork() {
   
     Handlebars.registerHelper('toString', function returnToString(x){
@@ -271,7 +272,6 @@ Template.build.rendered = function() {
       level.set(buildLevelId);
       gameUpdated = true;
       gameUpdatedDep.changed();
-      console.log(level.get());
       finishWork();
     });
   });  

@@ -5,8 +5,8 @@ this.OnWon = function() {
 this.game = new Game();
 this.player = new Player();
 
-var gamePausedDep = new Deps.Dependency;
-var gameDep = new Deps.Dependency;
+var gamePaused = new ReactiveVar(false);
+var gameReactive = new ReactiveVar(this.game);
 
 var gameCompleted = Bus.signal('gameCompleted'); // todo clean this up...
 var gameLoading = new ReactiveVar(false);
@@ -20,7 +20,7 @@ var signals = AutoSignal.register('game', {
   gameHidden: function() {
     gameOpen.set(false);
     game.pause();
-    gamePausedDep.changed();
+    gamePaused.set(true);
   },
   gameLoadStarted: function() {
     gameLoading.set(true);
@@ -53,8 +53,8 @@ Template.game.rendered = function() {
   configureQuintus(function(q) {
     levelPlay(q, args.level, function(q, world) {
       game = new Game(q, world);
-      gameDep.changed();
-      gamePausedDep.changed();
+      gameReactive.set(game);
+      gamePaused.set(false);
       gameShow();
       signals.gameLoadCompleted.dispatch(args.level);
       q.stageScene(args.level);
@@ -66,18 +66,15 @@ Template.game.rendered = function() {
 Template.game.helpers({
   name: function() {
     if (gameLoading.get() === true) return 'Teleporting...';
-    gameDep.depend();
-    return game.worldName();
+    return gameReactive.get().worldName();
   },
   explorerName: function() {
     if (gameLoading.get() === true) return '...';
-    gameDep.depend();
-    return game.explorerName();
+    return gameReactive.get().explorerName();
   },
   enemiesRespawn: function() {
     if (gameLoading.get() === true) return '...';
-    gameDep.depend();    
-    return game.enableEnemyRespawn() ? 'true' : 'false';
+    return gameReactive.get().enableEnemyRespawn() ? 'true' : 'false';
   },
   allowed: function(button) {
     var allowButton = _.indexOf(buttons, button);
@@ -97,12 +94,10 @@ Template.game.helpers({
   hideIfGameLoading: hideIfTrue(gameLoading),
   showIfGameLoading: showIfTrue(gameLoading),
   hideIfPaused: function() {
-    gamePausedDep.depend();
-    return hideIfTrue(game.isPaused());
+    return hideIfTrue(gamePaused.get());
   },
   hideIfPlaying: function() {
-    gamePausedDep.depend();
-    return hideIfTrue(!game.isPaused());
+    return hideIfTrue(!gamePaused.get());
   }
 });
 
@@ -112,18 +107,18 @@ Template.game.events({
   },
   'click .gamePause': function() {    
     game.pause();
-    gamePausedDep.changed();
+    gamePaused.set(true);
   },
   'click .gamePlay': function() {
     game.unpause();
-    gamePausedDep.changed();
+    gamePaused.set(false);
     gameShow();
     gameFocus();
   },
   'click .gameReset': function() {
     game.unpause();
+    gamePaused.set(false);    
     game.reset();
-    gamePausedDep.changed();
     gameShow();
     gameFocus();
   },
