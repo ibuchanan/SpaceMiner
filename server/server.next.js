@@ -220,6 +220,13 @@ function cleanDbAndCreateDefaultRecords() {
   }
 }
 
+function configureCORS() {
+  WebApp.connectHandlers.use(function (req, res, next) {
+    res.setHeader('access-control-allow-origin', '*');      
+    return next();
+  });
+}
+
 Meteor.startup(function() {
     Router.map(function() {
       this.route('levelSprites/:id', {
@@ -259,11 +266,7 @@ Meteor.startup(function() {
     });
   
     cleanDbAndCreateDefaultRecords();
-        
-    WebApp.connectHandlers.use(function (req, res, next) {
-      res.setHeader('access-control-allow-origin', '*');      
-      return next();
-    });
+    configureCORS();  
   
     var API = new CollectionAPI({});
     API.addCollection(Levels, 'levels');
