@@ -69,23 +69,37 @@ Template.home.created = function() {
 Template.home.helpers({
   levelId: function() {
     return Session.get('levelId');
-  }
-});
-
-Template.levels.helpers({
-  levels: function() {
-    return Levels.find({published:true}); //, _id:'starter'});
-  },
-  levelId: function() {
-    return Session.get('levelId');
   },
   hideIfGameVisible: hideIfTrue(gameOpen)
 });
 
-Template.levels.events({
+Template.home.events({
   'click .gameShow': function() {
     signals.gameOpened.dispatch();
-  }
+  }  
+});
+
+var sort = { sort : { lastUpdated: -1 } };
+
+Template.levelsForming.helpers({
+  levels: function() {
+    return Levels.find({published:false, phase: 'build'}, sort);
+  },
+  hideIfGameVisible: hideIfTrue(gameOpen)
+});
+
+Template.levelsExplore.helpers({
+  levels: function() {
+    return Levels.find({published:true, phase: 'test'}, sort);
+  },
+  hideIfGameVisible: hideIfTrue(gameOpen)
+});
+
+Template.levelsConquer.helpers({
+  levels: function() {
+    return Levels.find({published:true, phase: { $nin: ['test'] } }, sort);
+  },
+  hideIfGameVisible: hideIfTrue(gameOpen)  
 });
 
 Template.level.events({

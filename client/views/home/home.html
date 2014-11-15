@@ -31,19 +31,64 @@
           </ul>
       </div>
   </div>  
-  {{> levels}}
-  {{#if levelId}}
-    {{> game levelId}}
-  {{/if}}
+  <div class='container-fluid'>
+    <div class='row {{hideIfGameVisible}}'>
+      <div class='col-md-12 centered'>
+      {{#if levelId}}
+      <button class='btn btn-sm btn-primary gameShow'>Resume current game <span class='fa fa-chevron-right'></span></button>
+      {{/if}}    
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col-md-4'>
+      {{> levelsConquer}}        
+      </div>      
+      <div class='col-md-4'>
+      {{> levelsExplore}}
+      </div>
+      <div class='col-md-4'>
+      {{> levelsForming}}        
+      </div>      
+    </div>
+    <div class='row'>
+      <div class='col-md-12'>
+      {{#if levelId}}
+        {{> game levelId}}
+      {{/if}} 
+      </div>
+    </div>
+  </div>
 </template>
 
-<template name="levels">
-  <div id='levelsContainer' class='{{hideIfGameVisible}}'>
-    <h1>Conquer all worlds!</h1>
-    {{#if levelId}}
-      <button class='btn btn-sm btn-info gameShow'>Resume current game <span class='fa fa-chevron-right'></span></button>
-    {{/if}}
-    <div class="levels container-fluid">
+<template name="levelsConquer">
+  <div class='levelsContainer {{hideIfGameVisible}}'>
+    <h1><span class='label label-success'><span class='fa fa-trophy'></span> Worlds to conquer!</span></h1>
+    <h3>Miners, come conquer these worlds!</h3>
+    <div class="levels levelsConquer container-fluid">
+    {{#each levels}}
+      {{> level}}
+    {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="levelsExplore">
+  <div class='levelsContainer {{hideIfGameVisible}}'>
+    <h1><span class='label label-warning'><span class='fa fa-cubes'></span> Worlds to explore</span></h1>
+    <h3>Help explorers test their mines...</h3>
+    <div class="levels levelsExplore container-fluid">
+    {{#each levels}}
+      {{> level}}
+    {{/each}}
+    </div>
+  </div>
+</template>
+
+<template name="levelsForming">
+  <div class='levelsContainer {{hideIfGameVisible}}'>
+    <h1><span class='label label-info'><span class='fa fa-flag-o'></span> Worlds still forming</span></h1>
+    <h3>Explorers are busy building mining operations...</h3>
+    <div class="levels levelsForming container-fluid">
     {{#each levels}}
       {{> level}}
     {{/each}}
@@ -52,5 +97,5 @@
 </template>
 
 <template name="level">
-  <button class="col-md-2 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}{{{phase}}}<br/>{{{preview}}}</button>
+  <button class="col-md-5 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}{{{phase}}}<br/>{{{preview}}}</button>
 </template>

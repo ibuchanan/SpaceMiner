@@ -143,7 +143,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When in test, players can give feedback about your world, but they cannot rank it.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'test', published: true }
+          $set: { phase: 'test', published: true, lastUpdated: new Date() }
         }, function(err, count) {
           if (!err) {
             controls.alert('Your world is available for testing by everyone! You can keep working...');
@@ -159,7 +159,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When released, players can rank and comment on your world.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'released', published: true },
+          $set: { phase: 'released', published: true, lastUpdated: new Date() },
           $inc: { version : 1 }
         }, function(err, count) {
           if (!err) {
@@ -190,7 +190,8 @@ Template.build.rendered = function() {
         buildStepUpdateCounts['buildStepUpdateCounts.' + String(step)] = 1;
         console.log(buildStepUpdateCounts);
         Levels.update({_id:level.get()}, { 
-          $set: { name: worldName, script : userScript, buildStepCurrent: step },
+          $set: { name: worldName, script : userScript, buildStepCurrent: step, 
+                lastUpdated: new Date()},
           $inc : buildStepUpdateCounts
         }, function() {
           Meteor.setTimeout(function(){

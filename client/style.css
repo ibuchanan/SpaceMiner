@@ -29,8 +29,24 @@ h2{
   text-align: center;
 }
 
-#levelsContainer {
+.centered {
+  text-align: center;
+}
+
+.levelsContainer {
   text-align:center;  
+}
+
+.levelsForming {
+  background-color:rgba(91, 192, 222, 0.35)
+}
+
+.levelsExplore {
+  background-color:rgba(248, 148, 6, 0.35)
+}
+
+.levelsConquer {
+  background-color:rgba(98, 196, 98, 0.35)  
 }
 
 .hideElement {
