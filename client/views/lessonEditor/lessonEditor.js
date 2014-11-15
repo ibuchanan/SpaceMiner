@@ -10,4 +10,5 @@ Template.lessonEditor.rendered = function() {
     disable_properties: true,
     no_additional_properties: true
   });  
+  window.myEditor = editor;
 };
