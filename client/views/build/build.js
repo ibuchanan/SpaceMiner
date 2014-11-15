@@ -17,6 +17,10 @@ Template.build.helpers({
   }
 })
 
+function nickName() {
+  return Meteor.user().profile.nickName;
+}
+
 Template.build.rendered = function() { 
   
   function finishWork() {
@@ -143,7 +147,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When in test, players can give feedback about your world, but they cannot rank it.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'test', published: true, lastUpdated: new Date() }
+          $set: { phase: 'test', published: true, lastUpdated: new Date(), updatedBy: nickName() }
         }, function(err, count) {
           if (!err) {
             controls.alert('Your world is available for testing by everyone! You can keep working...');
@@ -159,7 +163,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When released, players can rank and comment on your world.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'released', published: true, lastUpdated: new Date() },
+          $set: { phase: 'released', published: true, lastUpdated: new Date(), updatedBy: nickName() },
           $inc: { version : 1 }
         }, function(err, count) {
           if (!err) {
@@ -191,7 +195,7 @@ Template.build.rendered = function() {
         console.log(buildStepUpdateCounts);
         Levels.update({_id:level.get()}, { 
           $set: { name: worldName, script : userScript, buildStepCurrent: step, 
-                lastUpdated: new Date()},
+                lastUpdated: new Date(), updatedBy: nickName()},
           $inc : buildStepUpdateCounts
         }, function() {
           Meteor.setTimeout(function(){
@@ -269,6 +273,7 @@ Template.build.rendered = function() {
     delete levelDoc._id;
     levelDoc.published = false;
     levelDoc.phase = 'build';
+    levelDoc.updatedBy = nickName();
     Levels.insert(levelDoc, function(err, buildLevelId) {
       level.set(buildLevelId);
       gameUpdated = true;

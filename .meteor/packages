@@ -9,7 +9,6 @@ insecure
 collection-api
 meteorhacks:npm
 npm-container
-iron:router
 jquery
 underscore
 accounts-password
@@ -27,3 +26,6 @@ codeadventure:js-signals
 reactive-var
 xorax:multiple-callbacks
 accounts-meetup
+joshowens:accounts-entry
+iron:router
+parhelium:epic-editor

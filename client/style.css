@@ -88,7 +88,16 @@ h2{
   background-size: 640px 448px;
 }
 
-.version1 {
-  font-size: 50%
-  color: gray;    
+.explorer {
+  padding-top: 3px;
+  font-size: 60%;
+  color: eggshell;    
+}
+
+.entry {
+  background-color: darkgray; /*rgb(217, 72, 54)*/
+}
+
+strong.line-thru: {
+  background-color: darkgray;
 }

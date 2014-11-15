@@ -72,74 +72,8 @@ tttttttttttttttttttt`;
   });    
 }
 
-function createLessonsDefault() {
-  
-  function value(val) {
-    return {
-      value: val === undefined ? 'undefined' : val,
-      type: typeof val
-    };
-  }
-  
-  function error(message) {
-    return {
-      error: message
-    };
-  }
-  
-  var lessonId = 'variables';
-  
-  function step(code, title, id, expectation, description) {
-    step.index++;
-    return {
-      name: lessonId + '-' + id,      
-      code,
-      title,
-      expectation,      
-      description,
-      current: step.index === 0,
-      attempted: false,
-      index: step.index
-    };
-  }
-  step.index = -1;
-  
-  function sec(title, ...paragraphs) {
-    return {
-      title,
-      paragraphs
-    };
-  }
-  
-  function question(title, ...choices) {
-    var correctAnswer = _.findWhere(choices, {correct:true});
-    var correctIndex = _.indexOf(choices, correctAnswer);
-    return {
-      title,
-      choices,
-      correctIndex
-    };
-  }
-  
-  function choice(text, feedback, correct=false) {
-    return {
-      text,
-      feedback,
-      correct
-    };
-  } 
- 
-  function finish(name, title, code, instruction, completion, assertion) {
-    return {
-      name,
-      title,
-      code,
-      instruction,
-      completion,
-      assertion
-    };
-  }
-  
+/*
+
   var lesson = {
     _id: lessonId,
     title: 'Make your game remember things with variables',
@@ -163,18 +97,14 @@ function createLessonsDefault() {
       step('red', 'Another undeclared variable error message from the interpreter', 'undeclared-variable-red', error('ReferenceError: red is not defined'), 'An error again? The reason is the same as before. The computer does not recognize <b>red</b> as defined variable. But, there is a simple way to use that color name, and any other, in a way that the computer recognizes as a <b>string</b> type...'),
       step('"red\"', 'Type a string value using double-quotes around text', 'string-variable', value('"red"'), 'Now you\'re getting somewhere! When the console simply echoes <b>"red"</b> back to you it is telling you that you sent it a value that it could process. In this case, because we surrounded the three characters <b>red</b> with a pair of <b>"</b> characters, the computer recognizes it as a <b>string</b> type. There are several other types of values you can type in that you will learn about later, but try typing each of the following, but do not surroundi them by " charactersjust to get a preview:  <p><ul><li>44</li><li>1.5</li><li>true</li><li>false</li></ul></p>.<p>Let\'s keep going for now...</p>'),
       step('faveColor = "red"', 'Assign a string value into the faveColor variable to make it remember', 'assign-string-value', value('"red"'), 'Now you have <i>assigned</i> the <b>value</b> of <i>"red"</i> into the <b>variable</b> named <i>faveColor</i>! This is a big step in learning how to code. You really cannot do anything else without mastering this step, so good job! At this point, your computer will forever remember "red" inside of the variable faveColor until you reassign the value, close this page, or leave your computer on long enough that it runs out of power and shuts down! TODO more info')
-      /*
-   Next: <code class='label label-primary'>faveColor</code>
-    <br />
-    Next: <code class='label label-primary'>prompt("What's your favorite color?")</code>
-    <br />
-    Next: <code class='label label-primary'>faveColor = prompt("What's your favorite color?")</code>
-    <br />
-      */
     ],
     finish: finish('fix-broken-congrats', 'Fix the broken congrats message!', 'var winnerName;\nprompt("Congratulations! What is your name?");\nalert("Great job, " + winnerName + "!");', 'Now that you have learned about variables, try to fix the broken code that asked for your name when you beat the level before:', "return winnerName", "_.isString(val)")
   };
-  Lessons.insert(lesson);
+
+*/
+
+function createLessonsDefault() {
+ 
 }
 
 function cleanDbAndCreateDefaultRecords() {

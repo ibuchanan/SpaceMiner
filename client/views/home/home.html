@@ -27,10 +27,10 @@
             {{/if}}
           </ul>
           <ul class="nav navbar-nav navbar-right">
-              {{> loginButtons }}
+              {{> accountButtons }}
           </ul>
       </div>
-  </div>  
+  </div>
   <div class='container-fluid'>
     <div class='row {{hideIfGameVisible}}'>
       <div class='col-md-12 centered'>
@@ -97,5 +97,5 @@
 </template>
 
 <template name="level">
-  <button class="col-md-5 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}{{{phase}}}<br/>{{{preview}}}</button>
+  <button class="col-md-5 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}{{{phase}}}<br/>{{{preview}}}<div class='explorer'>{{explorer}}</div></button>
 </template>

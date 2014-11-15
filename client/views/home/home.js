@@ -146,5 +146,9 @@ Template.level.helpers({
       if (i==1) images += "<img src='/images/spriteParts/" + this.tile + "' height='32' width='32' alt='' />&nbsp;";
     }
     return images;
+  },
+  explorer: function() {
+    if (this.updatedBy) return this.updatedBy;
+    return '';
   }
 });
