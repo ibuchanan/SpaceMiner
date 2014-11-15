@@ -177,6 +177,49 @@ function createLessonsDefault() {
   Lessons.insert(lesson);
 }
 
+function cleanDbAndCreateDefaultRecords() {
+  Levels.remove({phase: { $in: ['inception', 'build'] } });
+  if (Levels.find({_id:'starter'}).count() === 0) {
+    createLevelDefault();
+  }
+  
+  Lessons.remove({});
+  if (Lessons.find().count() === 0) {
+    createLessonsDefault();
+  }  
+
+  SpriteParts.remove({});
+  if (SpriteParts.find().count() === 0) {
+    var spritePartSort = {
+      player: 1,
+      enemy: 2,
+      gem: 3,
+      coin: 4,
+      tile: 5,
+      shot: 6
+    };
+    var glob = Meteor.npmRequire("glob");      
+    glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
+      var spriteParts = _.chain(files)
+      .map((file)=> { 
+        return file.replace("/home/action/Towerman/public/images/spriteParts/", "");
+      })
+      .groupBy((file)=> {
+        return file.substring(0, file.indexOf("/"));          
+      })
+      .value();        
+      _.each(spriteParts, (parts, category)=> {
+        SpriteParts.insert({
+          part: category,
+          choices: parts,
+          sort: spritePartSort[category],
+          selected: parts[0]
+        });
+      });
+    }));  
+  }
+}
+
 Meteor.startup(function() {
     Router.map(function() {
       this.route('levelSprites/:id', {
@@ -215,48 +258,8 @@ Meteor.startup(function() {
       }
     });
   
-    Levels.remove({name:'Space Miner'});
-    if (Levels.find({_id:'starter'}).count() === 0) {
-      createLevelDefault();
-    }
-  
-    Lessons.remove({});
-    if (Lessons.find().count() === 0) {
-      createLessonsDefault();
-    }  
-  
-    //StepFeedback.remove({});
-    SpriteParts.remove({});
-    if (SpriteParts.find().count() === 0) {
-      var spritePartSort = {
-        player: 1,
-        enemy: 2,
-        gem: 3,
-        coin: 4,
-        tile: 5,
-        shot: 6
-      };
-      var glob = Meteor.npmRequire("glob");      
-      glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
-        var spriteParts = _.chain(files)
-          .map((file)=> { 
-            return file.replace("/home/action/Towerman/public/images/spriteParts/", "");
-          })
-          .groupBy((file)=> {
-            return file.substring(0, file.indexOf("/"));          
-          })
-          .value();        
-          _.each(spriteParts, (parts, category)=> {
-              SpriteParts.insert({
-                part: category,
-                choices: parts,
-                sort: spritePartSort[category],
-                selected: parts[0]
-              });
-          });
-      }));
-    }  
-
+    cleanDbAndCreateDefaultRecords();
+        
     WebApp.connectHandlers.use(function (req, res, next) {
       res.setHeader('access-control-allow-origin', '*');      
       return next();
