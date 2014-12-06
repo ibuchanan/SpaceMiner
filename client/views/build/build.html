@@ -169,8 +169,8 @@ return obj;
           <h2>Code editor</h2>
           <div id="codeInput"></div>
           <p id="step" class="stepText"></p>
-          <button class="btn btn-success" id="update">Update world</button>
-          <button class="btn btn-primary" id="next">Next</button>
+          <button class="btn btn-success" id="update"><span class='fa fa-refresh'></span> Update world</button>
+          <button class="btn btn-primary" id="next"><span class='glyphicon glyphicon-step-forward'></span> Next</button>
         </section>
         <section class="col-md-5 well" style="text-align:center" id="worldSection">
           <div id="header"></div>
@@ -179,8 +179,8 @@ return obj;
             {{> game level=level buttons=buttons}}
             <br />
           {{/with}}
-          <button class="btn btn-danger" id="test">Test</button>
-          <button class="btn btn-info" id="release">Release!</button>          
+          <button class="btn btn-danger" id="test"><span class='fa-bug fa'></span> Test</button>
+          <button class="btn btn-info" id="release"><span class='fa fa-flag-checkered'></span> Release!</button>
         </section>
       </div>
     </div>
@@ -302,5 +302,4 @@ var sprites = {
         <li>When done, press the <b>Update world</b> button to see the change.</li>
       </ul>
   </div>
-  <form id='testForm'></form>
 </template>

@@ -20,7 +20,7 @@ this.Game = class {
   }
   static getDefaults() {
     var worldSprites = boardFromText(
-`tegccccccccccccgtc
+`cegccccccccccccgcc
 ctttttcccccctttttc
 ctgccccccccccccgtc
 ctttttcccccctttttc
@@ -47,6 +47,8 @@ ccgccccccccccccgcc`);
       },
       world: worldSprites,
       worldRows: [],
+      worldCoords: {},
+      worldBuild: {},
       enemy: {
         respawnDelay: 5000,
         increaseSpeedBy: 50
@@ -163,10 +165,3 @@ this.Controls = class {
     bootbox.confirm(question, callback);
   }
 }
-
-/*enemy = {
-  incSpeed: function() {
-     Q.Enemy.p.speed = this.p.speed + 10;
-    
-  }
-};

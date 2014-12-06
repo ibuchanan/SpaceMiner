@@ -20,6 +20,15 @@
       <div id='gameContainer' class='{{hideIfGameComplete}}'>
         <canvas id='game' width='640' height='448' class='game'></canvas>
       </div>
+      <div id='chat' class='chat {{showIfChatEnabled}}'>
+        <textarea id='chatEditor'></textarea>
+        <br />
+        <button class='btn btn-primary chatSend'><span class='fa fa-bullhorn'></span> Send</button>
+        <hr />
+        {{#each messages}}
+        <div><span class='label label-info'><span class='fa fa-comment-o'></span> {{user}}</span> {{{message}}}</div>
+        {{/each}}
+      </div>
     </div>
     <div class='{{showIfGameLoading}}' style='text-align:center'>
       <div class='gameLoading'>&nbsp;</div>

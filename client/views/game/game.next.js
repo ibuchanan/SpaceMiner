@@ -13,6 +13,8 @@ var gameLoading = new ReactiveVar(false);
 
 var gameOpen = new ReactiveVar(false);
 
+var chatEnabled = new ReactiveVar(false);
+
 var signals = AutoSignal.register('game', {
   gameOpened: function() {
     gameOpen.set(true);
@@ -43,6 +45,9 @@ Template.game.created = function() {
   levelId = args.level;
   if (args.buttons && _.isArray(args.buttons)) {
     buttons = args.buttons;
+  }
+  if (args.chatEnabled) {
+    chatEnabled.set(true);
   }
 };
 
@@ -98,6 +103,11 @@ Template.game.helpers({
   },
   hideIfPlaying: function() {
     return hideIfTrue(!gamePaused.get());
+  },
+  showIfChatEnabled: showIfTrue(chatEnabled),
+  messages: function() {
+    var sort = { sort : { date : -1 } };
+    return LevelsChat.find({level:levelId}, sort);
   }
 });
 
@@ -135,7 +145,14 @@ Template.game.events({
     Levels.insert(levelDoc, function(err, forkedLevelId) {
       window.open('/levelCustomize/' + forkedLevelId, '_blank');      
     });
-  }  
+  },
+  'click .chatSend': function() {
+    var message = $('#chatEditor').val();
+    var user = Meteor.user().profile.nickName;
+    var level = levelId;
+    LevelsChat.insert({ message, user, level });
+  }
+  
 });
 
 var SPRITE_PLAYER = 1;
@@ -267,12 +284,11 @@ function createOverrideFuncCode(worldScript, defaults) {
   return script;
 }
 
-function createBoardFromWorld(world, worldDefault) {
-  // TODO map to uppercase and - characters  
-  if (!_.isArray(world) || world.length === 0) {
-    return worldDefault;
+function worldOverride(overrides, world) {
+  if (!_.isArray(overrides) || overrides.length === 0) {
+    return world;
   }
-  var worldCopy = JSON.parse(JSON.stringify(worldDefault));
+  var worldCopy = JSON.parse(JSON.stringify(world));
   
   function copyRow(rowSource, rowTarget) {
     rowSource.forEach(function(cell, index) {
@@ -280,13 +296,19 @@ function createBoardFromWorld(world, worldDefault) {
     });
   }
   
-  if (_.isArray(world[0])) {
-    world.forEach(function(row, rowIndex) {
+  if (_.isArray(overrides[0])) {
+    overrides.forEach(function(row, rowIndex) {
       copyRow(row, worldCopy[rowIndex]);
     });
   } else {
-    copyRow(world, worldCopy[0]);
+    copyRow(overrides, worldCopy[0]);
   }
+  
+  return worldCopy;
+}
+
+function createBoardFromWorld(world, worldDefault) {
+  var worldCopy = worldOverride(world, worldDefault);
   
   // Now assure left and right borders are all tiles
   worldCopy.forEach(function(row) {
@@ -332,7 +354,15 @@ function configureQuintus(callback) {
 
   Q.gravityX = 0;
   Q.gravityY = 0;
-
+  
+  function getRows(rowStrings) {
+    var rows = _.map(rowStrings, function(row) {
+      if (_.isString(row)) return row.split('');
+      return [];
+    });
+    return rows;
+  }
+  
   Q.loadAssetLevel = function(key,src,callback,errorCallback) {
     var fileParts = src.split("."), worldName = fileParts[0];
     Q.loadAssetOther(key, "/collectionapi/levels/" + worldName, function(key, val) {
@@ -348,13 +378,80 @@ function configureQuintus(callback) {
         // TODO remove hack
         world._id = worldName;
         Q.assets[worldName + 'World'] = world;
-        var worldSprites = world.world;
+        
+        // First, if a world property was set, layer it over the defaults
+        var worldSprites = worldOverride(world.world, defaults.world);
+        console.info(worldSprites);
+        
+        // Second, if a worldRows property was set, layer that over the world
         if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
-          worldSprites = _.map(world.worldRows, function(row) {
-            if (_.isString(row)) return row.split('');
-            return [];
+          var overrides = getRows(world.worldRows);
+          worldSprites = worldOverride(overrides, worldSprites);
+        }
+        
+        // Third, if worldCoords was set, layer that on top of the world
+        if (_.isObject(world.worldCoords) && _.keys(world.worldCoords).length > 0) {
+          _.each(world.worldCoords, function(value, key) {
+            var coords = key.split(',');
+            if (coords.length < 2) {
+              console.log('The key: ' + key + ', must be in the format of r,c where r specifies a row number and c specifies a column within that row. For example: 0,0 is the first row and first column, and 3,4 would be the fourth row andd fifth column.');
+            }
+            var row = parseInt(coords[0]);
+            var col = parseInt(coords[1]);
+            worldSprites[row][col] = value;
           });
         }
+        
+        // Fourth, process the worldBuild directions
+        if(_.isObject(world.worldBuild) && _.keys(world.worldBuild).length > 0) {
+          var group = function(g) {
+            var start = g.start || '0,0';
+            var sprites = g.sprites || [];
+            var repeat = g.repeat || 'full'; // 'full|x|y count
+            
+            sprites = getRows(sprites);
+            
+            return {
+              start,
+              repeat,
+              sprites
+            };
+          };
+          
+          var groups = function(gs) {
+            if (!_.isArray(gs)) return [];
+            else {
+              return _.map(gs, group);
+            }
+          };
+          
+          var worldBuild = world.worldBuild;
+          
+          var gs = [];
+          if (_.isObject(worldBuild) && _.isArray(worldBuild.groups)) {
+            gs = groups(worldBuild.groups); 
+          } else if (_.isObject(worldBuild)) {
+            gs = [ group(worldBuild) ];
+          }
+          
+          // Now let's iterate...
+          _.each(gs, function(g) {
+            var start = g.start;
+            var sprites = g.sprites;
+            var repeat = g.repeat;
+            var coords = start.split(',');
+            if (coords.length < 2) coords = [0,0];
+            var row = parseInt(coords[0]);
+            var col = parseInt(coords[1]);
+            sprites.forEach(function(cells, rowIndex) {
+              cells.forEach(function(cell, colIndex) {
+                worldSprites[row + rowIndex][col + colIndex] = cell;
+              });
+            });
+          });
+        }        
+        
+        // TODO: is the second param necessary any more?
         board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
       } else {
         defaults._id = worldName;

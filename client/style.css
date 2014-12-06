@@ -101,3 +101,7 @@ h2{
 strong.line-thru: {
   background-color: darkgray;
 }
+
+.alert-info {
+  background-color: #8D063A;
+}
