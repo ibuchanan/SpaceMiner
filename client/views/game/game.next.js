@@ -483,7 +483,7 @@ function configureQuintus(callback) {
 /*
 
 var worldName = "Space Miner";
-
+''
 var worldBuild = {
     groups : [ 
         {
