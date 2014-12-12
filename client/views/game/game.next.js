@@ -407,7 +407,7 @@ function configureQuintus(callback) {
           var group = function(g) {
             var start = g.start || '0,0';
             var sprites = g.sprites || [];
-            var repeat = g.repeat || 'full'; // 'full|x|y count
+            var repeat = g.repeat || 'x 1'; // '[full|[count[ x|y]]
             
             sprites = getRows(sprites);
             
@@ -441,15 +441,62 @@ function configureQuintus(callback) {
             var repeat = g.repeat;
             var coords = start.split(',');
             if (coords.length < 2) coords = [0,0];
-            var row = parseInt(coords[0]);
-            var col = parseInt(coords[1]);
-            sprites.forEach(function(cells, rowIndex) {
-              cells.forEach(function(cell, colIndex) {
-                worldSprites[row + rowIndex][col + colIndex] = cell;
-              });
+            var startingRow = parseInt(coords[0]);
+            var startingCol = parseInt(coords[1]);
+            
+            var iterations = 1;
+            var repeatDirection = 'x';
+            var repeatParts = repeat.split(' ');
+            if (repeatParts[0] === 'full') {
+              // TODO calculate iterations or something...
+            } else {
+              iterations = parseInt(repeatParts[0]);
+            }
+            if (repeatParts.length > 1) {
+              repeatDirection = repeatParts[1];
+            }
+            
+            // Find max length of the spriteparts
+            var width = sprites[0].length;
+            _.each(sprites, function(row) {
+              if (row.legnth > width) width = row.length;
             });
+            var height = sprites.length;
+            
+            for(var i = 0; i < iterations; i++) {
+              var currentStartRowOffset = startingRow;
+              var currentStartColOffset = startingCol;              
+              if (repeatDirection === 'x') {
+                currentStartRowOffset = startingRow + (height * i);
+              }
+              else if (repeatDirection === 'y') {
+                currentStartColOffset = startingCol + (width * i)
+              }
+              sprites.forEach(function(cells, rowIndex) {
+                cells.forEach(function(cell, colIndex) {
+                  worldSprites[currentStartRowOffset + rowIndex][currentStartColOffset + colIndex] = cell;
+                });
+              });
+            }
           });
         }        
+/*
+
+var worldName = "Space Miner";
+
+var worldBuild = {
+    groups : [ 
+        {
+        start: '2,2',
+        repeat: '2 x',
+        sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
+        }
+    ]
+};
+    
+    
+
+*/
         
         // TODO: is the second param necessary any more?
         board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
