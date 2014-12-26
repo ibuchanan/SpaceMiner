@@ -443,7 +443,10 @@ function configureQuintus(callback) {
             if (coords.length < 2) coords = [0,0];
             var startingRow = parseInt(coords[0]);
             var startingCol = parseInt(coords[1]);
-            
+
+            var worldWidth = worldSprites[0].length;
+            var worldHeight = worldSprites.length;
+                        
             var iterations = 1;
             var repeatDirection = 'x';
             var repeatParts = repeat.split(' ');
@@ -459,24 +462,71 @@ function configureQuintus(callback) {
             // Find max length of the spriteparts
             var width = sprites[0].length;
             _.each(sprites, function(row) {
-              if (row.legnth > width) width = row.length;
+              if (row.length > width) width = row.length;
             });
             var height = sprites.length;
             
+            // Adapt to bounds           
+            if (startingRow > worldHeight) startingRow = worldHeight - height;
+            if (startingCol > worldWidth) startingCol = worldWidth - width;
+            if (startingRow + height > worldHeight) startingRow = worldHeight - height;
+            if (startingCol + width > worldWidth) startingCol = worldWidth - width;
+                      
+            var wrappedXCount = 0;
+            var wrappedYCount = 0;
+            
+            var vertGroupsNoWrap = 0;
+            
+            var wrappedAtRow = 0;
+            
+            console.log("World height: " + worldHeight);
+            console.log("World width: " + worldWidth);
+            console.log("startingRow: " + startingRow);
+            console.log("startingCol: " + startingCol);
+            
             for(var i = 0; i < iterations; i++) {
-              var currentStartRowOffset = startingRow;
-              var currentStartColOffset = startingCol;              
+              var currentStartingRow = startingRow;
+              var currentStartingCol = startingCol;
+              
+              var rowString = "";
+              
+              sprites.forEach(function(cells, rowIndex) {
+                var thisRow = currentStartingRow + rowIndex - wrappedAtRow;
+                if (thisRow >= worldHeight) {
+                  console.log("Uh oh, exceding height");
+                  console.log(thisRow);                  
+                  wrappedAtRow = rowIndex;
+                  currentStartingRow = 0;
+                  wrappedYCount++;
+                  thisRow = 0;
+                  vertGroupsNoWrap = 0; 
+                  // Adjust the next starting position to be 
+                  // 0 + the number of undone rows in the current block
+                  //startingRow = 0 + cells.length - rowIndex;
+                  startingRow = 0;
+                }
+                currentStartingCol = startingCol + (wrappedYCount * width);                
+                rowString = thisRow + ": ";
+                var colString = "";
+                cells.forEach(function(cell, colIndex) {
+                  rowString += (currentStartingCol + colIndex) + ",";
+                  worldSprites[thisRow][currentStartingCol + colIndex] = cell;
+                });
+                console.log(rowString);
+                if (rowIndex >= (sprites.length - 1)) {
+                  vertGroupsNoWrap++;
+                  console.log("vertGroups: " + vertGroupsNoWrap);
+                }
+              });
+              // Set the next positions for the next iteraion
               if (repeatDirection === 'x') {
-                currentStartRowOffset = startingRow + (height * i);
+                startingCol += (width * (i+1));
               }
               else if (repeatDirection === 'y') {
-                currentStartColOffset = startingCol + (width * i)
-              }
-              sprites.forEach(function(cells, rowIndex) {
-                cells.forEach(function(cell, colIndex) {
-                  worldSprites[currentStartRowOffset + rowIndex][currentStartColOffset + colIndex] = cell;
-                });
-              });
+                startingRow += (height);
+                console.log("For iteration " + (i+1));
+                console.log("...the starting row is now: " + startingRow);
+              }              
             }
           });
         }        
@@ -488,7 +538,7 @@ var worldBuild = {
     groups : [ 
         {
         start: '2,2',
-        repeat: '2 x',
+        repeat: '4 y',
         sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
         }
     ]
