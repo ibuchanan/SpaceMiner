@@ -472,7 +472,6 @@ function configureQuintus(callback) {
             if (startingRow + height > worldHeight) startingRow = worldHeight - height;
             if (startingCol + width > worldWidth) startingCol = worldWidth - width;
                       
-            var wrappedXCount = 0;
             var wrappedYCount = 0;
             
             var vertGroupsNoWrap = 0;
@@ -491,7 +490,7 @@ function configureQuintus(callback) {
               var currentStartingCol = startingCol;
               
               var rowString = "";
-              
+              /*
               if (repeatDirection === 'y') {
                 sprites.forEach(function(cells, rowIndex) {
                   var thisRow = currentStartingRow + rowIndex - wrappedAtRow;
@@ -530,33 +529,42 @@ function configureQuintus(callback) {
                 });
                 startingRow += height;
               }
+              */
+              if (repeatDirection === 'y') {
+                sprites.forEach(function(cells, rowIndex) {
+                  var thisRow = currentStartingRow + rowIndex - wrappedAtRow;
+                  if (thisRow >= worldHeight) {
+                    wrappedAtRow = rowIndex;
+                    currentStartingCol = startingCol + width;
+                    startingCol += width;
+                    currentStartingRow = startingRow = thisRow = 0;
+                  }
+                  cells.forEach(function(cell, colIndex) {
+                    var thisCol = currentStartingCol + colIndex;
+                    if (thisCol < worldWidth) {
+                      worldSprites[thisRow][thisCol] = cell;                      
+                    }                   
+                  });                  
+                });
+                startingRow += height;                
+              }
               else if (repeatDirection === 'x') {
-                for(var colI = 0; colI < width; colI++) {
-                  var thisCol = currentStartingCol + colI - wrappedAtCol;
+                for(var colIndex = 0; colIndex < width; colIndex++) {
+                  var thisCol = currentStartingCol + colIndex - wrappedAtCol;
                   if (thisCol >= worldWidth) {
-                    console.log('Past the world width: ' + thisCol + ':' + worldWidth);
-                    console.log('Uh oh, exceding width');
-                    console.log(thisCol);
-                    wrappedAtCol = colI;
+                    wrappedAtCol = colIndex;
                     currentStartingRow = startingRow + height;
                     startingRow += height;
                     currentStartingCol = startingCol = thisCol = 0;
-                    wrappedXCount++;
                   }
                   sprites.forEach(function(cells, rowIndex) {
-                   console.log('rowIndex:' + rowIndex);
-                   console.log('colI + 1 is ' + (colI+1));
-                   console.log('> ?');
-                   console.log(cells.length >= (colI+1));
-                   if (cells.length >= (colI+1)) {
-                     var cell = cells[colI];
+                   if (cells.length >= (colIndex+1)) {
+                     var cell = cells[colIndex];
                      var thisRow = currentStartingRow + rowIndex;
-                     console.log('the rowIndex is:' + thisRow);
                      worldSprites[thisRow][thisCol] = cell;
                    } 
                   });
-                }
-                
+                }                
                 startingCol += (width);
               }
             }
