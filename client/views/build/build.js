@@ -21,6 +21,84 @@ function nickName() {
   return Meteor.user().profile.nickName;
 }
 
+/*
+  <script type="text/plain" id="script-5">
+var sprites = {
+  tile : "plasma.png"
+};</script>
+  <div id="step-5" class='step'>
+      <h2>Transform your new world</h2>
+      <p class="alert alert-info" role="alert">Worlds can be fiery, icey, rocky, dusty, watery, and more! How do you want yours to look?</p>
+      <p>If you remember, the borders of your world used to be fiery, but now they are filled with plasma. To change this back to fiery tiles for a moment do this:</p>
+      <ul>
+        <li>Place these two identical characters <code>//</code> in front of the text <code>tile : "plasma.png"</code>
+ so that it looks like           <code>//tile : "plasma.png"</code>
+. These are comment characters, which tell the computer to ignore a single line of code.</li>
+        <li>When done, press the           <b>Update world</b>
+ button to see the change.</li>
+       <li>Then change the last bit of code again so that it looks like this: <pre><code>var sprites = {
+  tile : "plasma.png",
+  enemy : "goonGreen.png"
+}</code></pre></li>
+      </ul>
+      <h3>Objects let you use a single variable to group a bunch of other values by name</h3>
+      <p>
+      Before moving on to look at other sprites you can use to customize your world, let's break down this last chunk of code a bit more:
+      </p>
+      
+      <p>
+        <pre><code>var sprites = {
+  tile : "plasma.png",
+  enemy : "goonGreen.png"
+}</code></pre>
+      </p>
+    
+      <p>
+        <ul>
+          <li>The first line uses the familiar <code>var</code> keyword to begin a variable declaration, and the variable name is <code>sprites</code>.</li>
+          <li>After the assignment operator <code>=</code>, we use a <b>left curly brace</b>, <code>{</code> to start the creation of a new <b>object</b> data type.</li>
+          <li>The next line, <code>tile : "plasma.png",</code> places a <b>property</b> named <code>tile</code> inside this new object and assigns the value <code>"plasma.png"</code> to it. The colon character, <code>:</code>, serves a purpose like <code>=</code> does when assigning a value into a variable. Lastly, the comma, <code>,</code> tells JavaScript to expect another property to follow. </li>
+          <li>The line right after that, <code>enemy : "goonGreen.png"</code> places another property, named <code>enemy</code>, inside this new object and assigns it the value <code>"goonGreen.png"</code>. There is no comma after this value because we are not yet adding any more properties into this object. </li>
+          <li>The final line has just <code>}</code>, a <b>right curly brace</b> to finish the declaration and creation of the new object.</li> 
+        </ul>
+      </p>
+      
+      <p>There are a lot of other choices than just <code>"fiery.png"</code> <img src='http://supersonic-box-14-130414.use1.nitrousbox.com/images/spriteParts/tile/fiery.png' alt='fiery.png'/> and <code>"plasma.png"</code> <img src='http://supersonic-box-14-130414.use1.nitrousbox.com/images/spriteParts/tile/plasma.png' alt='plasma.png'/> for the <code>tile</code> property, and for the <code>enemy</code> property there are more choices than <code>"brainBlue.png"</code> <img src='http://supersonic-box-14-130414.use1.nitrousbox.com/images/spriteParts/enemy/brainBlue.png' alt='brainBlue.png'/> and <code>"goonGreen.png"</code> <img src='http://supersonic-box-14-130414.use1.nitrousbox.com/images/spriteParts/enemy/goonGreen.png' alt='goonGreen'/>.</p>
+      
+      <p>So, click next to try some new ones!</p>
+  </div>
+  <script type="text/plain" id="script-6"></script>
+  <div id="step-6" class='step'>
+      <h2>Pick your sprites!</h2>
+      <p class="alert alert-info" role="alert">You're probably already thinking about creating your own sprites. Don't worry, in a future lesson you will learn to use graphics editors to make your own sprites. For now, pick your favorites from those below and plug them into the <code>sprites</code> variable to customize your world.</p>
+      <p>No new code has been added in this step. That's your job this time. But, here's a sample of what the <code>sprites</code> variable would look like if all the possible properties had their original values: <pre><code>var sprites = {
+  tile: "fiery.png",
+  enemy: "brainBlue.png",
+  coin: "gold.png",
+  gem: "emerald.png",
+  player: "light.png"
+};</code></pre></p>
+    <p>Your choices are in the menu of sprites below:</p>
+      <div id="sprites"></div>      
+      <ul>
+        <li>Go ahead and add new properties for <code>coin</code>, <code>gem</code>, and <code>player</code> and type in the values for the sprites you like best from their categories to customize your world.</li>
+        <li>When done, press the <b>Update world</b> button to see the change.</li>
+      </ul>
+  </div>
+        
+*/        
+
+
+
+
+
+function buildSteps() {
+  
+  
+}
+
+
+
 Template.build.rendered = function() { 
   
   function finishWork() {

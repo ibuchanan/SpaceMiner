@@ -405,7 +405,7 @@ function configureQuintus(callback) {
         // Fourth, process the worldBuild directions
         if(_.isObject(world.worldBuild) && _.keys(world.worldBuild).length > 0) {
           var group = function(g) {
-            var start = g.start || '0,0';
+            var start = g.start || null;
             var sprites = g.sprites || [];
             var repeat = g.repeat || 'x 1'; // '[full|[count[ x|y]]
             
@@ -434,16 +434,21 @@ function configureQuintus(callback) {
             gs = [ group(worldBuild) ];
           }
           
+          var startingRow = 0,
+              startingCol = 0;
+          
           // Now let's iterate...
           _.each(gs, function(g) {
             var start = g.start;
             var sprites = g.sprites;
             var repeat = g.repeat;
-            var coords = start.split(',');
-            if (coords.length < 2) coords = [0,0];
-            var startingRow = parseInt(coords[0]);
-            var startingCol = parseInt(coords[1]);
-
+            if (start) {
+              var coords = start.split(',');
+              if (coords.length < 2) coords = [0,0];
+              startingRow = parseInt(coords[0]);
+              startingCol = parseInt(coords[1]);
+            }
+            
             var worldWidth = worldSprites[0].length;
             var worldHeight = worldSprites.length;
                         
