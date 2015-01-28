@@ -9,9 +9,9 @@ SpaceMiner is a tool to help beginner programming students learn JavaScript and 
   * Fun
   * Unique
   * Resumable at home or next time
- * How can we as mentors understand how well our tutorials and lessons are helping students make real progress?
- * How can students help each other improve and collaborate?
-   * And, how can we hook them on "that old time agile" mindset?
+* How can we as mentors understand how well our tutorials and lessons are helping students make real progress?
+* How can students help each other improve and collaborate?
+  * And, how can we hook them on "that old time agile" mindset?
 
 ## Current use
 
