@@ -4,7 +4,7 @@ SpaceMiner is a tool to help beginner programming students learn JavaScript and 
 
 ## Questions we're trying to address
 
-* How can a beginner get started quickly, and within one hour of coding for the first time produce a result that's:
+* How can a beginner get started quickly, and within one hour of coding for the first time produce a game that's:
   * Fun
   * Instructive
   * Unique
