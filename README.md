@@ -4,11 +4,12 @@ SpaceMiner is a tool to help beginner programming students learn JavaScript and 
 
 ## Questions we're trying to address
 
-* How can you get beginners started quickly, and within one hour have them produce a result that's:
+* How can a beginner get started quickly, and within one hour of coding for the first time produce a result that's:
   * Shareable 
   * Fun
   * Unique
-  * Resumable at home or next time
+  * Instructive
+  * And, easily resumable at home or next time
 * How can we as mentors understand how well our tutorials and lessons are helping students make real progress?
 * How can students help each other improve and collaborate?
   * And, how can we hook them on "that old time agile" mindset?
