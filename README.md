@@ -2,6 +2,17 @@
 
 SpaceMiner is a tool to help beginner programming students learn JavaScript and programming concepts in face-to-face or remote environments, with peer collaboration and mentor/teacher assistance.
 
+## Questions we're trying to address
+
+* How can you get beginners started quickly, and within one hour have them produce a result that's:
+  * Shareable 
+  * Fun
+  * Unique
+  * Resumable at home or next time
+ * How can we as mentors understand how well our tutorials and lessons are helping students make real progress?
+ * How can students help each other improve and collaborate?
+   * And, how can we hook them on "that old time agile" mindset?
+
 ## Current use
 
 * [CoderDojo Ponce Springs](http://www.meetup.com/CoderDojoPonceSprings/)
