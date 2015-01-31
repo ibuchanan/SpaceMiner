@@ -254,15 +254,28 @@ Template.build.rendered = function() {
       });
     }
 
+
+    function parseWorldDefinitionFromScript(script) {
+      var defaults = Game.getDefaults();      
+      var obj = window.ParseWorldDefinitionFromScript(script, defaults);      
+      console.log(obj);
+      return obj;
+    }
+
     var updateRun = false;
     function update(updateLevel) {
       updateLevel = updateLevel || false;
       var configureTemplate = $('#configureTemplate').text();
       var userScript = ace.edit("codeInput").getSession().getValue();
+      
+      
       if (updateRun && updateLevel) {  
+        /* OLD code TODO remove
         var funcText = '(function(){\n' + userScript + '\n' + configureTemplate + '\n})';
         var func = eval(funcText);
         var obj = func();
+        */
+        var obj = parseWorldDefinitionFromScript(userScript);
         
         var worldName = obj.worldName;        
         
@@ -271,9 +284,37 @@ Template.build.rendered = function() {
         var buildStepUpdateCounts = {};
         buildStepUpdateCounts['buildStepUpdateCounts.' + String(step)] = 1;
         console.log(buildStepUpdateCounts);
+        
+        // Get the updated tile and sprites
+        var selections = [
+          'player/' + obj.sprites.player,
+          'enemy/' + obj.sprites.enemy,
+          'gem/' + obj.sprites.gem,
+          'coin/' + obj.sprites.coin,
+          'shot/' + obj.sprites.shot
+        ];
+        
+        // Specify the exact properties to update
+        var props = { 
+          name: worldName, 
+          script: userScript, 
+          selections: selections,
+          tile: 'tile/' + obj.sprites.tile,
+          buildStepCurrent: step, 
+          lastUpdated: new Date(), 
+          updatedBy: nickName()
+        };
+        
+        Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
+          Meteor.setTimeout(function(){
+            gameUpdated = true;
+            gameUpdatedDep.changed();
+          }, 250);          
+        });
+        
+        /*
         Levels.update({_id:level.get()}, { 
-          $set: { name: worldName, script : userScript, buildStepCurrent: step, 
-                lastUpdated: new Date(), updatedBy: nickName()},
+          $set: props,
           $inc : buildStepUpdateCounts
         }, function() {
           Meteor.setTimeout(function(){
@@ -281,6 +322,7 @@ Template.build.rendered = function() {
             gameUpdatedDep.changed();
           }, 250);
         });
+        */
       }
       updateRun = true;
 

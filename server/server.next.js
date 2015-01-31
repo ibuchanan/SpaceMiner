@@ -1,7 +1,7 @@
 var gm = Meteor.npmRequire('gm');
 
 function createLevelRecord(levelDto, callback) {
-  var base = '/home/action/Towerman/public/images/';
+  var base = '/home/action/SpaceMiner/public/images/';
   var root = base + 'spriteParts/';
   var sprite = _.reduce(_.rest(levelDto.selections, 1), function(sprite, selection) { 
     return sprite.append(root + selection);
@@ -98,10 +98,10 @@ function cleanDbAndCreateDefaultRecords() {
       shot: 6
     };
     var glob = Meteor.npmRequire("glob");      
-    glob("/home/action/Towerman/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
+    glob("/home/action/SpaceMiner/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
       var spriteParts = _.chain(files)
       .map((file)=> { 
-        return file.replace("/home/action/Towerman/public/images/spriteParts/", "");
+        return file.replace("/home/action/SpaceMiner/public/images/spriteParts/", "");
       })
       .groupBy((file)=> {
         return file.substring(0, file.indexOf("/"));          
@@ -163,14 +163,37 @@ Meteor.startup(function() {
         }
       });      
     });
+    
+    var Future = Npm.require('fibers/future');
   
     Meteor.methods({
       'levelSave': (id, levelDto)=> {
         createLevelRecord(levelDto, (levelDtoPoweredUp)=> {
             Levels.upsert(id, {$set: levelDtoPoweredUp});          
         });
+      },
+      'levelUpdate': (id, props, buildStepUpdateCounts)=> {
+        var future = new Future();    
+        createLevelRecord(props, (propsPoweredUp)=> {
+          Levels.update(id, { 
+            $set: propsPoweredUp,
+            $inc : buildStepUpdateCounts
+          }, function() {
+            future.return(true);
+          });
+        });        
+        return future.wait();
       }
     });
+  
+    var path = Npm.require('path');
+    var base = path.resolve('.');
+    console.log(base);
+  
+    ServiceConfiguration.configurations.upsert(
+      { service: "meetup" },
+      { $set: { clientId: "frhtguo3lk9ngsr8kcm6hp7kai", secret: "pn37mhc8q0jmnb5423meaojd3g" } }
+    );
   
     cleanDbAndCreateDefaultRecords();
     configureCORS();

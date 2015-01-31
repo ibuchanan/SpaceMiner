@@ -176,7 +176,7 @@ return obj;
           <div id="header"></div>
           <div id="worldContainer" class='worldMap'></div>
           {{#with gameUpdated}}
-            {{> game level=level buttons=buttons}}
+            {{> game level=level buttons=buttons enableSound=false}}
             <br />
           {{/with}}
           <button class="btn btn-danger" id="test"><span class='fa-bug fa'></span> Test</button>

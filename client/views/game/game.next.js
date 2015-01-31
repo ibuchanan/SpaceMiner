@@ -36,6 +36,7 @@ var buttons = ['levelsShow', 'gamePause', 'gamePlay', 'gameReset', 'customize', 
 
 function argify(args) {
   if (_.isString(args)) args = { level : args };
+  if (!args.hasOwnProperty('enableSound')) args.enableSound = true;
   return args;
 }
 var levelId = 'starter';
@@ -65,7 +66,7 @@ Template.game.rendered = function() {
       q.stageScene(args.level);
       gameFocus();      
     });
-  });
+  }, { enableSound: args.enableSound } );
 };
 
 Template.game.helpers({
@@ -241,11 +242,12 @@ function parseWorldDefinitionFromScript(worldScript, defaults) {
       throw "parseWorldDefinitionFromScript could not parse function from code: " + funcScript;
     }
   } catch (ex) {
-    console.log('parseWorldDefinitionFromScript:');
     console.log(ex);
   }
   return {};
 }
+// TODO remove this hack
+window.ParseWorldDefinitionFromScript = parseWorldDefinitionFromScript;
 
 function __merge__(obj1, obj2) {
   for (var p in obj2) {
@@ -333,21 +335,42 @@ function makeFunc(rawCode) {
   return null;
 }
 
-function configureQuintus(callback) {  
+function Qloaded() {
+  return window.Q !== undefined;
+}
+
+function configureQuintus(callback, options) {  
+  /*
+  if (Qloaded()) {
+    callback(window.Q);
+    return window.Q;
+  }
+  */
+  
+  if (!options) options = { enableSound: true };
+  
   function configureCanvas(q) {
-    q.setup('game', {
+    var setup = q.setup('game', {
       width: 640, height: 448, scaleToFit: true
-    })
-    .enableSound()
-    .controls(true);
+    });
+    if (options.enableSound) setup.enableSound();
+    setup.controls(true);
     q.input.keyboardControls();
     q.input.joypadControls();
   }
   
+  var modules = ["Sprites", "Scenes", "Input", "2D", "UI"];
+  var audioSupported = [];
+  if (options.enableSound) {
+    modules.push("Audio");
+    audioSupported.push("wav");
+  }
+  var includes = modules.join(", ");
+  
   Q = window.Q = Quintus({
     development: true,
-    audioSupported: ['wav'] })
-  .include("Audio, Sprites, Scenes, Input, 2D, UI");
+    audioSupported: audioSupported });
+  Q.include(includes);
   configureCanvas(Q);
   
   QuintusOverrides.override(Q);
@@ -899,6 +922,7 @@ var worldBuild = {
     /* var levelId = Router.current().params.levelId;
     if (levelId) levelPlay(levelId);  
     */
+    console.log("Calling back with Q after loading assets!")
     callback(Q);
   });
   

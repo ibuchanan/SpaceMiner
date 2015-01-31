@@ -111,7 +111,9 @@ ccgccccccccccccgcc`);
     return this.paused;
   }
   soundPlay(soundName) {
-    this.q.audio.play(soundName);
+    if (this.q.options.audioSupported.length > 0) {
+      this.q.audio.play(soundName);
+    }
   }
   onCoinCollision() {
     // todo HACK

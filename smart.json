@@ -5,6 +5,7 @@
     "bootstrap-3": {},
     "accounts-ui-bootstrap-3": {},
     "ace-embed": {},
-    "animated-each": {}
+    "animated-each": {},
+    "accounts-entry": {}
   }
 }
