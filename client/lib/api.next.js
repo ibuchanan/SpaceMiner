@@ -32,18 +32,17 @@ ctcttcttttttcttctc
 ccgccccccpcccccgcc
 ctcttctcttctcttctc
 ccgccccccccccccgcc`);
-
     return {
       worldName : "Nemesis",
       explorerName : "Ninja Coder",
       numberOfLives : 1,
       enableEnemyRespawn : true,
       sprites: {
-        tile: "fiery.png",
+        tile: "plasma.png",
         enemy: "brainBlue.png",
-        coin: "gold.png",
-        gem: "emerald.png",
-        player: "light.png"
+        coin: "blue.png",
+        gem: "pinkGem.png",
+        player: "dark.png"
       },
       world: worldSprites,
       worldRows: [],

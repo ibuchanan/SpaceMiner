@@ -127,11 +127,11 @@ Template.build.rendered = function() {
       numberOfLives : 3,
       enableEnemyRespawn : true,
       sprites: {
-        tile: "fiery.png",
+        tile: "plasma.png",
         enemy: "brainBlue.png",
-        coin: "gold.png",
-        gem: "emerald.png",
-        player: "light.png"
+        coin: "blue.png",
+        gem: "pinkGem.png",
+        player: "dark.png"
       },
       world: [
         ['e', 'g', 'c', 'c', 'c', 'e', 'g', 'c', 'c', 'c', 'e', 'g', 'c', 'c', 'c', 'c', 'c', 'c', 'g'],
