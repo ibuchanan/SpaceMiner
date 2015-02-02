@@ -9,7 +9,6 @@ Template.build.helpers({
     return gameUpdated;
   },
   level: function() {
-    console.log(level.get());
     return level.get(); 
   },
   buttons: function() {
@@ -17,8 +16,8 @@ Template.build.helpers({
   }
 })
 
-function nickName() {
-  return Meteor.user().profile.nickName;
+function userName() {
+  return Meteor.user().profile.name;
 }
 
 /*
@@ -102,7 +101,6 @@ function buildSteps() {
 Template.build.rendered = function() { 
   
   function finishWork() {
-  
     Handlebars.registerHelper('toString', function returnToString(x){
       return ( x === void 0 ) ? 'undefined' : x.toString();
     });
@@ -122,9 +120,9 @@ Template.build.rendered = function() {
     }
 
     var defaults = {
-      worldName : "Nemesis",
+      worldName : "Space Miner",
       explorerName : "Ninja Coder",
-      numberOfLives : 3,
+      numberOfLives : 1,
       enableEnemyRespawn : true,
       sprites: {
         tile: "plasma.png",
@@ -225,7 +223,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When in test, players can give feedback about your world, but they cannot rank it.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'test', published: true, lastUpdated: new Date(), updatedBy: nickName() }
+          $set: { phase: 'test', published: true, lastUpdated: new Date(), updatedBy: userName() }
         }, function(err, count) {
           if (!err) {
             controls.alert('Your world is available for testing by everyone! You can keep working...');
@@ -241,7 +239,7 @@ Template.build.rendered = function() {
       controls.confirm('Are you sure? When released, players can rank and comment on your world.', function(result) {
         if (!result) return;
         Levels.update({_id:level.get()}, { 
-          $set: { phase: 'released', published: true, lastUpdated: new Date(), updatedBy: nickName() },
+          $set: { phase: 'released', published: true, lastUpdated: new Date(), updatedBy: userName() },
           $inc: { version : 1 }
         }, function(err, count) {
           if (!err) {
@@ -257,8 +255,7 @@ Template.build.rendered = function() {
 
     function parseWorldDefinitionFromScript(script) {
       var defaults = Game.getDefaults();      
-      var obj = window.ParseWorldDefinitionFromScript(script, defaults);      
-      console.log(obj);
+      var obj = window.ParseWorldDefinitionFromScript(script, defaults);    
       return obj;
     }
 
@@ -270,20 +267,12 @@ Template.build.rendered = function() {
       
       
       if (updateRun && updateLevel) {  
-        /* OLD code TODO remove
-        var funcText = '(function(){\n' + userScript + '\n' + configureTemplate + '\n})';
-        var func = eval(funcText);
-        var obj = func();
-        */
-        var obj = parseWorldDefinitionFromScript(userScript);
-        
+        var obj = parseWorldDefinitionFromScript(userScript);        
         var worldName = obj.worldName;        
-        
         gameUpdated = false;
         gameUpdatedDep.changed();
         var buildStepUpdateCounts = {};
         buildStepUpdateCounts['buildStepUpdateCounts.' + String(step)] = 1;
-        console.log(buildStepUpdateCounts);
         
         // Get the updated tile and sprites
         var selections = [
@@ -302,27 +291,17 @@ Template.build.rendered = function() {
           tile: 'tile/' + obj.sprites.tile,
           buildStepCurrent: step, 
           lastUpdated: new Date(), 
-          updatedBy: nickName()
+          updatedBy: userName()
         };
         
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
           Meteor.setTimeout(function(){
             gameUpdated = true;
             gameUpdatedDep.changed();
+            // TODO: this is weird. It's not entirely helping prevent the phantom player and double enemies spawning
+            game.reset();
           }, 250);          
-        });
-        
-        /*
-        Levels.update({_id:level.get()}, { 
-          $set: props,
-          $inc : buildStepUpdateCounts
-        }, function() {
-          Meteor.setTimeout(function(){
-            gameUpdated = true;
-            gameUpdatedDep.changed();
-          }, 250);
-        });
-        */
+        });        
       }
       updateRun = true;
 
@@ -389,16 +368,28 @@ Template.build.rendered = function() {
   
   Levels.update({_id: 'starter'}, {$set: {lastViewed: new Date()}}, function(err, count) {
     var levelDoc = Router.current().data();
-    console.log(levelDoc);
-    delete levelDoc._id;
-    levelDoc.published = false;
-    levelDoc.phase = 'build';
-    levelDoc.updatedBy = nickName();
-    Levels.insert(levelDoc, function(err, buildLevelId) {
-      level.set(buildLevelId);
-      gameUpdated = true;
-      gameUpdatedDep.changed();
-      finishWork();
-    });
+    if (levelDoc._id === 'starter') {
+      delete levelDoc._id;
+      levelDoc.published = false;
+      levelDoc.phase = 'build';
+      levelDoc.updatedBy = userName();
+      levelDoc.userId = Meteor.userId();
+      Levels.insert(levelDoc, function(err, buildLevelId) {
+        level.set(buildLevelId);
+        gameUpdated = true;
+        gameUpdatedDep.changed();
+        finishWork();
+      });
+    } else {
+      Levels.update({_id: Router.current().params._id}, {$set: {lastViewed: new Date()}}, function(err, count) {
+        var levelDoc = Router.current().data();      
+        level.set(levelDoc._id);
+        gameUpdated = true;
+        gameUpdatedDep.changed();
+        finishWork();        
+        // TODO remove hack
+        ace.edit("codeInput").getSession().setValue(levelDoc.script);        
+      });
+    }
   });  
 };

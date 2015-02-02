@@ -111,6 +111,10 @@ Template.level.events({
       signals.gameOpened.dispatch();
       //Session.set('gameVisible', true);      
     }, 1000);
+  },
+  'click button.levelEdit': function(evt, template) {
+    Session.set('levelId', null);
+    window.location = '/build?id=' + this._id;    
   }
 });
 
@@ -126,17 +130,11 @@ Template.level.helpers({
   randomBackgroundColor: function() {
     return randomElement(bsBackgrounds);
   },
-  phase: function() {
-    if (this.phase  && this.phase === 'test') {
-      return '&nbsp;<span class="label label-warning">Help test</span>';
-    }    
-    return '';
-  },
   version: function() {
-    if (this.phase && this.phase !== 'test') {
+    if (this.phase && this.phase !== 'build') {
       return '&nbsp;<span style="font-size:75%;color:eggshell;">v' + this.version + '</span>';
     }
-    else if (this.phase && this.phase === 'test') return ''
+    else if (this.phase && this.phase === 'build') return ''
     return '&nbsp;<span style="font-size:75%;color:eggshell;">v1</span>';
   },
   preview: function() {
@@ -150,5 +148,11 @@ Template.level.helpers({
   explorer: function() {
     if (this.updatedBy) return this.updatedBy;
     return '';
+  },
+  edit: function() {
+    if (this.userId && this.userId === Meteor.userId())  {
+      return "<div><button class='levelEdit btn btn-xs btn-danger'>Edit</button></div>";
+    }
+    return "";
   }
 });

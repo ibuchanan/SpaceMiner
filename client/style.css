@@ -60,6 +60,7 @@ h2{
 .levelPlay {
   margin: 5px;
   padding: 10px;    
+  white-space: normal;
 }
 
 #gamePanel {

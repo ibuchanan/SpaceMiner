@@ -6,6 +6,7 @@ var boardFromText = function(board) {
 
 this.Game = class {  
   constructor(q, world) {
+    this.timeOuts = [];
     this.q = q;
     this.levelId = "";
     this.world = world;
@@ -17,6 +18,14 @@ this.Game = class {
       this.world = Game.getDefaults();
     }
     this.paused = false;
+  }
+  setTimeout(delay, func) {
+    this.timeOuts.push(setTimeout(func, delay));
+  }
+  cancelTimeouts() {
+    for(var i = 0; i < this.timeOuts.length; i++) {
+      clearTimeout(this.timeOuts[i]);
+    }
   }
   static getDefaults() {
     var worldSprites = boardFromText(
@@ -33,7 +42,7 @@ ccgccccccpcccccgcc
 ctcttctcttctcttctc
 ccgccccccccccccgcc`);
     return {
-      worldName : "Nemesis",
+      worldName : "Space Miner",
       explorerName : "Ninja Coder",
       numberOfLives : 1,
       enableEnemyRespawn : true,
@@ -42,7 +51,8 @@ ccgccccccccccccgcc`);
         enemy: "brainBlue.png",
         coin: "blue.png",
         gem: "pinkGem.png",
-        player: "dark.png"
+        player: "dark.png",
+        shot: "basicShot.png"
       },
       world: worldSprites,
       worldRows: [],
@@ -96,8 +106,9 @@ ccgccccccccccccgcc`);
     this.q.stageScene(this.levelId);
   }
   resetState() {
+    this.cancelTimeouts();
     this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives() });
-  }
+  }  
   pause() {
     this.q.pauseGame();
     this.paused = true;
@@ -128,6 +139,7 @@ ccgccccccccccccgcc`);
     this.livesDec();
     hitPlayer.destroy();
     if (this.livesRemaining()) {
+      console.log("Resurrecting player:");
       var resurrectedPlayer = new this.q.Player(this.q.tilePos(10,7));
       this.q.stage().insert(resurrectedPlayer);
     } else {

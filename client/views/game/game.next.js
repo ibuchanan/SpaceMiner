@@ -2,6 +2,8 @@
 this.OnWon = function() {  
 }
 
+if (this.game) this.game.reset();
+
 this.game = new Game();
 this.player = new Player();
 
@@ -202,7 +204,11 @@ function levelMapCreate(q, levelMapId) {
           if (tile === 't') row[x] = 1;
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
-            this.stage.insert(new q[className](q.tilePos(x,y)));
+            var sprite = new q[className](q.tilePos(x,y));
+            if (className === 'Player') {
+              window.playerCurrent = sprite;
+            }
+            this.stage.insert(sprite);
             if (tile === 'E' || tile === 'P') {
               this.stage.insert(new q.Dot(q.tilePos(x,y)));
             }
@@ -338,6 +344,54 @@ function makeFunc(rawCode) {
 function Qloaded() {
   return window.Q !== undefined;
 }
+
+function move(cells, direction, next) {
+  var distance = cells * 32;
+  var destination = 0;
+
+  if (direction === 'left' || direction === 'up') {
+    distance = -distance;
+  }
+  if (direction === 'left' || direction === 'right') {
+    destination = playerCurrent.p.x + distance;
+  } else {
+    destination = playerCurrent.p.y + distance;
+  }
+  playerCurrent.p.travel = { direction: direction, destination: destination, next: next };
+  playerCurrent.p.direction = direction;
+  playerCurrent.p.speed = 200; 
+}
+window.move = move;
+
+function path() {
+ var args = arguments;
+ function runStep(index) {
+   var nextIndex = index+1;
+   if (index < args.length) {
+    var step = args[index].split(' ');
+    var cells = parseInt(step[0]);
+    move(cells, step[1], function() {
+     runStep(nextIndex);
+    });
+   }
+ }
+ runStep(0); 
+}
+window.path = path;
+
+/*
+
+path(
+'4 left', 
+'2 up',
+'1 right',
+'5 up',
+'4 left',
+'13 right'
+);
+
+*/
+
 
 function configureQuintus(callback, options) {  
   /*
@@ -658,6 +712,54 @@ var worldBuild = {
         case "up":   p.vy = -p.speed; break;
         case "down": p.vy = p.speed; break;
       }
+      if (p.travel) {
+        var dest = p.travel.destination;
+        var next = p.travel.next;
+        if (p.travel.direction === 'left') {          
+          if (p.x <= (dest+16)) {
+            p.speed = 0;
+            p.x = dest;
+            setTimeout(function() {
+              p.x = dest;
+              if (next) next();
+            }, 125);
+            delete p.travel;            
+          }
+        }
+        if (p.travel && p.travel.direction === 'right') {
+          if (p.x >= (dest-16)) {
+            p.speed = 0;
+            p.x = dest;
+            setTimeout(function() {
+              p.x = dest;
+              if (next) next();              
+            }, 125);
+            delete p.travel;
+          }
+        }
+        if (p.travel && p.travel.direction === 'up') {
+          if (p.y <= (dest+16)) {
+            p.speed = 0;
+            p.y = dest;
+            setTimeout(function() {
+              p.y = dest;
+              if (next) next();              
+            }, 125); 
+            delete p.travel;
+          }
+        }
+        if (p.travel && p.travel.direction === 'down') {
+          if (p.y >= (dest-16)) {
+            p.speed = 0;
+            p.y = dest;
+            setTimeout(function() {
+              p.y = dest;
+              if (next) next();              
+            }, 125);            
+            delete p.travel;
+          }
+        }        
+      }
     }
   });
 
@@ -763,9 +865,9 @@ var worldBuild = {
         this.p.shots.push(shot);
         entity.p.canFire = false;
         Q.state.dec("ammo", 1) ;
-        setTimeout(function(){
+        game.setTimeout(1000, function(){
           entity.p.canFire = true; 
-        },1000);
+        });
       }
     } 
   });
@@ -821,8 +923,8 @@ var worldBuild = {
       game.onGemCollision();      
       // If there are no more dots left, just restart the game
       // TODO move to next level from page
-      if(this.stage.dotCount == 0) {
-        Q.stageScene("level2");
+      if(this.stage.dotCount === 0) {
+        onLevelComplete();
       }
     }  
   });
@@ -899,12 +1001,12 @@ var worldBuild = {
       function die(self) {
         self.destroy();
         if (game.enableEnemyRespawn()) {
-          setTimeout(function(){
+          game.setTimeout(game.enemy().respawnDelay, function(){
             var newEnemy = new Q.Enemy(Q.tilePos(10,7));
             var speedUp = self.p.speed;
             newEnemy.p.speed = speedUp + game.enemy().increaseSpeedBy;
             Q.stage().insert(newEnemy);
-          },game.enemy().respawnDelay);
+          });
         }
       }      
       if(col.obj.isA("Player")) {

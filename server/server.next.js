@@ -39,6 +39,8 @@ tttttttttttttttttttt`;
     userId: 'admin',
     board,
     name: 'Space Miner',
+    numberOfLives : 1,
+    enableEnemyRespawn : true,    
     onEnemyHit: 'game.reset();',
     onGemHit: "player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
     onCoinHit: "player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
@@ -193,6 +195,11 @@ Meteor.startup(function() {
     ServiceConfiguration.configurations.upsert(
       { service: "meetup" },
       { $set: { clientId: "frhtguo3lk9ngsr8kcm6hp7kai", secret: "pn37mhc8q0jmnb5423meaojd3g" } }
+    );
+  
+    ServiceConfiguration.configurations.upsert(
+      { service: "github" },
+      { $set: { clientId: "64c121033426202d78cc", secret: "c15a3093da1e2bc973ee63544f83172d1a490598" } }
     );
   
     cleanDbAndCreateDefaultRecords();
