@@ -717,6 +717,8 @@ var worldBuild = {
         var next = p.travel.next;
         if (p.travel.direction === 'left') {          
           if (p.x <= (dest+16)) {
+            console.log("We finished:");
+            console.log(p.x);
             p.speed = 0;
             p.x = dest;
             setTimeout(function() {
@@ -871,6 +873,19 @@ var worldBuild = {
       }
     } 
   });
+  
+
+  function centersWithinRange(obj1, obj2, range) {
+    var obj1X = obj1.p.x;
+    var obj1Y = obj1.p.y;
+    var obj2X = obj2.p.x;
+    var obj2Y = obj2.p.y;
+    var distX = Math.abs(obj1X - obj2X);
+    var distY = Math.abs(obj1Y - obj2Y);
+    return distX < range && distY  < range;
+  } 
+  var COL_RANGE = 16;
+  
   // Create the Dot sprite
   Q.Sprite.extend("Dot", {
     init: function(p) {
@@ -889,17 +904,18 @@ var worldBuild = {
 
     // When a dot is hit..
     sensor: function() {
-      // Destroy it and keep track of how many dots are left
-      this.destroy();
-      this.stage.dotCount--;
-      game.onCoinCollision();
-      // If there are no more dots left, just restart the game
-      // TODO move to next level from page
-      if(this.stage.dotCount === 0) {
-        onLevelComplete();
+      var col = centersWithinRange(this, arguments[0], COL_RANGE);
+      if (col) {        
+        this.destroy();
+        this.stage.dotCount--;
+        game.onCoinCollision();
+        // If there are no more dots left, just restart the game
+        // TODO move to next level from page
+        if(this.stage.dotCount === 0) {
+          onLevelComplete();
+        }
       }
     },
-
     // When a dot is inserted, use it's parent (the stage)
     // to keep track of the total number of dots on the stage
     inserted: function() {
@@ -917,14 +933,14 @@ var worldBuild = {
       }));
     },
     sensor: function() {
-      // Destroy it and keep track of how many dots are left
-      this.destroy();
-      this.stage.dotCount--;
-      game.onGemCollision();      
-      // If there are no more dots left, just restart the game
-      // TODO move to next level from page
-      if(this.stage.dotCount === 0) {
-        onLevelComplete();
+      var col = centersWithinRange(this, arguments[0], COL_RANGE);
+      if (col) {
+        this.destroy();
+        this.stage.dotCount--;
+        game.onGemCollision();      
+        if(this.stage.dotCount === 0) {
+          onLevelComplete();
+        }
       }
     }  
   });
