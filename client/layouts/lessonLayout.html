@@ -1,5 +1,5 @@
 <template name='lessonLayout'>
-  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
   <style type='text/css'>
 body, html {
   margin: 0;
@@ -31,19 +31,13 @@ iframe {
 }
 
 .left {
-  top: 50px;
   height:100%;
 }
 
 .right {
-  top: 50px;
   height:100%;
 }    
     
-.challenge {
-  display: none;
-}    
-
 .stepCode {
   background-color: #333;
   color: #f7f7f7;
@@ -111,7 +105,7 @@ iframe {
 
 .popquiz {
   padding: 4px;
-  background-color: #eee;
+  background-color: #333;
   border-color: #ddd;
   border-width: 1px;
   border-radius: 4px 4px 0 0;
@@ -125,29 +119,6 @@ iframe {
   letter-spacing: 1px;
 }   
   </style>
-  <div class="navbar navbar-default" role="navigation">
-      <div class="navbar-header">
-          <a class="navbar-brand" href="/"><span class='fa fa-fighter-jet'></span> Space Miner!</a>
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-          </button>
-      </div>
-      <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="/home">Play <span class='fa fa-gamepad'></span></a></li>
-            <li><a href="/members">Members <span class='fa fa-users'></span></a></li>        
-            {{#if currentUser}}            
-            <li><a href="/build">Build World <span class='fa fa-globe'></span></a></li>
-            {{/if}}
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-              {{> loginButtons }} <!-- here -->
-          </ul>
-      </div>
-  </div>  
   <div>
   {{> yield}}
   </div>

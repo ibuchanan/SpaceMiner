@@ -1,16 +1,28 @@
+var IMAGES_BASE = '';
+if (process.env.IMAGES_BASE) {
+  IMAGES_BASE = process.env.IMAGES_BASE;
+  console.log("IMAGES_BASE manually set to:");
+  console.log(IMAGES_BASE);
+} else {
+  var path = Npm.require('path');
+  var root = path.resolve('.');
+  IMAGES_BASE = path.resolve('../web.browser/app/images/') + '/';
+  console.log("IMAGES_BASE auto-resolved to:");
+  console.log(IMAGES_BASE);
+}
+
 var gm = Meteor.npmRequire('gm');
 
-function createLevelRecord(levelDto, callback) {
-  var base = '/home/action/SpaceMiner/public/images/';
-  var root = base + 'spriteParts/';
+function createLevelRecord(levelDto, callback) {  
+  var root = IMAGES_BASE + 'spriteParts/';
   var sprite = _.reduce(_.rest(levelDto.selections, 1), function(sprite, selection) { 
     return sprite.append(root + selection);
   }, gm(root + levelDto.selections[0]).options({imageMagick:true}));
 
   sprite.toBuffer('PNG', Meteor.bindEnvironment(function (err, buffer) {
     levelDto.spritesData = buffer.toString('base64');
-    var tiles = gm(base + 'DoNotEraseTileLeft.png').options({imageMagick:true})
-    .append(root + levelDto.tile, base + 'DoNotEraseTileRight.png', true);
+    var tiles = gm(IMAGES_BASE + 'DoNotEraseTileLeft.png').options({imageMagick:true})
+    .append(root + levelDto.tile, IMAGES_BASE + 'DoNotEraseTileRight.png', true);
     tiles.toBuffer('PNG', Meteor.bindEnvironment(function(err2, buffer2) {
       levelDto.tilesData = buffer2.toString('base64');
       callback(levelDto);
@@ -79,6 +91,14 @@ function createLessonsDefault() {
 }
 
 function cleanDbAndCreateDefaultRecords() {
+  if(Surveys.find().count() === 0) {
+    Surveys.insert({ 
+      _id : 'memory', 
+      question : 'What kind of data and information do you think the code needs to keep in memory in order for the game to work?',
+      open: true
+    });
+  }
+  
   Levels.remove({phase: { $in: ['inception', 'build'] } });
   if (Levels.find({_id:'starter'}).count() === 0) {
     createLevelDefault();
@@ -99,11 +119,15 @@ function cleanDbAndCreateDefaultRecords() {
       tile: 5,
       shot: 6
     };
-    var glob = Meteor.npmRequire("glob");      
-    glob("/home/action/SpaceMiner/public/images/spriteParts/**/*.png", Meteor.bindEnvironment((er, files)=> {
+    var glob = Meteor.npmRequire("glob");     
+    var imageGlobPath = IMAGES_BASE + "spriteParts/**/*.png";
+    
+    glob(imageGlobPath, Meteor.bindEnvironment((er, files)=> {
+      console.log("Sprite part images found:");
+      console.log(files);
       var spriteParts = _.chain(files)
       .map((file)=> { 
-        return file.replace("/home/action/SpaceMiner/public/images/spriteParts/", "");
+        return file.replace(IMAGES_BASE + "spriteParts/", "");
       })
       .groupBy((file)=> {
         return file.substring(0, file.indexOf("/"));          
@@ -186,11 +210,7 @@ Meteor.startup(function() {
         });        
         return future.wait();
       }
-    });
-  
-    var path = Npm.require('path');
-    var base = path.resolve('.');
-    console.log(base);
+    });  
   
     ServiceConfiguration.configurations.upsert(
       { service: "meetup" },
@@ -199,7 +219,7 @@ Meteor.startup(function() {
   
     ServiceConfiguration.configurations.upsert(
       { service: "github" },
-      { $set: { clientId: "64c121033426202d78cc", secret: "c15a3093da1e2bc973ee63544f83172d1a490598" } }
+      { $set: { clientId: "e0dcb6c6b3c3c2c21f4e", secret: "45617166c064898848a38c6063a072350ffe4191" } }
     );
   
     cleanDbAndCreateDefaultRecords();

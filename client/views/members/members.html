@@ -1,0 +1,17 @@
+<template name="members">
+  <div class='container-fluid'>
+    <div class='row'>      
+      {{#each members}}
+      <button class="col-md-2 btn btn-lg btn-{{randomBackgroundColor}}">
+      <h1><span class='label label-{{randomBackgroundColor}}'><span class='fa fa-{{randomIcon}}'></span>
+      {{#if profile.nickName}}
+        {{profile.nickName}}
+      {{else}}  
+        {{profile.name}}
+      {{/if}}
+      </span></h1>
+      </button>
+      {{/each}}
+    </div>
+  </div>  
+</template>
