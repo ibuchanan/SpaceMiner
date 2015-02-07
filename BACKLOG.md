@@ -13,8 +13,9 @@ SpaceMiner takes beginning programmers on an intergalactic journey
 
 * `World` -- Members create a World for other Members to explore to collect Gems and Coins (maybe these should actually be minerals or something instead of coins?) for points while fighting off enemies. There will be more to the storyline in later drafts :)
 * `Creator` -- Refers to the Member who has created a given World. Members can create as many Worlds as they want.
+* `Explorer` -- Refers to a User who explores Worlds invented by Creators
  
-# Stories
+# Story Map
 
 We are high-tech in our agile tools here at SpaceMiner in how we track our stories. We use that fancy tracking tool called a Markdown document.
 
@@ -74,7 +75,33 @@ TODO
 
 This is where Members learn how to program in order to create their worlds
 
-TODO
+* As a Visitor I can view a list of Training Missions (Lessons) which will help me learn how to create a World by learning JavaScript and the SpaceMiner framework
+	* S I can see how many Trainees have completed each Training Mission
+		* S Based on Trainee answers to tests within a Training Mission, I can see the:
+			* AT Mean score
+			* AT Median score
+			* AT STD DEV of scores
+	* As a Member:
+		* For each Training Mission I have already attempted, I can see a Completion Badge that indicates how much of the Mission I have already completed
+			* AT If I have completed 50%, then the badge should be 50% solid and 50% silhouetted.
+			* AT I can see the percentage in text form as well as in the badge form
+		 
+* As a Visitor I can Open a Training Mission
+	* AT When I open a Mission:
+		* AT As a Visitor: I begin on the first Step of the Mission
+		* AT As a Member: I begin on the Step that I left off on before
+			* AT If I have already completed the mission, then I see my Mission Summary for the Training Mission
+				* AT And, I can direcrly skip to view a Mission Step 
+					* TODO this needs more clarity
+		* AT When I'm on a Mission Step I can see that I'm on Step N/M, such as 1/5
+		* AT If the Mission Step has questions to answer, then only after I answer the questions can I advance to the next Mission Step
+		* AT For Mission Steps after Step 1, I can:
+			* AT Return to First Step
+			* AT Return to Previous Step
+		* AT When I'm on a Step that I have already completed, then:
+			* AT I can choose to Reveal my previous Question Answers
+			* AT I can choose to Rest my previous Question Answers
+
 
 # Build (Maybe this shoudl be Teraform?)
 
