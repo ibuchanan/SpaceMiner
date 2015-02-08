@@ -4,6 +4,12 @@ var gameUpdated = false;
 var gameUpdatedDep = new Deps.Dependency;
 
 Template.build.helpers({
+  mission: function() {
+    return trainingMission;
+  },
+  currentStep: function() {
+    return trainingMission.steps[0];
+  },
   gameUpdated: function() {
     gameUpdatedDep.depend();
     return gameUpdated;
@@ -349,7 +355,7 @@ Template.build.rendered = function() {
       $('#sprites').html(output);
     }  
 
-    $.get('http://supersonic-box-14-130414.use1.nitrousbox.com/collectionapi/spriteParts', function(data) {
+    $.get('/collectionapi/spriteParts', function(data) {
       data = _.reject(data, function(item) { return item.part === 'Shots'});
       data.forEach(function(item) {
         if (item.part === 'Treasure') item.part = 'Gem';
