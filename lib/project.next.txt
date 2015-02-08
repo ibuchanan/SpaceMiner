@@ -18,7 +18,7 @@ var projectSchema = {
         "title": "Step",
         "required": [
           "title",
-          "sections"
+          "instructions"
         ],
         "properties": {
           "title": {
@@ -39,7 +39,6 @@ var projectSchema = {
             "type": "array",
             "title": "Sections",
             "items": {
-              "title": "Section",
               "oneOf": [
                 {
                   "type": "object",
@@ -49,50 +48,32 @@ var projectSchema = {
                       "type": "string",
                       "format": "html",
                       "title": "Text"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "paragraph"
-                      ]
                     }
                   }
                 },
                 {
-                  "type": "object",
+                  "type": "array",
                   "title": "Instructions",
-                  "properties": {
-                    "instructions": {
-                      "type": "array",
-                      "uniqueItems": true,
-                      "title": "Instructions",
-                      "items": {
-                        "type": "object",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "title": "Step",
+                    "properties": {
+                      "step": {
+                        "type": "string",
+                        "format": "html",
                         "title": "Step",
-                        "properties": {
-                          "step": {
-                            "type": "string",
-                            "format": "html",
-                            "title": "Step",
-                            "minLength": 2,
-                            "maxLength": 300
-                          },
-                          "tips": {
-                            "type": "string",
-                            "format": "html",
-                            "title": "Tips",
-                            "description": "Specify any tips for this step that the student can reveal for extra help in solving the step.",
-                            "minLength": 2,
-                            "maxLength": 300
-                          }
-                        }
+                        "minLength": 2,
+                        "maxLength": 300
+                      },
+                      "tips": {
+                        "type": "string",
+                        "format": "html",
+                        "title": "Tips",
+                        "description": "Specify any tips for this step that the student can reveal for extra help in solving the step.",
+                        "minLength": 2,
+                        "maxLength": 300
                       }
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "instructions"
-                      ]
                     }
                   }
                 },
@@ -104,12 +85,6 @@ var projectSchema = {
                       "type": "string",
                       "format": "javascript",
                       "title": "Code example"
-                    },
-                    "type": {
-                      "type": "string",
-                      "enum": [
-                        "code"
-                      ]
                     }
                   }
                 },
@@ -126,7 +101,7 @@ var projectSchema = {
                         "format": "html",
                         "title": "Description",
                         "minLength": 2,
-                        "maxLength": 300
+                        "maxLength": 1000
                       },
                       "explanation": {
                         "type": "string",
@@ -134,7 +109,7 @@ var projectSchema = {
                         "title": "Explanation",
                         "description": "Specify extra explanation for this explanation that the student can reveal for deeper understanding of this explanation.",
                         "minLength": 2,
-                        "maxLength": 300
+                        "maxLength": 1000
                       }
                     }
                   }
@@ -148,6 +123,8 @@ var projectSchema = {
   }
 };
 
+
+// NOTE: this is from another file, copied for reference only
 (function() {  
   function expect(val, error) {
     if (error) {

@@ -3,12 +3,15 @@ var level = new ReactiveVar('starter');
 var gameUpdated = false;
 var gameUpdatedDep = new Deps.Dependency;
 
+var currentStepIndex = 0;
+var currentStep = new ReactiveVar(trainingMission.steps[currentStepIndex]);
+
 Template.build.helpers({
   mission: function() {
     return trainingMission;
   },
   currentStep: function() {
-    return trainingMission.steps[0];
+    return currentStep.get();
   },
   gameUpdated: function() {
     gameUpdatedDep.depend();
@@ -20,7 +23,17 @@ Template.build.helpers({
   buttons: function() {
     return ['gamePause', 'gamePlay', 'gameReset'];
   }
-})
+});
+
+Template.build.events({
+  'click .stepNext': function() {
+    currentStepIndex++;
+    console.log(currentStepIndex);
+    var nextStep = trainingMission.steps[currentStepIndex];
+    console.log(nextStep);
+    currentStep.set(nextStep);
+  }
+});
 
 function userName() {
   return Meteor.user().profile.name;
