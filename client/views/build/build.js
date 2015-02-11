@@ -13,6 +13,10 @@ Template.build.helpers({
   currentStep: function() {
     return currentStep.get();
   },
+  currentStepIndex: function() {
+    currentStep.get();
+    return currentStepIndex + 1;
+  },
   gameUpdated: function() {
     gameUpdatedDep.depend();
     return gameUpdated;
@@ -62,21 +66,41 @@ Template.build.helpers({
   }
 });
 
+function userName() {
+  return Meteor.user().profile.name;
+}
+
+function missionStepViewed(stepIndex){
+  var profile = Meteor.user().profile;
+  var user = profile.nickName || profile.name;
+  
+  MissionStepViews.insert({ 
+    userId : Meteor.user()._id,
+    missionId : trainingMission._id,
+    userName : user,    
+    stepIndex : stepIndex,
+    date: new Date()
+  });  
+}
+
 Template.build.events({
   'click .stepNext': function() {
     if (currentStepIndex < trainingMission.steps.length - 1) currentStepIndex++;
+    missionStepViewed(currentStepIndex);
     var step = trainingMission.steps[currentStepIndex];
     currentStep.set(step);
   },
   'click .stepPrev': function() {
     if (currentStepIndex > 0) currentStepIndex--;
+    missionStepViewed(currentStepIndex);
     var step = trainingMission.steps[currentStepIndex];
     currentStep.set(step);
   },
   'click .stepJump': function() {
     var stepIndex = this - 1;
-    if (stepIndex >= 0 && stepIndex < trainingMission.steps.length && stepIndex !== currentStepIndex) {
+    if (stepIndex >= 0 && stepIndex < trainingMission.steps.length && stepIndex !== currentStepIndex) {      
       currentStepIndex = stepIndex;
+      missionStepViewed(currentStepIndex);
       var step = trainingMission.steps[stepIndex];
       currentStep.set(step);
     }
@@ -203,13 +227,20 @@ Template.build.rendered = function() {
 
     function next() {
       step++
+      var scriptText = trainingMission.steps[step].code;
+      var userScript = ace.edit("codeInput").getSession().getValue();
+      userScript += scriptText;
+      ace.edit('codeInput').getSession().setValue(userScript);      
+      update(false);
+      
+      /*
       var scriptText = $('#script-' + step).text();
       var stepHtml = $('#step-' + step).html();
       var userScript = ace.edit("codeInput").getSession().getValue();
       userScript += scriptText;
       ace.edit("codeInput").getSession().setValue(userScript);
-      $('#step').html(stepHtml);
-      update(false);
+      $#step').html(stepHtml);
+      */
     }
 
     function test() {
@@ -255,9 +286,7 @@ Template.build.rendered = function() {
     var updateRun = false;
     function update(updateLevel) {
       updateLevel = updateLevel || false;
-      var configureTemplate = $('#configureTemplate').text();
-      var userScript = ace.edit("codeInput").getSession().getValue();
-      
+      var userScript = ace.edit("codeInput").getSession().getValue();      
       
       if (updateRun && updateLevel) {  
         var obj = parseWorldDefinitionFromScript(userScript);        
@@ -286,6 +315,8 @@ Template.build.rendered = function() {
           lastUpdated: new Date(), 
           updatedBy: userName()
         };
+        
+        $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show')        
         
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
           Meteor.setTimeout(function(){

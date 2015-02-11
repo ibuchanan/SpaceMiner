@@ -1,3 +1,7 @@
+html {
+  padding: 0px;
+}
+
 body {   
   padding:0px; padding-top: 0px; margin:0px; background-color:mintcream;
   background-color: #000000;
@@ -13,9 +17,40 @@ h2{
   font-size: 150%;
 }
 
-.editor {
+#steps .header {
+  text-align: center;  
+}
+
+#codeEditorSection {
+  margin-top: 10px;
+  width: 50%;
+  left: 50%;
+  position: fixed;
+  background-color: #333;
+  border: 2px solid #666;
+  border-right: none;
+  padding-bottom: 10px;
+}
+
+#codeEditorSection .header {
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+#codeEditorSection.affix-top {
+  position: static;
+  width: 50%;
+}
+  
+#codeEditorSection.affix {
+  position: fixed;
+  top:20px;
+  width:50%;
+}
+
+#codeInput {
   width:98%;
-  height:350px;
+  height:600px;
 }
 
 .previewContainer {
@@ -105,4 +140,8 @@ strong.line-thru: {
 
 .alert-info {
   background-color: #8D063A;
+}
+
+.tips {
+  white-space: normal;
 }

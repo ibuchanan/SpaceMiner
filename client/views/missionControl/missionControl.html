@@ -1,0 +1,25 @@
+<template name='missionControl'>
+<!-- {{#each missionStepViews}}
+  <div>ID: {{_id}}</div>
+  <div>missionId: {{missionId}}</div>
+  <div>userId: {{userId}}</div>
+  <div>stepIndex: {{stepIndex}}</div>
+  <div>date: {{date}}</div>
+  <hr />
+{{/each}} -->
+
+<div class='container-fluid'>
+  <div class='row'>
+  {{#each currentViewers}}
+    <button class="col-md-6 btn btn-lg btn-{{randomBackgroundColor}}">
+      <h3><span class='label label-{{randomBackgroundColor}}'>{{missionStepIndex}}: {{missionStepTitle}}</span></h3>
+      <h4>{{missionStepViewers.length}} viewer(s):</h4>
+      {{#each missionStepViewers}}
+      <span class='label label-{{randomBackgroundColor}}'>{{userName}}</span>&nbsp;
+      {{/each}}
+    </button>      
+  {{/each}}  
+  </div>
+</div>  
+  
+</template>
