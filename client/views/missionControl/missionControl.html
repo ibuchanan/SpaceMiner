@@ -1,19 +1,13 @@
 <template name='missionControl'>
-<!-- {{#each missionStepViews}}
-  <div>ID: {{_id}}</div>
-  <div>missionId: {{missionId}}</div>
-  <div>userId: {{userId}}</div>
-  <div>stepIndex: {{stepIndex}}</div>
-  <div>date: {{date}}</div>
-  <hr />
-{{/each}} -->
 
 <div class='container-fluid'>
   <div class='row'>
+  <h1 style='text-align: center'><span class='label label-warning'><span class='fa fa-search'></span> Mission trainee tracking system</span></h1>
+  <h2 style='text-align: center'><span class='label label-info'><span class='fa fa-globe'></span> {{missionProjectTitle}}</span></h2>
   {{#each currentViewers}}
-    <button class="col-md-6 btn btn-lg btn-{{randomBackgroundColor}}">
+    <button class="col-xs-12 btn btn-lg btn-{{randomBackgroundColor}}">
       <h3><span class='label label-{{randomBackgroundColor}}'>{{missionStepIndex}}: {{missionStepTitle}}</span></h3>
-      <h4>{{missionStepViewers.length}} viewer(s):</h4>
+      <h4>{{missionStepViewers.length}} trainee(s):</h4>
       {{#each missionStepViewers}}
       <span class='label label-{{randomBackgroundColor}}'>{{userName}}</span>&nbsp;
       {{/each}}

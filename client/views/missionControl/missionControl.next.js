@@ -18,7 +18,6 @@ Template.missionControl.helpers({
       missionId: Router.current().params.missionId,
       date: { $gt: hourago } 
     }, { sort: { date: -1 } }).fetch();
-    // group by unique users
     var groupedEvents = 
     _.chain(events)
     .groupBy((event)=> { return event.userName; })
@@ -27,7 +26,7 @@ Template.missionControl.helpers({
     .value();
     
     _.each(groupedEvents, (events, missionId)=> { 
-      groupedEvents[missionId] = _.groupBy(events, (event) => { return event.stepIndex; } );
+      groupedEvents[missionId] = _.groupBy(events, (event) => { return event.stepIndex + 1; } );
     });
     
     var result = _.pairs(groupedEvents[Router.current().params.missionId]);
@@ -46,6 +45,9 @@ Template.missionControl.helpers({
     });
     return _.pairs(missionGroups);
     */
+  },
+  missionProjectTitle: function() {
+    return trainingMission.project;
   },
   missionStepIndex: function() {
     return this[0];
