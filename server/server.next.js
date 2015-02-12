@@ -212,14 +212,23 @@ Meteor.startup(function() {
       }
     });  
   
+    /*
     ServiceConfiguration.configurations.upsert(
       { service: "meetup" },
       { $set: { clientId: "frhtguo3lk9ngsr8kcm6hp7kai", secret: "pn37mhc8q0jmnb5423meaojd3g" } }
     );
-  
+    */
+    /* dev:
     ServiceConfiguration.configurations.upsert(
       { service: "github" },
       { $set: { clientId: "e0dcb6c6b3c3c2c21f4e", secret: "45617166c064898848a38c6063a072350ffe4191" } }
+    );
+    */
+    
+    // spaceminer.mod.bz:
+    ServiceConfiguration.configurations.upsert(
+      { service: "github" },
+      { $set: { clientId: "64c121033426202d78cc", secret: "c15a3093da1e2bc973ee63544f83172d1a490598" } }
     );
   
     cleanDbAndCreateDefaultRecords();

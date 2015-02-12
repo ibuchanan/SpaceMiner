@@ -230,7 +230,7 @@ Template.build.rendered = function() {
       var scriptText = trainingMission.steps[step].code;
       var userScript = ace.edit("codeInput").getSession().getValue();
       userScript += scriptText;
-      ace.edit('codeInput').getSession().setValue(userScript);      
+      //ace.edit('codeInput').getSession().setValue(userScript);      
       update(false);
       
       /*

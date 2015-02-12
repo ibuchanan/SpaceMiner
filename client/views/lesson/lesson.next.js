@@ -19,10 +19,12 @@ Template.lesson.helpers({
 });
 
 Template.lesson.events({
+  /* TODO still use this?
   'click .challengeShow': function() {
     $('.lesson').hide();
     $('.challenge').show();
   }
+  */
 });
 
 Template.question.rendered = function() {

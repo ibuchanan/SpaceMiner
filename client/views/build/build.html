@@ -155,6 +155,14 @@ code {
         {{#if currentStep.intro}}
         <p class="alert alert-info" role="alert"><h1 style='display: inline'><span class='fa fa-bullhorn'></span></h1> {{{currentStep.intro}}}</p>
         {{/if}}
+          {{#if currentStep.code}}
+          <div class='panel panel-warning'>
+            <div class='panel-heading'>
+              <h3 class='panel-title'><span class='fa fa-code'></span> CODE</h3>
+            </div>
+<pre><code>{{currentStep.code}}</code></pre>
+          </div>
+          {{/if}}      
         {{#each currentStep.sections}}
           {{#if eq type 'paragraph'}}
           <div class="panel panel-info">
@@ -166,7 +174,7 @@ code {
             </div>
           </div>
           {{stepLoaded this}}
-          {{/if}}  
+          {{/if}}
           {{#if eq type 'instructions'}}
           <div class="panel panel-primary">
             <div class="panel-heading">
@@ -212,6 +220,8 @@ code {
             <div role="tabpanel" class="tab-pane active" id="codeEditorTab">
               <div class='header'>              
                 <button class="btn btn-success" id="update"><span class='fa fa-refresh'></span> Update world</button>
+                <button class="btn btn-danger" id="test"><span class='fa-bug fa'></span> Send world to test</button>
+                <button class="btn btn-info" id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
               <div id="codeInput"></div>            
             </div>

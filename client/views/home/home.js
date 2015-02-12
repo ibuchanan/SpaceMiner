@@ -2,8 +2,11 @@ onLevelComplete = function() {
   Session.set('gameComplete', true);
 //function onLevelComplete() {
   try {
+    OnWon();
+    /* TODO use this still?
     if (!challengeAlreadySolved('variables')) challenge('variables');
     else OnWon();
+    */
   } catch(ex) {
     console.log(ex);  
   }
