@@ -2,7 +2,8 @@
   <div class='container-fluid'>
     <section class='row'>
       <section class='left col-xs-12 col-sm-12 col-md-4 col-lg-5 challenge'>
-        {{> steps}}
+        <!-- {{> steps}} -->        
+        {{> game level='starter' enableSound=false}}
       </section>
       <section class='right col-xs-12 col-sm-12 col-md-8 col-lg-7'>
         <h2>Code Console</h2>
@@ -31,7 +32,7 @@
         <h4>After pressing enter, you should see this:</h4>
 <pre class="output">
 <span class="command">{{code}}</span>
-<span class="prefix">  =&gt; </span>{{#if expectation.error}}<span class="error">"{{expectation.error}}"</span>{{/if}}{{#if expectation.type}}<span class="value {{expectation.type}}">{{expectation.value}}</span>{{/if}}
+<span class="prefix">  =&gt; </span>{{#if expectation.error}}<span class="error">"{{expectation.error}}"</span>{{/if}}{{#if typeNotError}}<span class="value {{expectation.type}}">{{expectation.value}}</span>{{/if}}
 </pre>  
       </p>
       <div class="panel-group" id="accordion">

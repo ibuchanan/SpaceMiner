@@ -5,7 +5,6 @@ this.OnWon = function() {
 if (this.game) this.game.reset();
 
 this.game = new Game();
-this.player = new Player();
 
 var gamePaused = new ReactiveVar(false);
 var gameReactive = new ReactiveVar(this.game);
@@ -177,7 +176,6 @@ function levelPlay(q, levelId, callback) {
 }
 
 function levelMapCreate(q, levelMapId) {
-  player = new Player(q);
   q.TileLayer.extend("Level" + levelMapId,{
     init: function() {
       this._super({
@@ -205,9 +203,6 @@ function levelMapCreate(q, levelMapId) {
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             var sprite = new q[className](q.tilePos(x,y));
-            if (className === 'Player') {
-              window.playerCurrent = sprite;
-            }
             this.stage.insert(sprite);
             if (tile === 'E' || tile === 'P') {
               this.stage.insert(new q.Dot(q.tilePos(x,y)));
@@ -345,39 +340,57 @@ function Qloaded() {
   return window.Q !== undefined;
 }
 
-function move(cells, direction, next) {
+function _move(props, cells, direction, next) {
   var distance = cells * 32;
   var destination = 0;
-
+  
+  direction = direction || 'left';
+  direction = direction.toLowerCase();
+  
+  var directionMap = {
+    'left': 'left',
+    'l': 'left',
+    'right': 'right',
+    'r': 'right',
+    'up': 'up',
+    'u': 'up',
+    'down': 'down',
+    'd': 'down'
+  };
+  
+  direction = directionMap[direction];
+  
+  direction = direction || 'left';
+  
   if (direction === 'left' || direction === 'up') {
     distance = -distance;
   }
   if (direction === 'left' || direction === 'right') {
-    destination = playerCurrent.p.x + distance;
+    destination = props.x + distance;
   } else {
-    destination = playerCurrent.p.y + distance;
+    destination = props.y + distance;
   }
-  playerCurrent.p.travel = { direction: direction, destination: destination, next: next };
-  playerCurrent.p.direction = direction;
-  playerCurrent.p.speed = 200; 
+  props.travel = { direction: direction, destination: destination, next: next };
+  props.direction = direction;
+  props.speed = 200; 
 }
-window.move = move;
+window._move = _move;
 
-function path() {
+function move(props) {
  var args = arguments;
  function runStep(index) {
    var nextIndex = index+1;
    if (index < args.length) {
     var step = args[index].split(' ');
     var cells = parseInt(step[0]);
-    move(cells, step[1], function() {
+    _move(props, cells, step[1], function() {
      runStep(nextIndex);
     });
    }
  }
- runStep(0); 
+ runStep(1); 
 }
-window.path = path;
+window.move = move;
 
 /*
 
@@ -715,17 +728,15 @@ var worldBuild = {
       if (p.travel) {
         var dest = p.travel.destination;
         var next = p.travel.next;
-        if (p.travel.direction === 'left') {          
+        if (p.travel.direction === 'left') {
           if (p.x <= (dest+16)) {
-            console.log("We finished:");
-            console.log(p.x);
             p.speed = 0;
             p.x = dest;
             setTimeout(function() {
               p.x = dest;
               if (next) next();
             }, 125);
-            delete p.travel;            
+            delete p.travel;
           }
         }
         if (p.travel && p.travel.direction === 'right') {
@@ -784,14 +795,14 @@ var worldBuild = {
   });
 
   Q.Sprite.extend("Player", {
-    init: function(p) {
+    init: function(p) {      
       this._super(p,{
         sheet:"player",
         type: SPRITE_PLAYER,
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
       });
       this.add("2d, towerManControls, laser");
-    },
+    }
   });
   Q.Sprite.extend("Shot", {
     init: function(p) {
@@ -1030,7 +1041,7 @@ var worldBuild = {
         game.onEnemyCollision(col.obj);
       }
       else if(col.obj.isA("Shot")){
-        player.scoreInc(1000);
+        game.player.scoreInc(1000);
         die(this);
       }
     }

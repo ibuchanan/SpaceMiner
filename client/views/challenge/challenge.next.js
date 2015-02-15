@@ -1,8 +1,12 @@
+var lessonDep = new Deps.Dependency;
+var lesson;
+
 Template.challenge.created = function() {
   var id = Router.current().params._id;      
   Lessons.update({_id: id}, {$set: {lastViewed: new Date()}}, function(err, count) {
-    var lesson = Router.current().data();
+    lesson = Router.current().data();
     setLesson(lesson);
+    lessonDep.changed();
   });
 }
 
@@ -20,7 +24,9 @@ Template.challenge.helpers({
 
 Template.steps.helpers({
     notFinished: function() {
+      lessonDep.depend();
       var lesson = getLesson();
+      console.log(lesson);
       var notFin = lesson.finishing !== true;
       return notFin;
     },    
@@ -28,6 +34,9 @@ Template.steps.helpers({
 });
 
 Template.step.helpers({
+  typeNotError: function() {
+    return this.expectation.type && this.expectation.type !== 'error';
+  },
   previousAllowed: function() {
     return this.index > 0;
   },
@@ -59,6 +68,7 @@ function feedbackInsert(step, sense) {
       lessonStepName: step.name,
       lessonStepTitle: step.title,
       userId: Meteor.userId(),
+      userName: userName(),
       date: new Date(),
       sense
     };
@@ -111,6 +121,8 @@ Template.finish.events({
         Challenges.insert({userId:Meteor.userId(), challenge:Router.current().params._id}, function(err) {
           if (err) {
             bootbox.alert("Sorry! There was an error saving your challenge results. Please try again.");
+          } else {
+            bootbox.alert('Good job!');
           }
           /* TODO this once made sense as a follow on from beating the first level, but probably not now, at least not at the moment
           if (!err) {

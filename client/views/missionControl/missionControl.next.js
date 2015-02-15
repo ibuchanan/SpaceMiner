@@ -6,6 +6,21 @@ function randomElement(array) {
   return array[Math.floor(Math.random() * array.length)];
 }
 
+var indicatorMap = {
+  'Not exactly': {
+    icon: 'fa-frown-o',
+    klass: 'label label-danger'
+  },
+  'Got it': {
+    icon: 'fa-smile-o',
+    klass: 'label label-success'
+  },  
+  'Almost there': {
+    icon: 'fa-meh-o',
+    klass: 'label label-warning'
+  }
+};
+
 Template.missionControl.helpers({
   randomBackgroundColor: function() {
     return randomElement(bsBackgrounds);
@@ -29,22 +44,8 @@ Template.missionControl.helpers({
       groupedEvents[missionId] = _.groupBy(events, (event) => { return event.stepIndex + 1; } );
     });
     
-    var result = _.pairs(groupedEvents[Router.current().params.missionId]);
-        
-    return result;
-    
-    /*
-    var userGroups = _.groupBy(events, (item)=> { return item.userName; });   
-    // reduce by date
-    var mostRecents = _.map(userGroups, (item)=> { return item[0]; });
-    // group by mission id   
-    var missionGroups = _.groupBy(mostRecents, (item)=> { return item.missionId; });
-    _.each(missionGroups, (events, missionId)=> {
-      var byStepIndex = _.groupBy(events, (event)=> { return event.stepIndex; } );
-      missionGroups[missionId] = byStepIndex;
-    });
-    return _.pairs(missionGroups);
-    */
+    var result = _.pairs(groupedEvents[Router.current().params.missionId]);        
+    return result;    
   },
   missionProjectTitle: function() {
     return trainingMission.project;
@@ -57,5 +58,40 @@ Template.missionControl.helpers({
   },
   missionStepViewers: function() {
     return this[1];
-  }
+  },
+  klass: (key)=> {
+    return indicatorMap[key].klass;
+  },
+  icon: (key)=> {
+    return indicatorMap[key].icon;
+  },
+  stepAssessments: ()=> { 
+    var all = MissionStepSelfAssessments.find().fetch();
+    var byStep = _.groupBy(all, 'stepTitle');
+    _.each(byStep, (observations, stepTitle) => {
+      var byUser = _.groupBy(observations, 'userId');
+      _.each(byUser, (observations, userId) => {
+        var sorted = _.sortBy(observations, (obs) => {
+          return obs.stepTitle;
+        });
+        sorted = sorted.reverse();
+        byUser[userId] = sorted[0];
+      });  
+      var counts = _.countBy(byUser, 'sense');
+      var keyName = (key) => {
+        var map = {
+          'not': 'Not exactly',
+          'yes': 'Got it',
+          'almost': 'Almost there'
+        };
+        return map[key];
+      };
+      counts = _.map(counts, (value, key)=> {return {key : keyName(key), value}});
+      byStep[stepTitle] = counts;
+    });
+    return _.map(byStep, (value, key)=> {
+      console.log(value);
+      console.log(key);
+      return {key, value}});
+  }  
 });

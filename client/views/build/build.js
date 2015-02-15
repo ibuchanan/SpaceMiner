@@ -6,6 +6,19 @@ var gameUpdatedDep = new Deps.Dependency;
 var currentStepIndex = 0;
 var currentStep = new ReactiveVar(trainingMission.steps[currentStepIndex]);
 
+function assessmentInsert(missionId, step, stepIndex, sense) {
+    var assessment = {
+      missionId: missionId,
+      stepTitle: (stepIndex + 1) + ': ' + step.title,
+      stepIndex: stepIndex,
+      userId: Meteor.userId(),
+      userName: userName(),
+      date: new Date(),
+      sense: sense
+    };
+    MissionStepSelfAssessments.insert(assessment);
+}
+
 Template.build.helpers({
   mission: function() {
     return trainingMission;
@@ -66,13 +79,8 @@ Template.build.helpers({
   }
 });
 
-function userName() {
-  return Meteor.user().profile.name;
-}
-
 function missionStepViewed(stepIndex){
-  var profile = Meteor.user().profile;
-  var user = profile.nickName || profile.name;
+  var user = userName();
   
   MissionStepViews.insert({ 
     userId : Meteor.user()._id,
@@ -83,18 +91,25 @@ function missionStepViewed(stepIndex){
   });  
 }
 
+function codeEditorShow() {
+  $('#gameTabsNav a[href="#codeEditorTab"]').tab('show');
+  ace.edit("codeInput").focus();
+}
+
 Template.build.events({
   'click .stepNext': function() {
     if (currentStepIndex < trainingMission.steps.length - 1) currentStepIndex++;
     missionStepViewed(currentStepIndex);
     var step = trainingMission.steps[currentStepIndex];
     currentStep.set(step);
+    codeEditorShow();
   },
   'click .stepPrev': function() {
     if (currentStepIndex > 0) currentStepIndex--;
     missionStepViewed(currentStepIndex);
     var step = trainingMission.steps[currentStepIndex];
     currentStep.set(step);
+    codeEditorShow();
   },
   'click .stepJump': function() {
     var stepIndex = this - 1;
@@ -103,17 +118,20 @@ Template.build.events({
       missionStepViewed(currentStepIndex);
       var step = trainingMission.steps[stepIndex];
       currentStep.set(step);
+      codeEditorShow();
     }
-  }
+  },
+  // TODO remove hard code
+  'click .not': function() {
+    assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'not');
+  },
+  'click .almost': function() {
+    assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'almost');
+  },
+  'click .yes': function() {
+    assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'yes');
+  }  
 });
-
-function userName() {
-  return Meteor.user().profile.name;
-}
-
-function buildSteps() {
-  
-}
 
 Template.build.rendered = function() { 
   
@@ -126,103 +144,7 @@ Template.build.rendered = function() {
       var split = sprite.split('/');
       return split[1];
     });
-
-    function render(obj) {
-      var templateScript = $("#templateHeader").html();
-      var template = Handlebars.compile(templateScript);
-      var output = template(obj);
-      $('#header').html(output);
-      var world = obj.drawWorld(obj.world);
-      $('#worldContainer').html(world);
-    }
-
-    var defaults = {
-      worldName : "Space Miner",
-      explorerName : "Ninja Coder",
-      numberOfLives : 1,
-      enableEnemyRespawn : true,
-      sprites: {
-        tile: "plasma.png",
-        enemy: "brainBlue.png",
-        coin: "blue.png",
-        gem: "pinkGem.png",
-        player: "dark.png"
-      },
-      world: [
-        ['e', 'g', 'c', 'c', 'c', 'e', 'g', 'c', 'c', 'c', 'e', 'g', 'c', 'c', 'c', 'c', 'c', 'c', 'g'],
-        ['c', 'c', 't', 't', 'c', 't', 'c', 'c', 'c', 'c', 't', 't', 'c', 't', 't', 't', 'c', 't', 'c'],
-        ['c', 'c', 't', 't', 'c', 't', 'g', 't', 't', 't', 't', 't', 'c', 'c', 'c', 'c', 'c', 't', 'c'],
-        ['c', 'c', 't', 't', 'c', 't', 'c', 'c', 'c', 'c', 't', 't', 'c', 'c', 'c', 'c', 'c', 't', 'c'],
-        ['c', 'c', 't', 'c', 'c', 't', 'c', 'c', 'c', 'c', 't', 't', 'c', 'c', 'c', 'c', 'c', 't', 'c'],
-        ['c', 'c', 'g', 't', 'c', 't', 'c', 'c', 'c', 'g', 't', 't', 'c', 'c', 't', 't', 't', 't', 'c'],
-        ['c', 'c', 't', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 'c', 't', 'c', 'c', 'c', 'c', 'g', 't', 'c'],
-        ['c', 'c', 't', 't', 'c', 'c', 'g', 'c', 'c', 'c', 't', 't', 'c', 't', 't', 't', 't', 't', 'c'],
-        ['c', 'c', 'c', 't', 'c', 't', 't', 't', 'c', 'c', 'c', 't', 'c', 'c', 'c', 'c', 'c', 't', 'c'],
-        ['c', 'c', 't', 'c', 'c', 't', 'c', 'c', 'c', 'c', 't', 't', 'c', 'c', 'c', 'c', 'c', 't', 'c'],
-        ['c', 'c', 'c', 'c', 'c', 't', 'c', 'c', 'c', 'c', 't', 't', 'c', 'c', 'c', 't', 'c', 't', 'c'],
-        ['c', 'c', 'p', 't', 'c', 'c', 'c', 'c', 'c', 'c', 'e', 't', 'c', 'c', 'c', 't', 'g', 't', 'g'],
-      ],
-      drawWorldCell: function(cell, rowNum, cellNum) {
-        var spritesMap = {
-          t : 'tile',
-          p : 'player',
-          e : 'enemy',
-          g : 'gem',
-          c : 'coin'
-        };
-        var spriteName = this.sprites[spritesMap[cell]];
-        if (!spriteName) {
-          spriteName = defaults.sprites[spritesMap[cell]];
-        }
-        var file = spritesMap[cell] + '/' + spriteName;
-        return '<span class="worldCell" data-coords="' + rowNum + ':' + cellNum + '" style="background-image: url(http://supersonic-box-14-130414.use1.nitrousbox.com/images/spriteParts/' + file + ');"></span>';
-      },
-      drawWorldRow: function(row, rowNum) {
-        var rowHtml = "<div class='worldRow'>";
-        var that = this;
-        row.forEach(function(cell, cellNum) {
-          rowHtml += that.drawWorldCell(cell, rowNum, cellNum);
-        });
-        return rowHtml + '</div>\n';
-      },
-      drawWorld: function(world) {
-        var worldHtml = '';
-        var that = this;
-        if (!_.isArray(world)) throw "world must be a valid array";
-        if (world.length === 0) {
-          world = defaults.world;
-        }
-        var worldCopy = JSON.parse(JSON.stringify(defaults.world));
-
-        function copyRow(rowSource, rowTarget) {
-          rowSource.forEach(function(cell, index) {
-            rowTarget[index] = cell;
-          });
-        }
-        if (_.isArray(world[0])) {
-          world.forEach(function(row, rowIndex) {
-            copyRow(row, worldCopy[rowIndex]);
-          });
-        } else {
-          copyRow(world, worldCopy[0]);
-        }
-        // Now assure left and right borders are all tiles
-        worldCopy.forEach(function(row) {
-          row.push('t');
-          row.unshift('t');
-        });
-        // And, the top and bottom rows are all tiles
-        var borderRow = 'ttttttttttttttttttttt'.split('');
-        worldCopy.push(borderRow);
-        worldCopy.unshift(borderRow);
-
-        worldCopy.forEach(function(row, rowNum) {
-          worldHtml += that.drawWorldRow(row, rowNum);
-        });
-        return worldHtml;
-      }
-    };
-
+    
     var step = 0;
 
     function next() {
@@ -232,6 +154,7 @@ Template.build.rendered = function() {
       userScript += scriptText;
       //ace.edit('codeInput').getSession().setValue(userScript);      
       update(false);
+      missionStepViewed(currentStepIndex);
       
       /*
       var scriptText = $('#script-' + step).text();
@@ -276,7 +199,6 @@ Template.build.rendered = function() {
       });
     }
 
-
     function parseWorldDefinitionFromScript(script) {
       var defaults = Game.getDefaults();      
       var obj = window.ParseWorldDefinitionFromScript(script, defaults);    
@@ -316,7 +238,7 @@ Template.build.rendered = function() {
           updatedBy: userName()
         };
         
-        $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show')        
+        $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show');
         
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
           Meteor.setTimeout(function(){
@@ -327,42 +249,13 @@ Template.build.rendered = function() {
           }, 250);          
         });        
       }
-      updateRun = true;
-
-      //render(obj);
-      //$('#toggleGrid').click(toggleGrid);
-      //$('#toggleCoords').click(toggleCoords);    
+      updateRun = true;    
     }
 
     function aceConfigure() {
       var editor = ace.edit("codeInput");
       editor.setTheme("ace/theme/monokai");
       editor.getSession().setMode("ace/mode/javascript");    
-    }
-
-    function toggleGrid() {
-      $('.worldCell').toggleClass('worldCellBorder');
-    }
-
-    function toggleCoords() {
-      $('.worldCell').toggleClass('worldCellCoords');
-    }
-
-    function renderWorldMap() {
-      var rows = 14;
-      var cols = 21;
-
-      var world = '';
-
-      for(var rowNum = 0; rowNum < 14; rowNum++) {
-        world += "<div class='worldRow'>";
-        for(var colNum = 0; colNum < cols; colNum++) {
-          world += "<span class='worldCell' data-coords='" + rowNum + "," + colNum + "'>&nbsp;</span>";
-        }
-        world += "</div>";
-      }
-
-      $('#worldMap').html(world);
     }
 
     aceConfigure();

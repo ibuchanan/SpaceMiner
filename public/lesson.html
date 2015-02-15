@@ -53,6 +53,8 @@ body {
 				model : model,
         placeholder: ' '
 			});
+      
+      if (top.game !== undefined) window.sandbox.model.iframeEval("Object.defineProperty(this, 'game', { get: function() { return top.game; } } )");
 		});
 	</script>
 <!--  

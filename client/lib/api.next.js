@@ -19,6 +19,10 @@ this.Game = class {
     }
     this.paused = false;
   }
+  get player() {
+    var qPlayer = this.q('Player').items[0];
+    return new Player(this.q, qPlayer);
+  }
   setTimeout(delay, func) {
     this.timeOuts.push(setTimeout(func, delay));
   }
@@ -127,12 +131,12 @@ ccgccccccccccccgcc`);
   }
   onCoinCollision() {
     // todo HACK
-    player.scoreInc(this.collisions().coin.scoreInc);
+    this.player.scoreInc(this.collisions().coin.scoreInc);
     this.soundPlay(this.collisions().coin.soundPlay);
   }
   onGemCollision() {
-    player.scoreInc(this.collisions().gem.scoreInc);
-    player.ammoInc(this.collisions().gem.ammoInc);
+    this.player.scoreInc(this.collisions().gem.scoreInc);
+    this.player.ammoInc(this.collisions().gem.ammoInc);
     this.soundPlay(this.collisions().gem.soundPlay);
   }  
   onEnemyCollision(hitPlayer) {
@@ -149,8 +153,38 @@ ccgccccccccccccgcc`);
 }
 
 this.Player = class { 
-  constructor(q) {
+  constructor(q, player) {
     this.q = q;
+    this.player = player;    
+    var move = this.move;
+    var moveHelp =
+`
+<h2>player.move('count direction', ...)</h2>
+
+<p>Call this function to move the player <b>count</b> number of cells for the given <b>direction</b>. The <b>direction</b> may be <b>left, up, right, or down</b>. You can also use <b>l, u, r, or d</b> as shortcuts. This function will take any number of arguments and will keep moving the player until it has evaluated each argument.</p>
+
+<h3>Usage examples</h3>
+
+<div>
+<p>To move the player 4 spaces to the left, followed by 2 up, 7 to the right and then 5 down, type this code:</p>
+<p>
+<code>game.player.move('4 left', '2 up', '7 right', '5 down');</code>
+</p>
+<p>
+You can also use the shortcut form like this:
+<p>
+<p>
+<code>game.player.move('4 l', '2 u', '7 r', '5 d');</code>
+</p>
+</div>
+`;
+    move.help = function() {
+      bootbox.alert(moveHelp);
+    };
+    move.helpt = function() {
+      var text = $(moveHelp).text();
+      return text.replace(/\n\n\n+/g, "\n\n");
+    }
   }  
   scoreInc(amount) {
     this.q.state.inc('score', amount);
@@ -160,10 +194,24 @@ this.Player = class {
   }  
   scoreGet() {
     return this.q.state.get('score');
-  }  
+  }
   ammoInc(amount) {
     this.q.state.inc('ammo', amount);
+  }
+  ammoGet() {
+    return this.q.state.get('ammo');
+  }
+  livesGet() {
+    return this.q.state.get('lives');
+  }
+  // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
+  // move the quintus code into here and dispense with the facades
+  fire() {
+    this.player.fire();
   }  
+  move() {
+    move(this.player.p, ...arguments);
+  }
 }
 
 this.Controls = class {
