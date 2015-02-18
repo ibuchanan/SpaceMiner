@@ -274,6 +274,7 @@ var worldRows = ${worldRowsString};
   createLevelRecord(level, function(levelDto) {
     Levels.insert(levelDto);          
   });
+  
 }
 
 function cleanDbAndCreateDefaultRecords() {
