@@ -4,6 +4,20 @@ var boardFromText = function(board) {
   });
 };
 
+
+function defineProperties(target, source, props) {
+  props.forEach(function(prop) {
+    Object.defineProperty(target, prop, {
+      get: function() {
+        return source[prop];
+      },
+      set: function(val) {
+        source[prop] = val;
+      }
+    });
+  });
+}
+
 this.Game = class {  
   constructor(q, world) {
     this.timeOuts = [];
@@ -21,7 +35,21 @@ this.Game = class {
   }
   get player() {
     var qPlayer = this.q('Player').items[0];
-    return new Player(this.q, qPlayer);
+    var player = new Player(this.q, qPlayer);
+
+    defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);
+    
+    return player;    
+  }
+  get enemies() {
+    var qEnemies = this.q('Enemy');
+    var that = this;
+    var enemies = _.map(qEnemies.items, (qEnemy) => {
+      var enemy = new Enemy(that.q, qEnemy);
+      defineProperties(enemy, qEnemy.p, ['x', 'y', 'speed', 'direction']);
+      return enemy;
+    });
+    return enemies;
   }
   setTimeout(delay, func) {
     this.timeOuts.push(setTimeout(func, delay));
@@ -79,12 +107,12 @@ ccgccccccccccccgcc`);
       }
     };    
   }
-  worldName() {
+  get worldName() {
     // TODO decouple Levels ?
     if (!this.world) return "No world loaded...";
     return this.world.worldName;
   }  
-  enableEnemyRespawn() {
+  get enableEnemyRespawn() {
     return this.world.enableEnemyRespawn;
   }
   enemy() {
@@ -93,10 +121,10 @@ ccgccccccccccccgcc`);
   collisions() {
     return this.world.collisions;
   }
-  explorerName() {
+  get explorerName() {
     return this.world.explorerName;
   }
-  numberOfLives() {
+  get numberOfLives() {
     return this.world.numberOfLives;
   }
   livesRemaining() {
@@ -111,7 +139,7 @@ ccgccccccccccccgcc`);
   }
   resetState() {
     this.cancelTimeouts();
-    this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives() });
+    this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives });
   }  
   pause() {
     this.q.pauseGame();
@@ -152,10 +180,34 @@ ccgccccccccccccgcc`);
   }
 }
 
+this.Enemy = class {
+  constructor(q, enemy) {
+    this.q = q;
+    this.enemy = enemy;
+  }
+  speedSet(speed) {
+    this.enemy.p.speed = speed;
+  }
+  speedGet() {
+    return this.enemy.p.speed;    
+  }
+  freeze() {
+    this.enemy.p.speedOld = this.enemy.p.speed;
+    this.enemy.p.speed = 0;
+  }
+  unfreeze() {
+    this.enemy.p.speed = this.enemy.p.speedOld;
+  }
+}
+
 this.Player = class { 
   constructor(q, player) {
+    var that = this;
     this.q = q;
-    this.player = player;    
+    this.qobj = player;
+    
+    Player.defineWrappers(this);
+    
     var move = this.move;
     var moveHelp =
 `
@@ -185,7 +237,37 @@ You can also use the shortcut form like this:
       var text = $(moveHelp).text();
       return text.replace(/\n\n\n+/g, "\n\n");
     }
-  }  
+  }
+  
+  static defineWrappers(obj) {
+    // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
+    // move the quintus code into here and dispense with the facades
+    obj.fire = function() {
+      obj.qobj.fire();
+    }; 
+    obj.move = function() {
+      move(obj.qobj.p, ...arguments);
+    };
+    obj.cloak = function() {
+      obj.qobj.p.cloaked = true;
+      obj.qobj.p.sheet = 'enemy';
+      // TODO: hard-coded reference to game should be encapsulated
+      game.setTimeout(5000, function() {
+        obj.qobj.p.cloaked = false;
+        obj.qobj.p.sheet = 'player';
+      });
+    };
+    obj.teleport = function(x, y) {
+      obj.x = x;
+      obj.y = y;
+    };
+    obj.teleporter = function(x, y) {
+      return function() {
+        obj.teleport(x, y);
+      }
+    };
+  }
+  
   scoreInc(amount) {
     this.q.state.inc('score', amount);
   }  
@@ -203,14 +285,6 @@ You can also use the shortcut form like this:
   }
   livesGet() {
     return this.q.state.get('lives');
-  }
-  // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
-  // move the quintus code into here and dispense with the facades
-  fire() {
-    this.player.fire();
-  }  
-  move() {
-    move(this.player.p, ...arguments);
   }
 }
 

@@ -1,3 +1,10 @@
+Template.training.helpers({
+  levelId: function() {
+    console.log(Router.current().params.query.id);
+    return Router.current().params.query.id;
+  }  
+});
+
 Template.training.rendered = function() {
   function render(obj) {
     var templateScript = $("#templateHeader").html();
@@ -104,7 +111,7 @@ Template.training.rendered = function() {
     $('.worldCell').toggleClass('worldCellCoords');
   }
 
-  render(defaults);
+  //render(defaults);
   $('#toggleGrid').click(toggleGrid);
   $('#toggleCoords').click(toggleCoords);
 

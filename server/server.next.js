@@ -86,8 +86,194 @@ tttttttttttttttttttt`;
   });    
 }
 
+function createTrainingLevels() {
+
+  var easyTarget =  {
+    "_id": "easyTarget",
+    "userId": "admin",
+    "board": "tttttttttttttttttttt\nt-EG------------G--t\nt-ttttt------ttttt-t\nt-tG------------Gt-t\nt-ttttt------ttttt-t\nt-----t--tt--t-----t\nt--t--t--tt--t--t--t\nt-----t------t-----t\nt-t--------------t-t\nt-t-tt-tttttt-tt-t-t\nt--G------P-----G--t\nt-t-tt-t-tt-t-tt-t-t\nt--G------------G--t\ntttttttttttttttttttt",
+    "name": "Easy Target",
+    "numberOfLives": 1,
+    "enableEnemyRespawn": false,
+    "onEnemyHit": "game.reset();",
+    "onGemHit": "player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
+    "onCoinHit": "player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
+    "onWon": "controls.alert('You won!');",
+    "published": false,
+    "selections": [
+        "player/light.png",
+        "enemy/cyclopsYellow.png",
+        "gem/ruby.png",
+        "coin/gold.png",
+        "shot/basicShot.png"
+    ],
+    "tile": "tile/rockSpeckled.png",
+    "phase": "training",
+    "buildStepCurrent": 0,
+    "buildStepUpdateCounts": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 0,
+        "6": 0,
+        "7": 0,
+        "8": 0
+    },
+    "version": 1,
+    "script": "var worldName = 'Easy Target';\nvar enableEnemyRespawn = false;\nvar sprites = {\n  tile : \"rockSpeckled.png\",\n  enemy : \"cyclopsYellow.png\",\n  coin : \"gold.png\",\n  gem : \"ruby.png\",\n  player : \"light.png\"\n};\n\nvar worldRows = [\n'tttttttttttttttttt',\n'ccccccccccccccccet',\n'cttttttttttttttttt',\n'ctgggggggggggggggg',\n'ctcccccccccccccccc',\n'ctgggggggggggggggg',\n'ctcccccccccccccccc',\n'ctgggggggggggggggg',\n'ctcccccccccccccccc',\n'ctgggggggggggggggg',\n'ctttttttttttttttct',\n'cgcgcgcgcgcgcgcgcp'\n];\n"
+  };  
+  
+  createLevelRecord(easyTarget, function(levelDto) {
+    Levels.insert(levelDto);          
+  });
+  
+  var boxStep =  {
+    "_id":"boxStep",
+    "board":"tttttttttttttttttttt\nt-EG------------G--t\nt-ttttt------ttttt-t\nt-tG------------Gt-t\nt-ttttt------ttttt-t\nt-----t--tt--t-----t\nt--t--t--tt--t--t--t\nt-----t------t-----t\nt-t--------------t-t\nt-t-tt-tttttt-tt-t-t\nt--G------P-----G--t\nt-t-tt-t-tt-t-tt-t-t\nt--G------------G--t\ntttttttttttttttttttt",
+    "buildStepCurrent":1,
+    "buildStepUpdateCounts":{"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},
+    "enableEnemyRespawn":false,
+    "name":"Box Step",
+    "numberOfLives":1,       
+    "onCoinHit":"player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
+    "onEnemyHit":"game.reset();",
+    "onGemHit":"player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
+    "onWon":"controls.alert('You won!');",
+    "phase":"training",
+    "published":false,
+    "script":"var worldName = 'Box Step';\r\nvar enableEnemyRespawn = false;\r\nvar sprites = {\r\n    tile : \"fiery.png\",\r\n    enemy : \"cyclopsRed.png\",\r\n    coin : \"brown.png\",\r\n    gem : \"diamondLight.png\",\r\n    player : \"light.png\"\r\n};\r\n\r\nvar worldRows =  [\r\n'cccccccccccccccccc',\r\n'cpggcccgggcccgggcc',\r\n'cgcgcccgcgcccgcgcc',\r\n'cgggcccgggcccgggcc',\r\n'cccccccccccccccccc',\r\n'cgggcccgggcccgggcc',\r\n'cgcgcccgcgcccgcgcc',\r\n'cgggcccgggcccgggcc',\r\n'cccccccccccccccccc',\r\n'cgggcccgggcccgggcc',\r\n'cgcgcccgcgcccgcgcc',\r\n'cgggcccgggcccgggcc'\r\n];",
+    "selections": [
+      "player/light.png",
+      "enemy/cyclopsRed.png",
+      "gem/diamondLight.png",
+      "coin/brown.png",
+      "shot/basicShot.png"
+    ],
+    "tile":"tile/fiery.png",
+    "updatedBy":"admin",
+    "userId":"admin",
+    "version":1
+  }; 
+  
+  createTrainingLevel('boxStep', 'Box Step', 
+    {
+      tile : "fiery.png",
+      enemy : "cyclopsRed.png",
+      coin : "brown.png",
+      gem : "diamondLight.png",
+      player : "light.png"
+    },
+    [
+      'cccccccccccccccccc',
+      'cpggcccgggcccgggcc',
+      'cgcgcccgcgcccgcgcc',
+      'cgggcccgggcccgggcc',
+      'cccccccccccccccccc',
+      'cgggcccgggcccgggcc',
+      'cgcgcccgcgcccgcgcc',
+      'cgggcccgggcccgggcc',
+      'cccccccccccccccccc',
+      'cgggcccgggcccgggcc',
+      'cgcgcccgcgcccgcgcc',
+      'cgggcccgggcccgggcc'
+     ]                      
+  );
+  
+  createTrainingLevel('mightySquare', 'Mighty Square', 
+    {
+      tile : "plasma.png",
+      enemy : "goonGreen.png",
+      coin : "brown.png",
+      gem : "diamondDark.png",
+      player : "dark.png"
+    },
+    [
+      'ccccpccccccccccccc',
+      'ccccggggggggggcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccgccccccccgcccc',
+      'ccccggggggggggcccc',
+      'cccccccccccccccccc',
+     ]                      
+  );  
+      
+  createTrainingLevel('mightierSquares', 'Mightier Squares', 
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "blue.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'ccccpccccccccccccc',
+      'ccccggggggggggcccc',
+      'ccccgccccccccgcccc',
+      'ccccgcggggggcgcccc',
+      'ccccgcgccccgcgcccc',
+      'ccccgcgcggcgcgcccc',
+      'ccccgcgcggcgcgcccc',
+      'ccccgcgccccgcgcccc',
+      'ccccgcggggggcgcccc',
+      'ccccgccccccccgcccc',
+      'ccccggggggggggcccc',
+      'cccccccccccccccccc',
+     ]                      
+  );      
+}
+
 function createLessonsDefault() {
   Lessons.insert(Lesson.defaultLesson);
+}
+
+function createTrainingLevel(id, name, sprites, worldRows) {
+  
+  var spritesString = JSON.stringify(sprites);
+  var worldRowsString = JSON.stringify(worldRows);
+    
+  var level =  {
+    "_id": id,
+    name,
+    "phase":"training",    
+    "published":false,
+    "script":
+`var worldName = '${name}';
+var enableEnemyRespawn = false;
+var sprites = ${spritesString};
+var worldRows = ${worldRowsString};
+`,    
+    "selections": [
+      "player/" + sprites.player,
+      "enemy/" + sprites.enemy,
+      "gem/" + sprites.gem,
+      "coin/" + sprites.coin,
+      "shot/basicShot.png"
+    ],
+    "tile": "tile/" + sprites.tile,    
+    "board":"tttttttttttttttttttt\nt-EG------------G--t\nt-ttttt------ttttt-t\nt-tG------------Gt-t\nt-ttttt------ttttt-t\nt-----t--tt--t-----t\nt--t--t--tt--t--t--t\nt-----t------t-----t\nt-t--------------t-t\nt-t-tt-tttttt-tt-t-t\nt--G------P-----G--t\nt-t-tt-t-tt-t-tt-t-t\nt--G------------G--t\ntttttttttttttttttttt",
+    "buildStepCurrent":1,
+    "buildStepUpdateCounts":{"1":0,"2":0,"3":0,"4":0,"5":0,"6":0,"7":0,"8":0},
+    "enableEnemyRespawn":false,    
+    "numberOfLives":1,       
+    "onCoinHit":"player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
+    "onEnemyHit":"game.reset();",
+    "onGemHit":"player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
+    "onWon":"controls.alert('You won!');",
+    "updatedBy":"admin",
+    "userId":"admin",
+    "version":1
+  };  
+  
+  createLevelRecord(level, function(levelDto) {
+    Levels.insert(levelDto);          
+  });
 }
 
 function cleanDbAndCreateDefaultRecords() {
@@ -99,9 +285,12 @@ function cleanDbAndCreateDefaultRecords() {
     });
   }
   
-  Levels.remove({phase: { $in: ['inception', 'build'] } });
+  Levels.remove({phase: { $in: ['inception', 'training'] } });  
   if (Levels.find({_id:'starter'}).count() === 0) {
     createLevelDefault();
+  }  
+  if (Levels.find({_id:'easyTarget'}).count() === 0) {
+    createTrainingLevels();
   }
   
   Lessons.remove({});

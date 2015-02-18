@@ -73,15 +73,15 @@ Template.game.rendered = function() {
 Template.game.helpers({
   name: function() {
     if (gameLoading.get() === true) return 'Teleporting...';
-    return gameReactive.get().worldName();
+    return gameReactive.get().worldName;
   },
   explorerName: function() {
     if (gameLoading.get() === true) return '...';
-    return gameReactive.get().explorerName();
+    return gameReactive.get().explorerName;
   },
   enemiesRespawn: function() {
     if (gameLoading.get() === true) return '...';
-    return gameReactive.get().enableEnemyRespawn() ? 'true' : 'false';
+    return gameReactive.get().enableEnemyRespawn ? 'true' : 'false';
   },
   allowed: function(button) {
     var allowButton = _.indexOf(buttons, button);
@@ -381,11 +381,37 @@ function move(props) {
  function runStep(index) {
    var nextIndex = index+1;
    if (index < args.length) {
-    var step = args[index].split(' ');
-    var cells = parseInt(step[0]);
-    _move(props, cells, step[1], function() {
-     runStep(nextIndex);
-    });
+     var arg = args[index];
+     if (_.isString(arg) && arg.indexOf(' ') === -1) {
+       var cmd = arg.toLowerCase();
+       var map = {
+         'cloak': game.player.cloak,
+         'fire' : game.player.fire         
+       };
+       if (_.has(map, cmd))  {
+         map[cmd]();
+       }
+       runStep(nextIndex);
+     } else  if (_.isFunction(args[index])) {
+       args[index]();
+       runStep(nextIndex);
+     } else {
+      var step = args[index].split(' ');
+      var num = parseInt(step[0]);
+      var y = parseInt(step[1]);
+      if (!_.isNaN(y)) {
+        num++;
+        y++;
+        props.x = (num * 32) + 16;
+        props.y = (y * 32 + 16);
+        runStep(nextIndex);
+      }
+      else {
+        _move(props, num, step[1], function() {
+           runStep(nextIndex);
+        });        
+      }
+    }
    }
  }
  runStep(1); 
@@ -1027,7 +1053,7 @@ var worldBuild = {
     hit: function(col) {
       function die(self) {
         self.destroy();
-        if (game.enableEnemyRespawn()) {
+        if (game.enableEnemyRespawn) {
           game.setTimeout(game.enemy().respawnDelay, function(){
             var newEnemy = new Q.Enemy(Q.tilePos(10,7));
             var speedUp = self.p.speed;
@@ -1037,8 +1063,10 @@ var worldBuild = {
         }
       }      
       if(col.obj.isA("Player")) {
-        die(this);
-        game.onEnemyCollision(col.obj);
+        if (!col.obj.p.cloaked === true) {
+          die(this);
+          game.onEnemyCollision(col.obj);
+        }
       }
       else if(col.obj.isA("Shot")){
         game.player.scoreInc(1000);
