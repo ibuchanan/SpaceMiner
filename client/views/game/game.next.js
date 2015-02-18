@@ -402,9 +402,13 @@ function move(props) {
       if (!_.isNaN(y)) {
         num++;
         y++;
+        props.speed = 0;
+        props.direction = '';
         props.x = (num * 32) + 16;
         props.y = (y * 32 + 16);
-        runStep(nextIndex);
+        game.setTimeout(100, function() {
+          runStep(nextIndex);
+        });
       }
       else {
         _move(props, num, step[1], function() {
@@ -736,32 +740,45 @@ var worldBuild = {
       } else if(p.vy < 0) {
         p.angle = 0;
       }
-
+       
       // grab a direction from the input
       p.direction = Q.inputs['left']  ? 'left' :
       Q.inputs['right'] ? 'right' :
       Q.inputs['up']    ? 'up' :
       Q.inputs['down']  ? 'down' : p.direction;
-
+      
+      // If any inputs, then turn on the gas
+      var weWantTheGas = Q.inputs['right'] || Q.inputs['left'] || Q.inputs['down'] || Q.inputs['up'];
+      if (weWantTheGas) p.speed = 200;      
+      
       // based on our direction, try to add velocity
       // in that direction
       switch(p.direction) {
-        case "left": p.vx = -p.speed; break;
-        case "right":p.vx = p.speed; break;
-        case "up":   p.vy = -p.speed; break;
-        case "down": p.vy = p.speed; break;
+        case "left": p.vx = -p.speed;
+             p.vy = 0;  
+             break;
+        case "right":p.vx = p.speed; 
+             p.vy = 0;  
+             break;
+        case "up":   p.vy = -p.speed; 
+             p.vx = 0;
+             break;
+        case "down": p.vy = p.speed; 
+             p.vx = 0;
+             break;
       }
+      
       if (p.travel) {
         var dest = p.travel.destination;
         var next = p.travel.next;
         if (p.travel.direction === 'left') {
           if (p.x <= (dest+16)) {
-            p.speed = 0;
             p.x = dest;
-            setTimeout(function() {
+            p.speed = 0;            
+            game.setTimeout(125, function() {
               p.x = dest;
               if (next) next();
-            }, 125);
+            });
             delete p.travel;
           }
         }
@@ -769,10 +786,10 @@ var worldBuild = {
           if (p.x >= (dest-16)) {
             p.speed = 0;
             p.x = dest;
-            setTimeout(function() {
+            game.setTimeout(125, function() {
               p.x = dest;
               if (next) next();              
-            }, 125);
+            });
             delete p.travel;
           }
         }
@@ -780,10 +797,10 @@ var worldBuild = {
           if (p.y <= (dest+16)) {
             p.speed = 0;
             p.y = dest;
-            setTimeout(function() {
+            game.setTimeout(125, function() {
               p.y = dest;
               if (next) next();              
-            }, 125); 
+            }); 
             delete p.travel;
           }
         }
@@ -791,10 +808,10 @@ var worldBuild = {
           if (p.y >= (dest-16)) {
             p.speed = 0;
             p.y = dest;
-            setTimeout(function() {
+            game.setTimeout(125, function() {
               p.y = dest;
               if (next) next();              
-            }, 125);            
+            });
             delete p.travel;
           }
         }        
