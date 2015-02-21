@@ -4,7 +4,6 @@ var boardFromText = function(board) {
   });
 };
 
-
 function defineProperties(target, source, props) {
   props.forEach(function(prop) {
     Object.defineProperty(target, prop, {
@@ -36,9 +35,7 @@ this.Game = class {
   get player() {
     var qPlayer = this.q('Player').items[0];
     var player = new Player(this.q, qPlayer);
-
-    defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);
-    
+    defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);    
     return player;    
   }
   get enemies() {
@@ -183,20 +180,46 @@ ccgccccccccccccgcc`);
 this.Enemy = class {
   constructor(q, enemy) {
     this.q = q;
-    this.enemy = enemy;
+    this.qobj = enemy;
+    
+    Enemy.defineWrappers(this);
+    
+    this.qobj.p.speedDefault = 150;
   }
   speedSet(speed) {
-    this.enemy.p.speed = speed;
+    this.qobj.p.speedDefault = speed;
+    this.qobj.p.speed = speed;
   }
   speedGet() {
-    return this.enemy.p.speed;    
+    return this.qobj.p.speed;    
   }
   freeze() {
-    this.enemy.p.speedOld = this.enemy.p.speed;
-    this.enemy.p.speed = 0;
+    this.qobj.p.speed = 0;
   }
   unfreeze() {
-    this.enemy.p.speed = this.enemy.p.speedOld;
+    this.qobj.p.speed = this.qobj.p.speedDefault;
+  }
+  start() {
+    this.qobj.p.speed = this.qobj.p.speedDefault;
+  }
+  
+  static defineWrappers(obj) {
+    // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
+    // move the quintus code into here and dispense with the facades
+    obj.move = function() {
+      move(obj.qobj.p, ...arguments);
+    };
+    
+    obj.teleport = function(x, y) {
+      obj.x = x;
+      obj.y = y;
+    };
+    
+    obj.teleporter = function(x, y) {
+      return function() {
+        obj.teleport(x, y);
+      }
+    };    
   }
 }
 
@@ -207,6 +230,8 @@ this.Player = class {
     this.qobj = player;
     
     Player.defineWrappers(this);
+    
+    this.qobj.p.speedDefault = 200;
     
     var move = this.move;
     var moveHelp =
@@ -285,6 +310,9 @@ You can also use the shortcut form like this:
   }
   livesGet() {
     return this.q.state.get('lives');
+  }
+  start() {
+    this.qobj.p.speed = this.qobj.p.speedDefault;
   }
 }
 

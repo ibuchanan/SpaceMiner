@@ -372,7 +372,8 @@ function _move(props, cells, direction, next) {
   }
   props.travel = { direction: direction, destination: destination, next: next };
   props.direction = direction;
-  props.speed = 200; 
+  if (props.speed === 0) props.speed = props.speedDefault;
+  console.log("def: " + props.speedDefault);
 }
 window._move = _move;
 
@@ -386,7 +387,7 @@ function move(props) {
        var cmd = arg.toLowerCase();
        var map = {
          'cloak': game.player.cloak,
-         'fire' : game.player.fire         
+         'fire' : game.player.fire,
        };
        if (_.has(map, cmd))  {
          map[cmd]();
@@ -403,6 +404,7 @@ function move(props) {
         num++;
         y++;
         props.speed = 0;
+        props.directionOld = props.direction;
         props.direction = '';
         props.x = (num * 32) + 16;
         props.y = (y * 32 + 16);
@@ -706,7 +708,63 @@ var worldBuild = {
     img.src = Q.assetUrl("levelTiles/", src);
   };
   Q.assetTypes.til = 'Tile';
-
+  
+  function handleTravel(p) {
+    console.log("travel");
+    console.log(p.travel);
+    
+    var dest = p.travel.destination;
+    var next = p.travel.next;
+    if (p.travel.direction === 'left') {
+      if (p.x <= (dest+16)) {
+        p.x = dest;
+        p.directionOld = p.direction;
+        p.speed = 0;            
+        game.setTimeout(125, function() {
+          p.x = dest;
+          if (next) next();
+        });
+        delete p.travel;
+      }
+    }
+    if (p.travel && p.travel.direction === 'right') {
+      if (p.x >= (dest-16)) {
+        p.directionOld = p.direction;            
+        p.speed = 0;
+        p.x = dest;
+        game.setTimeout(125, function() {
+          p.x = dest;
+          if (next) next();              
+        });
+        delete p.travel;
+      }
+    }
+    if (p.travel && p.travel.direction === 'up') {
+      if (p.y <= (dest+16)) {
+        p.directionOld = p.direction;            
+        p.speed = 0;
+        p.y = dest;
+        game.setTimeout(125, function() {
+          p.y = dest;
+          if (next) next();              
+        }); 
+        delete p.travel;
+      }
+    }
+    if (p.travel && p.travel.direction === 'down') {
+      if (p.y >= (dest-16)) {
+        p.directionOld = p.direction;
+        p.speed = 0;
+        p.y = dest;
+        game.setTimeout(125, function() {
+          p.y = dest;
+          if (next) next();              
+        });
+        delete p.travel;
+      }
+    }    
+  }
+  
   Q.component("towerManControls", {
     // default properties to add onto our entity
     defaults: { speed:200, /*direction: 'up' */ },
@@ -742,13 +800,13 @@ var worldBuild = {
       }
        
       // grab a direction from the input
-      p.direction = Q.inputs['left']  ? 'left' :
-      Q.inputs['right'] ? 'right' :
-      Q.inputs['up']    ? 'up' :
-      Q.inputs['down']  ? 'down' : p.direction;
+      p.direction = Q.inputs.left ? 'left' :
+      Q.inputs.right ? 'right' :
+      Q.inputs.up ? 'up' :
+      Q.inputs.down ? 'down' : p.direction;
       
       // If any inputs, then turn on the gas
-      var weWantTheGas = Q.inputs['right'] || Q.inputs['left'] || Q.inputs['down'] || Q.inputs['up'];
+      var weWantTheGas = Q.inputs.right || Q.inputs.left || Q.inputs.down || Q.inputs.up;
       if (weWantTheGas) p.speed = 200;      
       
       // based on our direction, try to add velocity
@@ -768,54 +826,7 @@ var worldBuild = {
              break;
       }
       
-      if (p.travel) {
-        var dest = p.travel.destination;
-        var next = p.travel.next;
-        if (p.travel.direction === 'left') {
-          if (p.x <= (dest+16)) {
-            p.x = dest;
-            p.speed = 0;            
-            game.setTimeout(125, function() {
-              p.x = dest;
-              if (next) next();
-            });
-            delete p.travel;
-          }
-        }
-        if (p.travel && p.travel.direction === 'right') {
-          if (p.x >= (dest-16)) {
-            p.speed = 0;
-            p.x = dest;
-            game.setTimeout(125, function() {
-              p.x = dest;
-              if (next) next();              
-            });
-            delete p.travel;
-          }
-        }
-        if (p.travel && p.travel.direction === 'up') {
-          if (p.y <= (dest+16)) {
-            p.speed = 0;
-            p.y = dest;
-            game.setTimeout(125, function() {
-              p.y = dest;
-              if (next) next();              
-            }); 
-            delete p.travel;
-          }
-        }
-        if (p.travel && p.travel.direction === 'down') {
-          if (p.y >= (dest-16)) {
-            p.speed = 0;
-            p.y = dest;
-            game.setTimeout(125, function() {
-              p.y = dest;
-              if (next) next();              
-            });
-            delete p.travel;
-          }
-        }        
-      }
+      if (p.travel) handleTravel(p);
     }
   });
 
@@ -1020,16 +1031,20 @@ var worldBuild = {
     step: function(dt) {
       var p = this.entity.p;
 
-      if(Math.random() < p.switchPercent / 100) {
-        this.tryDirection();
-      }
-
       switch(p.direction) {
         case "left": p.vx = -p.speed; break;
         case "right":p.vx = p.speed; break;
         case "up":   p.vy = -p.speed; break;
         case "down": p.vy = p.speed; break;
       }
+      
+      if (p.travel) handleTravel(p);
+      
+      else {
+        if(Math.random() < p.switchPercent / 100) {
+          this.tryDirection();
+        }
+      }    
     },
 
     tryDirection: function() {
