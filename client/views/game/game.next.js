@@ -1106,7 +1106,35 @@ var worldBuild = {
       }
     }
   });
- 
+   function pickUpGems(startX, startY, boxWidth, boxHeight, boxTotal, boxesOnX, xSpace, ySpace){
+     var row = 0;
+     var col = 0;
+     var maxH = boxesOnX;
+     var maxV = boxTotal/boxesOnX;
+     function getGems(){
+       if(row < maxV){
+            if(col < maxH){
+              game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
+              col++;
+              game.player.move(
+                boxWidth - 1 +' '+'right', 
+                boxHeight - 1 + ' ' + 'down', 
+                boxWidth -1 + ' ' + 'left',  
+                boxHeight -1 + ' ' + 'up',
+                getGems);
+            }
+            else if(row < maxV-1){
+               row++;
+               col = 0; 
+               game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
+               col++;
+               game.player.move(boxWidth - 1 +' '+'right', boxHeight - 1 + ' ' + 'down', boxWidth -1 + ' ' + 
+               'left',  boxHeight -1 + ' ' + 'up',getGems);
+           }
+       }  
+     }
+        getGems();
+  }
   Q.load("sprites.json, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
     /* var levelId = Router.current().params.levelId;
     if (levelId) levelPlay(levelId);  
@@ -1128,3 +1156,4 @@ this.gameShow = function() {
   Session.set('gameVisible', true);
   Session.set('gameComplete', false);
 }
+
