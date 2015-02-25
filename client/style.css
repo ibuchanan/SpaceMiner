@@ -144,3 +144,7 @@ strong.line-thru: {
 .tips {
   white-space: normal;
 }
+
+.lesson-part {
+  background-color: rgba(141,6,58,0.5);
+}

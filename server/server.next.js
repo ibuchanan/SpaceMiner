@@ -165,8 +165,8 @@ function createTrainingLevels() {
       player : "light.png"
     },
     [
-      'cccccccccccccccccc',
-      'cpggcccgggcccgggcc',
+      'cpcccccccccccccccc',
+      'cgggcccgggcccgggcc',
       'cgcgcccgcgcccgcgcc',
       'cgggcccgggcccgggcc',
       'cccccccccccccccccc',
@@ -226,11 +226,37 @@ function createTrainingLevels() {
       'ccccggggggggggcccc',
       'cccccccccccccccccc',
      ]                      
-  );      
+  );
+  
+  createTrainingLevel('crazyBoxes', 'Crazy Boxes', 
+    {
+      tile : "rockSwirly.png",
+      enemy : "cyclopsRed.png",
+      coin : "pink.png",
+      gem : "ruby.png",
+      player : "dark.png"
+    },
+    [
+      'pggcggcggcggcggcgg',
+      'cggcggcggcggcggcgg',
+      'cccccccccccccccccc',
+      'cggcggcggcggcggcgg',
+      'cggcggcggcggcggcgg',
+      'cccccccccccccccccc',
+      'cggcggcggcggcggcgg',
+      'cggcggcggcggcggcgg',
+      'cccccccccccccccccc',
+      'cggcggcggcggcggcgg',
+      'cggcggcggcggcggcgg',
+      'cccccccccccccccccc'      
+     ]                      
+  );  
 }
 
 function createLessonsDefault() {
-  Lessons.insert(Lesson.defaultLesson);
+  Lesson.defaultLessons.forEach((lesson)=> {
+    Lessons.insert(lesson);
+  });
 }
 
 function createTrainingLevel(id, name, sprites, worldRows) {
