@@ -42,6 +42,14 @@ function argify(args) {
 }
 var levelId = 'starter';
 
+function toggleGrid() {
+  $('.worldCell').toggleClass('worldCellBorder');
+}
+
+function toggleCoords() {
+  $('.worldCell').toggleClass('worldCellCoords');
+}
+
 Template.game.created = function() {
   var args = argify(this.data);
   levelId = args.level;
@@ -110,6 +118,19 @@ Template.game.helpers({
   messages: function() {
     var sort = { sort : { date : -1 } };
     return LevelsChat.find({level:levelId}, sort);
+  },
+  worldRows: function() {
+    var rows = 14;
+    var cols = 21;    
+    var worldRows = [];
+    for(var rowNum = 0; rowNum < rows; rowNum++) {
+      var row = [];
+      for(var colNum = 0; colNum < cols; colNum++) {
+        row.push({row:rowNum, col:colNum});
+      }
+      worldRows.push(row);
+    }
+    return worldRows;
   }
 });
 
@@ -1106,7 +1127,7 @@ var worldBuild = {
       }
     }
   });
-   function pickUpGems(startX, startY, boxWidth, boxHeight, boxTotal, boxesOnX, xSpace, ySpace){
+   window.pickUpGems = function(startX, startY, boxWidth, boxHeight, boxTotal, boxesOnX, xSpace, ySpace){
      var row = 0;
      var col = 0;
      var maxH = boxesOnX;

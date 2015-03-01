@@ -317,16 +317,17 @@ var Sandbox = {
 		// The keydown handler, that controls all the input
 		keydown: function(e) {
 			// Register shift, control and alt keydown
-			if ( _([16,17,18]).indexOf(e.which, true) > -1 ) this.ctrl = true;
+			if ( ([16,17,18]).indexOf(e.which, true) > -1 ) this.ctrl = true;
 
 			// Enter submits the command
 			if (e.which === 13) {
 				e.preventDefault();
 				var val = this.textarea.val();
-
+        console.log("The val is:" + val);
 				// If shift is down, do a carriage return
 				if ( this.ctrl ) {
 					this.currentHistory = val + "\n";
+          console.log("Current hist:" + this.currentHistory);
 					this.update();
 					return false;
 				}
@@ -395,7 +396,7 @@ var Sandbox = {
 		// The keyup handler, used to switch off shift/alt keys
 		keyup: function(e) {
 			// Register shift, alt and control keyup
-			if ( _([16,17,18]).indexOf(e.which, true) > -1 ) this.ctrl = false;
+			if ( ([16,17,18]).indexOf(e.which, true) > -1 ) this.ctrl = false;
 		},
 		
 		// Checks for special commands. If any are found, performs their action and returns true

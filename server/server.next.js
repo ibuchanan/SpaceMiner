@@ -165,18 +165,18 @@ function createTrainingLevels() {
       player : "light.png"
     },
     [
-      'cpcccccccccccccccc',
-      'cgggcccgggcccgggcc',
-      'cgcgcccgcgcccgcgcc',
-      'cgggcccgggcccgggcc',
-      'cccccccccccccccccc',
-      'cgggcccgggcccgggcc',
-      'cgcgcccgcgcccgcgcc',
-      'cgggcccgggcccgggcc',
-      'cccccccccccccccccc',
-      'cgggcccgggcccgggcc',
-      'cgcgcccgcgcccgcgcc',
-      'cgggcccgggcccgggcc'
+      'ggggcccggggcccgggg',
+      'gccgcccgccgcccgccg',
+      'gccgcccgccgcccgccg',
+      'ggggcccggggcccgggg',
+      'ggggcccggggcccgggg',
+      'gccgcccgccgpccgccg',
+      'gccgcccgccgcccgccg',
+      'ggggcccggggcccgggg',
+      'ggggcccggggcccgggg',
+      'gccgcccgccgcccgccg',
+      'gccgcccgccgcccgccg',
+      'ggggcccggggcccgggg'
      ]                      
   );
   
@@ -227,6 +227,102 @@ function createTrainingLevels() {
       'cccccccccccccccccc',
      ]                      
   );
+  
+  createTrainingLevel('rectangles', 'Rectangles', 
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "pink.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggpggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc',
+      'ggcggcggcggcggcggc'      
+     ]                      
+  );  
+  
+  createTrainingLevel('columns', 'Columns', 
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "pink.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gpgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc',
+      'gcgcgcgcgcgcgcgcgc'
+    ]                      
+  );
+  
+  createTrainingLevel('rows', 'Rows', 
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "pink.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'gggggggggggggggggg',
+      'cccccccccccccccccc',
+      'gggggggggggggggggg',
+      'cccccccccccccccccc',
+      'gggggggggggggggggg',
+      'cccccccccpcccccccc',
+      'gggggggggggggggggg',
+      'cccccccccccccccccc',
+      'gggggggggggggggggg',
+      'cccccccccccccccccc',
+      'gggggggggggggggggg',
+      'cccccccccccccccccc'
+    ]                      
+  );
+  
+  createTrainingLevel('jumps', 'Jumps', 
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "pink.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'gggggcgggggcgggggc',
+      'cccccccccccccccccc',
+      'gggggcgggggcgggggc',
+      'cccccccccccccccccc',
+      'gggggcgggggcgggggc',
+      'cccccccccpcccccccc',
+      'gggggcgggggcgggggc',
+      'cccccccccccccccccc',
+      'gggggcgggggcgggggc',
+      'cccccccccccccccccc',
+      'gggggcgggggcgggggc',
+      'cccccccccccccccccc'
+    ]                      
+  );  
   
   createTrainingLevel('crazyBoxes', 'Crazy Boxes', 
     {

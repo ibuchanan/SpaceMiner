@@ -35,7 +35,7 @@
     </ul>
   </nav>
   {{#each parts}}
-    {{> part}}
+    {{> Template.dynamic template=type data=this}}
   {{/each}}
 {{/if}}
 </template>
@@ -60,9 +60,8 @@
 {{/if}}  
 </template>
 
-<template name='part'>  
+<template name='paragraph'>
 {{#if isRevealed}}
-{{#if eq type 'paragraph'}}
   {{#if isSeen}}
   <div class="collapse lesson-part" id="part{{index}}">
     <p class='paragraph'>{{{text}}}</p>
@@ -71,68 +70,69 @@
     <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>    
   </div>  
   {{else}}
-    <div class='collapse in lesson-part' id='part{{index}}'>
+  <div class='collapse in lesson-part' id='part{{index}}'>
     <p class='paragraph'>
       {{{text}}} 
     </p>
     <br/>
     <br/>
     <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
-    </div>
+  </div>
   {{/if}}
 {{/if}}
-{{#if eq type 'quickCheck'}}  
-<div class='collapse in' id='part{{index}}'> 
-  <section class='quickCheck'>
-    <div class="panel panel-default">
-      <div class="panel-heading" role="tab" id="headingOne">
-        <h4 class="panel-title">
-          <span class='title'><span class='fa fa-graduation-cap'></span> Quick Check:  {{{title}}}</span>
-        </h4>
-      </div>
-      <div class="panel-body">
-        {{{text}}}
-        <br />
-        <div class="input-group">
-          <input type='text' class='quickCheckInput form-control' />
-          <span class="input-group-btn">          
-            <button class='btn btn-success quickCheckSubmit'>Check answer <span class='fa fa-check'></span></button>     
-          </span>
+</template>  
+
+<template name='quickCheck'>
+{{#if isRevealed}}
+  <div class='collapse in' id='part{{index}}'> 
+    <section class='quickCheck'>
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title">
+            <span class='title'><span class='fa fa-graduation-cap'></span> Quick Check:  {{{title}}}</span>
+          </h4>
         </div>
-      </div>              
-    </div>          
-  </section>
-</div>
-{{/if}}
-{{#if eq type 'popquiz'}}
-<div class='collapse in' id='part{{index}}'>  
-  {{> popquiz}}
-</div>
-{{/if}}  
+        <div class="panel-body">
+          {{{text}}}
+          <br />
+          <div class="input-group">
+            <input type='text' class='quickCheckInput form-control' />
+            <span class="input-group-btn">          
+              <button class='btn btn-success quickCheckSubmit'>Check answer <span class='fa fa-check'></span></button>     
+            </span>
+          </div>
+        </div>              
+      </div>          
+    </section>
+  </div>
 {{/if}}
 </template>
 
 <template name='popquiz'>
-  <section class='popquiz'>
-    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-      <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingOne">
-          <h4 class="panel-title">
-            <a data-toggle="collapse" data-parent="#accordion" href="#quiz" aria-expanded="true" aria-controls="quiz">
-              <span class='title'><span class='fa fa-graduation-cap'></span> Pop Quiz</span>
-            </a>
-          </h4>
-        </div>
-        <div id="quiz" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
-          <div class="panel-body">
-            {{#each questions}}
-            {{> question}}          
-            {{/each}}
+{{#if isRevealed}}  
+  <div class='collapse in' id='part{{index}}'>   
+    <section class='popquiz'>
+      <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <div class="panel panel-default">
+          <div class="panel-heading" role="tab" id="headingOne">
+            <h4 class="panel-title">
+              <a data-toggle="collapse" data-parent="#accordion" href="#quiz" aria-expanded="true" aria-controls="quiz">
+                <span class='title'><span class='fa fa-graduation-cap'></span> Pop Quiz</span>
+              </a>
+            </h4>
+          </div>
+          <div id="quiz" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+              {{#each questions}}
+                {{> question}}          
+              {{/each}}
+            </div>
           </div>
         </div>
-      </div>
-    </div>          
-  </section>  
+      </div>          
+    </section>
+  </div>
+{{/if}}
 </template>
 
 <template name='question'>

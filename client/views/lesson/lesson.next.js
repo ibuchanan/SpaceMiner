@@ -146,9 +146,10 @@ Template.partNav.events({
   }
 });
 
-Template.part.helpers({
+var sharedHelpers = {
   isRevealed: function() {
-    secPartRevealedDep.depend()
+    secPartRevealedDep.depend();
+    console.log(this.revealed);
     return this.revealed;
   },
   isSeen: function() {
@@ -157,10 +158,14 @@ Template.part.helpers({
   },
   partIndex: function() {
     return this.index + 1;
-  }
+  }  
+};
+
+_.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
+  Template[item].helpers(sharedHelpers);
 });
 
-Template.part.events({
+var sharedEvents = {
   'click .continue': function(evt, template) {
     var index = currentSecIndex.get(); 
     var lesson = getLesson();
@@ -204,6 +209,10 @@ Template.part.events({
       bootbox.alert("<h2>There was a problem with the system!</h2>");
     }
   }
+};
+
+_.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
+  Template[item].events(sharedEvents);
 });
 
 Template.question.rendered = function() {

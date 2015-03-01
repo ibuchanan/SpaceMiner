@@ -18,6 +18,15 @@
         {{/if}}
       </div>
       <div id='gameContainer' class='{{hideIfGameComplete}}'>
+        <div id="worldContainer" class='worldMap'>
+          {{#each worldRows}}
+          <div class='worldRow'>
+            {{#each this}}
+            <span class='worldCell' data-coords='{{row}},{{col}}'>&nbsp;</span>
+            {{/each}}
+          </div>
+          {{/each}}
+        </div>        
         <canvas id='game' width='640' height='448' class='game'></canvas>
       </div>
       <div id='chat' class='chat {{showIfChatEnabled}}'>
