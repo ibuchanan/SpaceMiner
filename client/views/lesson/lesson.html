@@ -1,8 +1,9 @@
-<template name='lesson'> 
-  <div class='container-fluid'>
+<template name='lesson'>
+  <div class='container-fluid lesson'>
     <section class='row'>
       <article class='lesson'>
-        <h1>{{lesson.title}}</h1>
+        <h1 style='text-align: center'><span class='label label-danger'>{{lessonTitle}} <span class='fa fa-graduation-cap'></span></span></h1>
+        <h6 style='text-align: center'><i>{{lastViewed}}</i></h6>
         <ul class='nav nav-tabs'>
         {{#each lesson.sections}}
           {{> sectionNav}}
@@ -26,8 +27,9 @@
 </template>
 
 <template name='section'>
+<div class='sectionWrapper'>
 {{#if current}}
-  <nav>
+  <nav style='text-align: center'>
     <ul class='pagination'>
       {{#each parts}}
         {{> partNav}}    
@@ -35,42 +37,29 @@
     </ul>
   </nav>
   {{#each parts}}
-    {{> Template.dynamic template=type data=this}}
+    {{#if currentPart}}
+      <h6 style='text-align: center; margin-top: -10px'><i>{{lastViewedPart}}</i></h6>
+      {{> Template.dynamic template=type data=this}}
+    {{/if}}
   {{/each}}
 {{/if}}
+</div>
 </template>
 
 <template name='sectionNav'>
-  <li role="presentation" class="{{current}}"><a href="#" class='sectionNav'>{{title}} <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span></a></li>
+  <li role="presentation" class="{{current}}"><a href="#" class='sectionNav'>{{title}} <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span><div class='lesson-section-nav'>{{lastViewed}}</div></a></li>
 </template>
 
 <template name='partNav'>
 {{#if current}}  
   <li class='active'><a href="#" class='partNav'>{{partIndex}}</a></li>
 {{else}}
-  {{#if isRevealed}}
-    <li><a href="#" class='partNav'>{{partIndex}}</a></li>
-  {{else}}
-    {{#if isSeen}}
-    <li><a href="#" class='partNav'>{{partIndex}}</a></li>
-    {{else}}
-    <li class='disabled'><a href="#">{{partIndex}}</a></li>
-    {{/if}}
-  {{/if}}
+  <li><a href="#" class='partNav'>{{partIndex}}</a></li>
 {{/if}}  
 </template>
 
 <template name='paragraph'>
-{{#if isRevealed}}
-  {{#if isSeen}}
-  <div class="collapse lesson-part" id="part{{index}}">
-    <p class='paragraph'>{{{text}}}</p>
-    <br/>
-    <br/>
-    <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>    
-  </div>  
-  {{else}}
-  <div class='collapse in lesson-part' id='part{{index}}'>
+  <div class='lesson-part alert' id='part{{index}}'>
     <p class='paragraph'>
       {{{text}}} 
     </p>
@@ -78,13 +67,10 @@
     <br/>
     <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
   </div>
-  {{/if}}
-{{/if}}
 </template>  
 
 <template name='quickCheck'>
-{{#if isRevealed}}
-  <div class='collapse in' id='part{{index}}'> 
+  <div id='part{{index}}'> 
     <section class='quickCheck'>
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
@@ -105,12 +91,10 @@
       </div>          
     </section>
   </div>
-{{/if}}
 </template>
 
 <template name='popquiz'>
-{{#if isRevealed}}  
-  <div class='collapse in' id='part{{index}}'>   
+  <div id='part{{index}}'>   
     <section class='popquiz'>
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
@@ -132,7 +116,6 @@
       </div>          
     </section>
   </div>
-{{/if}}
 </template>
 
 <template name='question'>

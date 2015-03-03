@@ -31,3 +31,4 @@ iron:router
 parhelium:epic-editor
 service-configuration
 accounts-github
+momentjs:moment

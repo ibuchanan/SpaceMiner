@@ -1,51 +1,74 @@
 var lesson;
+var lessonProgress;
 var lessonDep = new Deps.Dependency;
 
 var currentSecIndex = new ReactiveVar(0);
-var secPartRevealedDep = new Deps.Dependency;
 var currentPartIndex = new ReactiveVar(0);
 
+function overlayUserProgressOnLesson(lesson, lessonProgress) {
+  _.extend(lesson, _.omit(lessonProgress, 'sections'));
+  // TODO: update last viewed
+  lesson.sections.status = _.omit(lessonProgress.sections, 'items');
+  _.each(lesson.sections, (section, index) => {
+    var secProgress = lessonProgress.sections.items[index];
+    section.parts.status = _.omit(secProgress.parts, 'items');
+    _.extend(section, _.omit(secProgress, 'parts'));
+    _.each(section.parts, (part, partIndex) => {
+      var partProgress = secProgress.parts.items[partIndex];
+      _.extend(part, partProgress);
+    });
+  });
+}
+
+function updateLessonProgress(lessonProgress) {
+  LessonsProgress.update({_id:lessonProgress._id}, {$set: _.omit(lessonProgress, '_id')});
+}
+
+function getLessonProgressForCurrentUser() {
+  return LessonsProgress.findOneForUser(lesson, Meteor.userId());
+}
+
+function updateLessonProgressPartLastViewed(lessonProgress, secIndex, partIndex, includeSec) {
+  if (includeSec) {
+    lessonProgress.sections.items[secIndex].lastViewed = new Date();
+    lessonProgress.sections.lastIndex = secIndex;
+  }
+  lessonProgress.sections.items[secIndex].parts.items[partIndex].lastViewed = new Date();
+  lessonProgress.sections.items[secIndex].parts.lastIndex = partIndex;
+  updateLessonProgress(lessonProgress);
+  console.log(lessonProgress);
+}
+
 Template.lesson.rendered = function() {
-  var id = Router.current().params._id;      
-  Lessons.update({_id: id}, {$set: {lastViewed: new Date()}}, function(err, count) {
+  var id = Router.current().params._id;
+  // Insane: not sure why I have to do this, but it prevents errors...
+  Lessons.update({_id: id}, {$inc: {views:1}}, function(err, count) {
     lesson = Router.current().data();
     var secIndex = Router.current().params.query.sec;
     var partIndex = Router.current().params.query.part;
-        
+
+    lessonProgress = getLessonProgressForCurrentUser();
+    overlayUserProgressOnLesson(lesson, lessonProgress);
+    lessonProgress.lastViewed = new Date();
+
     if (secIndex) {
       secIndex = parseInt(secIndex) - 1;
-      var notSeens = _.filter(lesson.sections, (sec) => {
-        return sec.index < secIndex;
-      });
-      if (notSeens && notSeens.length > 0) {
-        _.each(notSeens, (notSeen)=> {
-          notSeen.seen = true;
-        });
-      }      
-      currentSecIndex.set(secIndex);
     } else {
-      secIndex = 0;
+      secIndex = lessonProgress.sections.lastIndex;
+      console.log(secIndex);
     }
     if (partIndex)  {
+      // nothing special, just parse it
       partIndex = parseInt(partIndex) - 1;
-      var parts = lesson.sections[secIndex].parts;
-      var partFinder = (part)=> {
-        return part.index < partIndex;
-      };
-      var notSeens = _.filter(parts, partFinder);
-      if (notSeens && notSeens.length > 0) {
-        _.each(notSeens, (notSeen) => { 
-          notSeen.seen = true;
-          notSeen.revealed = true;
-        });
-      }
-      parts[partIndex].revealed = true;
-      currentPartIndex.set(partIndex);
-      secPartRevealedDep.changed();
-    }    
-    
-    lessonDep.changed();    
-  });  
+    } else {
+      partIndex = lessonProgress.sections.items[secIndex].parts.lastIndex;
+      console.log(partIndex);
+    }
+    currentSecIndex.set(secIndex);
+    currentPartIndex.set(partIndex);
+    lessonDep.changed();
+    updateLessonProgressPartLastViewed(lessonProgress, secIndex, partIndex, true);
+  });
 }
 
 function getLesson() {
@@ -57,6 +80,15 @@ var answeredDep = new Deps.Dependency;
 
 Template.lesson.helpers({
   lesson: getLesson,
+  lastViewed: function() {
+    var lesson = getLesson();
+    if (!lesson) return '';
+    if (lesson.lastViewed) {
+      var fmt = moment(lesson.lastViewed).fromNow();
+      return 'lesson seen ' + fmt;
+    }
+    return 'lesson seen just now';
+  },
   challengeReady: function() {
     answeredDep.depend();
     var lesson = getLesson();
@@ -69,7 +101,12 @@ Template.lesson.helpers({
       $('.collapse').collapse('hide');
     }
     return ready;
-  }
+  },
+  lessonTitle: function() {    
+    var lesson = getLesson();    
+    if (!lesson) return '';    
+    return 'Lesson: ' + lesson.title;
+  }  
 });
 
 Template.popquiz.helpers({
@@ -81,14 +118,17 @@ Template.section.helpers({
     var index = currentSecIndex.get();    
     return this.index === index;
   },
-  'prevEnabled': function() {
-    var lesson =  getLesson();
-    return this.index > 0;
-  }/*,
-  'nextEnabled': function() {
-    var lesson = getLesson();
-    return this.index < lesson.sections[currentSecIndex.get()].parts[this.index].length - 1;
-  }*/  
+  currentPart: function() {
+   var index = currentPartIndex.get();
+   return this.index === index;
+  },
+  lastViewedPart: function() {
+    currentPartIndex.get();
+    return this.lastViewed ? 'step ' + (this.index+1) + ' seen ' + moment(this.lastViewed).fromNow() : 'step ' + (this.index+1) + ' seen just now';
+  },
+  partIndex: function() {
+    return this.index + 1;
+  }
 });
 
 Template.sectionNav.helpers({
@@ -97,19 +137,29 @@ Template.sectionNav.helpers({
   },
   seenStar: function() {
     currentSecIndex.get();
-    return this.seen ? 'fa-star' : 'fa-star-o';
+    return this.lastViewed !== null ? 'fa-star' : 'fa-star-o';
   },
   seenBadge: function() {
     currentSecIndex.get();
-    return this.seen ? 'alert-success' : '';
+    return this.lastViewed !== null ? 'alert-success' : '';
+  },
+  lastViewed : function() {
+    var index = currentSecIndex.get();
+    if (this.lastViewed) {
+      var fmt = moment(this.lastViewed).fromNow();
+      return 'seen ' + fmt;
+    }
+    return index === this.index ? 'seen just now' : 'never seen';
   }
 });
 
 Template.sectionNav.events({
   'click .sectionNav': function(evt, template) {
-    if (template.data.seen) {
-      currentSecIndex.set(template.data.index);
-    }
+    currentSecIndex.set(template.data.index);
+    currentPartIndex.set(0);
+    var lesson = getLesson();
+    overlayUserProgressOnLesson(lesson, lessonProgress);
+    updateLessonProgressPartLastViewed(lessonProgress, template.data.index, 0, true);
   }
 });
 
@@ -121,14 +171,6 @@ Template.lesson.events({
 });
 
 Template.partNav.helpers({
-  isSeen: function() {
-    secPartRevealedDep.depend();
-    return this.seen;    
-  },
-  isRevealed: function() {
-    secPartRevealedDep.depend();
-    return this.revealed;
-  },
   current: function() {
     var partIndex = currentPartIndex.get();
     return partIndex === this.index;
@@ -141,21 +183,12 @@ Template.partNav.helpers({
 Template.partNav.events({
   'click .partNav': function(evt, template) {
     currentPartIndex.set(template.data.index);
-    $('.collapse').collapse('hide');
-    $('#part' + template.data.index).collapse('show');
+    overlayUserProgressOnLesson(lesson, lessonProgress);
+    updateLessonProgressPartLastViewed(lessonProgress, currentSecIndex.get(), template.data.index);    
   }
 });
 
 var sharedHelpers = {
-  isRevealed: function() {
-    secPartRevealedDep.depend();
-    console.log(this.revealed);
-    return this.revealed;
-  },
-  isSeen: function() {
-    secPartRevealedDep.depend();
-    return this.seen;    
-  },
   partIndex: function() {
     return this.index + 1;
   }  
@@ -167,43 +200,42 @@ _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
 
 var sharedEvents = {
   'click .continue': function(evt, template) {
-    var index = currentSecIndex.get(); 
+    var index = currentSecIndex.get();     
     var lesson = getLesson();
+    overlayUserProgressOnLesson(lesson, lessonProgress);
     var parts = lesson.sections[index].parts;
-    var needsDepChange = false;
-    var notSeen = _.find(parts, (part) => { return !part.seen; });
-    if (notSeen) {
-      notSeen.seen = true;
-      lesson.sections[index].seen = true;
-      needsDepChange = true;
-    }
-    var notRevealed = _.find(parts, (part) => { return !part.revealed; });
-    if (notRevealed) {
-      needsDepChange = true;
-      notRevealed.revealed = true;
+    if (template.data.index < parts.length - 1) {
       var partIndex = currentPartIndex.get();
-      currentPartIndex.set(partIndex + 1);
+      var nextIndex = partIndex + 1;
+      currentPartIndex.set(nextIndex);
+      console.log('changing:');
+      console.log(partIndex);
+      console.log(nextIndex);
+      updateLessonProgressPartLastViewed(lessonProgress, index, nextIndex);
     }
-    if (needsDepChange) secPartRevealedDep.changed();
     if (template.data.index === parts.length -1) {
       currentSecIndex.set(index+1);
       currentPartIndex.set(0);
+      updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
     }
   },
   'click .quickCheckSubmit': (evt, template)=> {
     var input = $(template.find('.quickCheckInput')).val();
     var index = currentSecIndex.get();
+    var lesson = getLesson();
+    overlayUserProgressOnLesson(lesson, lessonProgress);    
     var part = template.data;
     try {
       var evaluator = eval(part.evaluator);
       var correct = evaluator(input);
       if (correct) {
-        bootbox.alert("<h2>Correct!</h2> <p>Press OK to continue...</p>", ()=> {
+        bootbox.alert("<div class='bbalert'><i class='fa fa-smile-o'></i><h2>Correct!</h2> <p>Press OK to continue...</p></div>", ()=> {
           currentSecIndex.set(index+1);
-          currentPartIndex.set(0);        
+          currentPartIndex.set(0);
+          updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
         });
       } else {
-        bootbox.alert("<h2>Nope!</h2><p>Try again...</p>");
+        bootbox.alert("<div class='bbalert'><i class='fa fa-frown-o'></i><h2>Nope!</h2><p>Press OK to try again...</p></div>");
       }
     } catch(ex) {
       bootbox.alert("<h2>There was a problem with the system!</h2>");

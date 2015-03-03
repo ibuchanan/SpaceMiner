@@ -9,6 +9,25 @@ body {
   /*background-image: url(http://a1star.com/images/starsglow1.gif);*/
 }
 
+.bbalert {
+  text-align: center;
+}
+
+.bbalert .fa {
+  font-size: 500%;
+  padding: 6px;
+}
+
+.bbalert .fa-smile-o {
+  color: yellow;
+  background: rgb(98, 196, 98);
+}
+
+.bbalert .fa-frown-o {
+  color: white;
+  background: darkred;
+}
+
 h2{
   color:#D3D3D3;
 }
@@ -201,6 +220,30 @@ strong.line-thru: {
   white-space: normal;
 }
 
+.sectionWrapper {
+  background-color: rgba(96,96,96,0.25);
+}
+
 .lesson-part {
   background-color: rgba(141,6,58,0.5);
+  padding: 8px;
+}
+
+.lesson-section-nav {
+  font-size:55%; 
+  text-align:center;
+  margin-top: 2px;
+  margin-bottom: 0px;
+  background: #222;
+}
+
+.nav-tabs > li, .nav-pills > li {
+    float:none;
+    display:inline-block;
+    *display:inline; /* ie7 fix */
+     zoom:1; /* hasLayout ie7 trigger */
+}
+
+.nav-tabs, .nav-pills {
+    text-align:center;
 }
