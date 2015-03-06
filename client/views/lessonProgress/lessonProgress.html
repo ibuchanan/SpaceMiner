@@ -1,0 +1,36 @@
+<template name='lessonProgress'>
+
+<div class='container-fluid'>
+  <div class='row'>
+    <h1 style='text-align: center'><span class='label label-warning'><span class='fa fa-search'></span> Lesson: {{lesson.title}}</span></h1>
+  </div>
+  <div class='row'>
+    <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+    {{#each lesson.sections}}
+      {{> lessonProgress_section}}
+    {{/each}}
+    </div>
+  </div>
+</div>
+
+</template>
+
+<template name="lessonProgress_section">
+  {{#if mostRecent}}
+  <div style='background: darkgreen; padding: 2px'>
+    <h2><span class='label label-info'>{{title}}</span></h2>
+  </div>
+  {{else}}
+  <h2><span class='label label-info'>{{title}}</span></h2>
+  {{/if}}
+  <i>{{lastViewed}}</i>
+  <div>
+  {{#each parts}}
+    {{> lessonProgress_part}}
+  {{/each}}
+  </div>
+</template>
+
+<template name="lessonProgress_part">
+  <div><span class='label label-primary'>{{index}}</span> <i>{{lastViewed}}</i></div>
+</template>

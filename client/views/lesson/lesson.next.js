@@ -5,21 +5,6 @@ var lessonDep = new Deps.Dependency;
 var currentSecIndex = new ReactiveVar(0);
 var currentPartIndex = new ReactiveVar(0);
 
-function overlayUserProgressOnLesson(lesson, lessonProgress) {
-  _.extend(lesson, _.omit(lessonProgress, 'sections'));
-  // TODO: update last viewed
-  lesson.sections.status = _.omit(lessonProgress.sections, 'items');
-  _.each(lesson.sections, (section, index) => {
-    var secProgress = lessonProgress.sections.items[index];
-    section.parts.status = _.omit(secProgress.parts, 'items');
-    _.extend(section, _.omit(secProgress, 'parts'));
-    _.each(section.parts, (part, partIndex) => {
-      var partProgress = secProgress.parts.items[partIndex];
-      _.extend(part, partProgress);
-    });
-  });
-}
-
 function updateLessonProgress(lessonProgress) {
   LessonsProgress.update({_id:lessonProgress._id}, {$set: _.omit(lessonProgress, '_id')});
 }
@@ -48,7 +33,7 @@ Template.lesson.rendered = function() {
     var partIndex = Router.current().params.query.part;
 
     lessonProgress = getLessonProgressForCurrentUser();
-    overlayUserProgressOnLesson(lesson, lessonProgress);
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
     lessonProgress.lastViewed = new Date();
 
     if (secIndex) {
@@ -158,7 +143,7 @@ Template.sectionNav.events({
     currentSecIndex.set(template.data.index);
     currentPartIndex.set(0);
     var lesson = getLesson();
-    overlayUserProgressOnLesson(lesson, lessonProgress);
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
     updateLessonProgressPartLastViewed(lessonProgress, template.data.index, 0, true);
   }
 });
@@ -183,7 +168,7 @@ Template.partNav.helpers({
 Template.partNav.events({
   'click .partNav': function(evt, template) {
     currentPartIndex.set(template.data.index);
-    overlayUserProgressOnLesson(lesson, lessonProgress);
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
     updateLessonProgressPartLastViewed(lessonProgress, currentSecIndex.get(), template.data.index);    
   }
 });
@@ -202,7 +187,7 @@ var sharedEvents = {
   'click .continue': function(evt, template) {
     var index = currentSecIndex.get();     
     var lesson = getLesson();
-    overlayUserProgressOnLesson(lesson, lessonProgress);
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
     var parts = lesson.sections[index].parts;
     if (template.data.index < parts.length - 1) {
       var partIndex = currentPartIndex.get();
@@ -223,7 +208,7 @@ var sharedEvents = {
     var input = $(template.find('.quickCheckInput')).val();
     var index = currentSecIndex.get();
     var lesson = getLesson();
-    overlayUserProgressOnLesson(lesson, lessonProgress);    
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);    
     var part = template.data;
     try {
       var evaluator = eval(part.evaluator);
@@ -246,6 +231,10 @@ var sharedEvents = {
 _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
   Template[item].events(sharedEvents);
 });
+
+Template.paragraph.rendered = function(evt, template) {
+  sampleProgramWireupAll();
+}
 
 Template.question.rendered = function() {
   $('.choice').button();
