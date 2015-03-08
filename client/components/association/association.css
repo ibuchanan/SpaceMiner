@@ -1,0 +1,42 @@
+.association {
+  background: #333;
+  padding: 4px;
+}
+
+.association .asc-topic {
+  background: blue;
+  display: block;
+  cursor: move; 
+  font-weight: bold;
+}
+
+.association .asc-item {
+  background: purple;
+  display: block;  
+  cursor: move;
+}
+
+.association .asc-element {
+  border: 1px solid #333;
+}
+
+.association .asc-element .fa-arrow-up {
+  cursor: pointer;
+  margin-right: 3px;
+  padding-right: 5px;
+}
+
+.association .asc-element .fa-arrow-down {
+  cursor: pointer;
+  margin-left: 3px;
+  padding-left: 5px;
+  float: right;
+}
+
+.association .asc-correct {
+  background: green;
+}
+
+.association .asc-incorrect {
+  background: red;
+}

@@ -32,3 +32,6 @@ parhelium:epic-editor
 service-configuration
 accounts-github
 momentjs:moment
+mizzao:jquery-ui
+dsyko:jquery-ui-touch-punch
+iamkevingreen:mixitup

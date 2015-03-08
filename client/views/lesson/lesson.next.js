@@ -24,7 +24,15 @@ function updateLessonProgressPartLastViewed(lessonProgress, secIndex, partIndex,
   console.log(lessonProgress);
 }
 
+function setupWindowGlobals() {
+  window.display = function(expr) {
+    bootbox.alert(String(expr));
+  }
+}
+
 Template.lesson.rendered = function() {
+  setupWindowGlobals();
+  
   var id = Router.current().params._id;
   // Insane: not sure why I have to do this, but it prevents errors...
   Lessons.update({_id: id}, {$inc: {views:1}}, function(err, count) {
@@ -232,8 +240,20 @@ _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
   Template[item].events(sharedEvents);
 });
 
-Template.paragraph.rendered = function(evt, template) {
-  sampleProgramWireupAll();
+Template.paragraph.rendered = function(evt, template) {  
+  $('script[type="text/spaceminer+dynamic"]').each(function() {
+    var el = $(this);
+    var name = el.attr('data-name');
+    var data;
+    var text = el.text();
+    try {
+      var data = JSON.parse(text);
+    } catch (ex) {
+      data = text;
+    }
+    UI.insert(UI.renderWithData(Template[name], data), this.parentNode, this);
+    el.remove();
+  }); 
 }
 
 Template.question.rendered = function() {
@@ -257,4 +277,3 @@ Template.question.events({
     }
   }
 });
-

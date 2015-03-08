@@ -1,0 +1,13 @@
+<template name="association">
+<div class="association well well-sm">
+  {{#each items}}
+  {{> associationItem}}
+  {{/each}}
+  <br/>
+  <button class="btn btn-success btn-sm checkAnswers">Check answers</button>  <span class="label label-primary asc-tally"></span>
+</div>
+</template>
+
+<template name="associationItem">
+  <div class="{{type}} asc-element"><i class="fa fa-arrow-up moveUp"></i>{{{label}}}<i class="fa fa-arrow-down moveDown"></i></div>
+</template>
