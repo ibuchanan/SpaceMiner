@@ -1,21 +1,61 @@
 //Template.associationItem.rendered = function() {  
 Template.association.rendered = function() {    
   var el = $(this.firstNode);
-  el.sortable();
+  el.sortable({items:'.asc-item'});
   el.disableSelection(); 
 };
 
 Template.association.helpers({
   items: function() {
+
+    var topics = [];
+    var items = [];
+
+    _.each(this, function(value, key) {
+        var topic =  { type: 'asc-topic', label: key, match: null };
+        var item = { type: 'asc-item', label: value, match: topic };
+        topic.match = item;
+        topics.push(topic);
+        items.push(item);
+    });
+
+    items = _.shuffle(items);
+
+    return {
+      topics: topics,
+      items: items
+    }
+    /*
+    var pairs = _.zip(topics, items);
+    //var flat = _.flatten(pairs);    
+    
+    //return flat;
+    
+    pairs = _.map(pairs, function(pair) {
+      return {
+        topic: pair[0],
+        item: pair[1]
+      };
+    });
+    
+    return pairs;
+    */
+    
+    /*
+    var topics = _.keys(this);
+    var items = _.values(this);
+    var pairs = _.zip(topics, items);
+    
     var pairs = _.map(_.pairs(this),
       function(pair) {
-      var topic =  { type: 'asc-topic', label: pair[0] + ":", match: null };
-      var item = { type: 'asc-item', label: "&nbsp;&nbsp;" + pair[1], match: topic };
+      var topic =  { type: 'asc-topic', label: '<span class="fa fa-question-circle"></span>&nbsp;' + pair[0] + "&nbsp;", match: null };
+      var item = { type: 'asc-item', label: '<span class="fa fa-arrow-circle-right"></span>&nbsp;' + pair[1], match: topic };
       topic.match = item;
       return [ topic, item ];    
     });
     
     return _.shuffle(_.flatten(pairs));
+    */
   }
 });
 

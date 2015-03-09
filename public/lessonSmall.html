@@ -52,7 +52,7 @@ body {
 			window.sandbox = new Sandbox.View({
 				el : $('#sandbox'),
 				model : model,
-        placeholder: ' '
+        placeholder: ''
 			});
       
       if (top.game !== undefined) window.sandbox.model.iframeEval("Object.defineProperty(this, 'game', { get: function() { return top.game; } } )");
