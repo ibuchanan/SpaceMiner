@@ -58,14 +58,14 @@ Template.association.events({
 
 Template.associationItem.events({
   'click .moveUp': function(evt) {
-    var $el = $(evt.target).parent().parent();
+    var $el = $(evt.target).parent();
     $el.fadeOut(250, function(){
         $el.insertBefore($el.prev());
         $el.fadeIn(250);
     });  
   },
   'click .moveDown': function(evt) {
-    var $el = $(evt.target).parent().parent();
+    var $el = $(evt.target).parent();
     $el.fadeOut(250, function(){
       $el.insertAfter($el.next());
       $el.fadeIn(250);
