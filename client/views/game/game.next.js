@@ -51,6 +51,8 @@ function toggleCoords() {
 }
 
 Template.game.created = function() {
+  console.log("THE DATA:");
+  console.log(this.data);
   var args = argify(this.data);
   levelId = args.level;
   if (args.buttons && _.isArray(args.buttons)) {

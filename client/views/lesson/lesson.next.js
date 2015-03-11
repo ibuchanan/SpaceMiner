@@ -33,10 +33,14 @@ function setupWindowGlobals() {
 Template.lesson.rendered = function() {
   setupWindowGlobals();
   
-  var id = Router.current().params._id;
+  //var id = Router.current().params._id;
+  var id = Router.current().params.query.id;
+  console.log(id);
+
   // Insane: not sure why I have to do this, but it prevents errors...
   Lessons.update({_id: id}, {$inc: {views:1}}, function(err, count) {
     lesson = Router.current().data();
+    
     var secIndex = Router.current().params.query.sec;
     var partIndex = Router.current().params.query.part;
 
@@ -72,6 +76,12 @@ function getLesson() {
 var answeredDep = new Deps.Dependency;
 
 Template.lesson.helpers({
+  gameData: function() {
+    return {
+      level: "boxStep",
+      enableSound: false
+    };
+  },
   lesson: getLesson,
   lastViewed: function() {
     var lesson = getLesson();

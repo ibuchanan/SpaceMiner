@@ -25,37 +25,6 @@ Template.association.helpers({
       topics: topics,
       items: items
     }
-    /*
-    var pairs = _.zip(topics, items);
-    //var flat = _.flatten(pairs);    
-    
-    //return flat;
-    
-    pairs = _.map(pairs, function(pair) {
-      return {
-        topic: pair[0],
-        item: pair[1]
-      };
-    });
-    
-    return pairs;
-    */
-    
-    /*
-    var topics = _.keys(this);
-    var items = _.values(this);
-    var pairs = _.zip(topics, items);
-    
-    var pairs = _.map(_.pairs(this),
-      function(pair) {
-      var topic =  { type: 'asc-topic', label: '<span class="fa fa-question-circle"></span>&nbsp;' + pair[0] + "&nbsp;", match: null };
-      var item = { type: 'asc-item', label: '<span class="fa fa-arrow-circle-right"></span>&nbsp;' + pair[1], match: topic };
-      topic.match = item;
-      return [ topic, item ];    
-    });
-    
-    return _.shuffle(_.flatten(pairs));
-    */
   }
 });
 
@@ -68,10 +37,11 @@ Template.association.events({
     template.findAll('.asc-topic').forEach(function(topic) {  
       totalCount++;
       var topicData = Blaze.getView(topic).templateInstance().data;
-      var itemEl = $(topic).next('.asc-item')[0];
+      var index = $(topic).index();
+      var itemEl = template.findAll('.asc-item')[index];
       var itemData =  Blaze.getView(itemEl).templateInstance().data;
       var item = $(itemEl);
-      if (topicData.match === itemData && itemData.match === topicData) {
+      if (topicData.match.label === itemData.label && itemData.match.label === topicData.label) {
         item.addClass('asc-correct');
         item.removeClass('asc-incorrect');
         correctCount++;
@@ -79,14 +49,6 @@ Template.association.events({
       else {
         item.addClass('asc-incorrect');
         item.removeClass('asc-correct');
-        incorrectCount++;
-      }
-    });
-    
-    template.findAll('.asc-item').forEach(function(itemEl) {  
-      var item = $(itemEl);
-      if (!item.hasClass('asc-correct') && !item.hasClass('asc-incorrect')) {
-        item.addClass('asc-incorrect');
         incorrectCount++;
       }
     });
