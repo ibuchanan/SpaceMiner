@@ -1,9 +1,62 @@
+Template.program.created = function() {
+  this._instanceId = Meteor.uuid();
+};
+
+function getEditor(template) {
+  var id = getId(template);
+  var editor = ace.edit(id);
+  return editor;
+}
+
+Template.program.rendered = function() {
+  var editor = getEditor(this);
+  editor.setTheme("ace/theme/chrome");
+  var session = editor.getSession();
+  session.setMode("ace/mode/javascript");
+  var script = this.data.script;
+  editor.setOptions({
+    maxLines: 50,
+    fontSize: 20,
+    showPrintMargin: false,
+    showInvisibles: this.data.contentEditable,
+    readOnly: !this.data.contentEditable,
+    highlightActiveLine: this.data.contentEditable,
+    highlightGutterLine: this.data.contentEditable
+  });  
+
+  session.setOptions({useWorker: false});
+  session.setTabSize(2);
+  session.setValue(script);
+  
+  editor.renderer.setPadding(20);
+  if (!this.data.contentEditable) {
+    editor.renderer.$cursorLayer.element.style.opacity = 0;
+  }
+}
+
+function getId(instance) {
+  return instance._instanceId;
+}
+
+Template.program.helpers({
+  getId: function() {
+    return getId(Template.instance());
+  },
+  contentEditable: function() {
+    return this.contentEditable ? 'contentEditable' : '';
+  },
+  contentEditableClass: function() {
+    return this.contentEditable ? 'editable' : '';
+  }  
+});
+
 Template.program.events({
   'click .execute': function(evt, template) {
+    var editor = getEditor(template);
     var program = $(template.firstNode);
     var useStringify = this.useStringify;
     var disp = program.find('.display');
-    var code = program.find('.code').text();
+    var code = editor.getSession().getValue();
     disp.text('').hide();
     var printed = false;
     var console = {
@@ -53,8 +106,10 @@ Template.program.events({
       .addClass('unexecuted fa-square-o');
 
     execute.removeClass('btn-primary').addClass('btn-success');
-    execute.find('.command').text('Execute');
+    execute.find('.command').text('Execute');    
 
     program.effect('highlight', {color:'blue'});    
+    
+    program.find('.displayContainer').hide();
   }
 });
