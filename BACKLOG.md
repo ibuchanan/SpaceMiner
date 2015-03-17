@@ -7,6 +7,7 @@ SpaceMiner takes beginning programmers on an intergalactic journey
 * `User` -- The most generic, almost useless, category of an actor interacting with SpaceMiner. Generally, avoid using **"As a User"** in stories.
 * `Visitor` -- Any User, whether authenticated or not, who is interacting with SpaceMiner.
 * `Member` -- A User who has Registered with SpaceMiner and is actively logged in.
+* `Author` -- A User who authors lessons / courses within SpacemMiner
 * `Admin` -- The User who rules over all and can do anything. The Admin is not quite omnipotent, but aspires to be. 
 
 # Definitions
@@ -122,5 +123,26 @@ This is where information about what's happening across the galaxy shows up. It'
 * Training stats in real time
 * World information
 * Scoreboard that tallies number of gems and coins 
+
+# Lesson Components
+
+## program component
+
+This component lets a Member read and execute a chunk of code. It should be able to:
+
+### Phase 1
+* Execute code, and output results to its own Console area, with functions for:
+  * `print(val)` -- Writes `val` to the Console with a new line to the console
+  * `printb(val)` -- Writes `val` to the Console but without a new line
+* Automatically save each Execution, perhaps even auto-saving in the background.
+* Load saved code when a Member navigates back to the step that contains this component instance.
+  * Perhaps this should be the responsibility of its container instead of itself. In such a case, it should fire an event when it is destroyed or on interval (for auto-save) for listening containers to observe and do their saving action on.
+* Allow for loading the canonical example from the Author
+### Phase 2
+* Allow loading code from other people who have done this step
+* Allow rating and comments on the solution that a particular Member has provided for a challenge step
+* Show who is currently on this step
+  * Allow interactive chat with those Members
+* Allow rating understanding of the code on slider scale
 
 
