@@ -9,6 +9,13 @@ function getEditor(template) {
 }
 
 Template.program.rendered = function() {
+  console.log("------------");
+  console.log(this.data);
+  if (!_.has(this.data, 'contentEditable')) this.data = {
+    contentEditable : true,
+    script: '',
+    useStringify: true
+  };
   var editor = getEditor(this);
   editor.setTheme("ace/theme/chrome");
   var session = editor.getSession();
@@ -66,6 +73,10 @@ Template.program.events({
       }
     };
     var print = console.log;
+    var printb = function(val) {
+      printed = true;
+      disp.append(val);
+    }
     var result;
     try {
       result = eval(code);
