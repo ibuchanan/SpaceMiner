@@ -77,6 +77,15 @@ Template.program.events({
       printed = true;
       disp.append(val);
     }
+    
+    var printArray = function(array) {
+      array.forEach(print);
+    }
+    
+    var printbArray = function(array) {
+      array.forEach(printb);
+    }
+    
     var result;
     try {
       result = eval(code);
