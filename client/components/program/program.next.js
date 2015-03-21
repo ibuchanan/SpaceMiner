@@ -25,7 +25,6 @@ Template.program.rendered = function() {
     maxLines: 50,
     fontSize: 20,
     showPrintMargin: false,
-    showInvisibles: this.data.contentEditable,
     readOnly: !this.data.contentEditable,
     highlightActiveLine: this.data.contentEditable,
     highlightGutterLine: this.data.contentEditable
