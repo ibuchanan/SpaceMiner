@@ -1,0 +1,19 @@
+<template name="ticTacToe">
+  <section class="ticTacToe">
+    <div class="ttt-outer">
+      <h1 class="ttt-title">Tic-Tac-Toe</h1>
+      <div class="ttt-subtitle">X versus O where three-in-a-row wins!</div>
+      <h4>Game ID: {{game._id}}</h4>
+      <h3>Turn: {{game.turn}}</h3>
+      <div class='ttt-board'>
+      {{#each rows}}
+        <div class='ttt-row'>
+        {{#each row}}
+        <div class='ttt-cell'>{{move}}</div>
+        {{/each}}
+        </div>
+      {{/each}}
+      </div>    
+    </div>
+  </section>
+</template>

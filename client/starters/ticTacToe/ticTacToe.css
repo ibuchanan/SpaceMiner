@@ -1,0 +1,53 @@
+.ticTacToe {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: black;
+  font-weight: normal;
+  margin: 3em 0;
+  text-align: center;
+}
+
+.ticTacToe .ttt-outer {
+  margin: 0 auto;
+  max-width: 480px;
+  text-align: center;
+  background: white;
+  padding: 15px;  
+}
+
+.ttt-title {
+  font-size: 1.5em;
+  font-weight: 600;
+  letter-spacing: .3em;
+  margin: 0 0 .25em;
+  text-align: center;
+  text-indent: .3em;
+  text-transform: uppercase;
+}
+
+.ttt-subtitle {
+  color: #999;
+  font-size: .875em;
+  margin-bottom: 2em;
+}
+
+.ticTacToe .ttt-board {
+  display: table;
+  border: none;
+  margin: 0 auto;  
+}
+
+.ticTacToe .ttt-row {
+  display: table-row;
+}
+
+.ticTacToe .ttt-cell {
+  width: 100px;
+  height: 100px;
+  background: orange;
+  border: 1px solid black;
+  display: table-cell;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 300%;
+}
