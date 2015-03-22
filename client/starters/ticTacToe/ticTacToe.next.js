@@ -46,7 +46,21 @@ var TicTacToe = (function() {
     ], name);
   }
 
-  return class {
+  var defaults = {
+    move: function(board, row, col, player) {
+      board[row][col] = player;
+    },
+    detectWin: function(moves) {
+      return moves[0] != E && moves[0] === moves[1] && moves[1] === moves[2];
+    },
+    hasWinner: function() {
+      return this.row0.isWinner || this.row1.isWinner || this.row2.isWinner
+        || this.col0.isWinner || this.col1.isWinner || this.col2.isWinner
+        || this.diagLeft.isWinner || this.diagRight.isWinner;
+    }
+  };
+
+  var Ttt = class {
     constructor(id) {
       this._id = id;
       this.board = [
@@ -55,20 +69,7 @@ var TicTacToe = (function() {
         [E, E, E]
       ];
       this.turn = X;
-    }
-    // Default implementations of game logic
-    move(board, row, col, player) {
-      board[row][col] = player;
-    }
-
-    detectWin(moves) {
-      return moves[0] != E && moves[0] === moves[1] && moves[1] === moves[2];
-    }
-
-    get hasWinner() {
-      return this.row0.isWinner || this.row1.isWinner || this.row2.isWinner
-        || this.col0.isWinner || this.col1.isWinner || this.col2.isWinner
-        || this.diagLeft.isWinner || this.diagRight.isWinner;
+      this.reset();
     }
 
     player(playerLetter) { return player(this, playerLetter); }
@@ -110,6 +111,12 @@ var TicTacToe = (function() {
       return '';
     }
   };
+  Ttt.prototype.reset = function() {
+    this.move = defaults.move;
+    this.detectWin = defaults.detectWin;
+    this.hasWinner = defaults.hasWinner;
+  };
+  return Ttt;
 }());
 
  function getGameId() {
