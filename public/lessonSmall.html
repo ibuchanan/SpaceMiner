@@ -56,6 +56,10 @@ body {
 			});
       
       if (top.game !== undefined) window.sandbox.model.iframeEval("Object.defineProperty(this, 'game', { get: function() { return top.game; } } )");
+      if (top.onConsoleLoaded !== undefined && typeof top.onConsoleLoaded === 'function') {
+        console.log('Calling top.onConsoleLoaded');
+        top.onConsoleLoaded(window.sandbox);
+      }      
 		});
 	</script>
 </body>

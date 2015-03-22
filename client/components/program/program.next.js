@@ -28,12 +28,12 @@ Template.program.rendered = function() {
     readOnly: !this.data.contentEditable,
     highlightActiveLine: this.data.contentEditable,
     highlightGutterLine: this.data.contentEditable
-  });  
+  });
 
   session.setOptions({useWorker: false});
   session.setTabSize(2);
   session.setValue(script);
-  
+
   editor.renderer.setPadding(20);
   if (!this.data.contentEditable) {
     editor.renderer.$cursorLayer.element.style.opacity = 0;
@@ -53,7 +53,7 @@ Template.program.helpers({
   },
   contentEditableClass: function() {
     return this.contentEditable ? 'editable' : '';
-  }  
+  }
 });
 
 Template.program.events({
@@ -76,15 +76,22 @@ Template.program.events({
       printed = true;
       disp.append(val);
     }
-    
+
     var printArray = function(array) {
       array.forEach(print);
     }
-    
+
     var printbArray = function(array) {
       array.forEach(printb);
     }
-    
+
+    var ttt = {
+      get game() {
+        return window.tttGame.get();
+      },
+      update: function() { window.tttGame.set(this.game); }
+    };
+
     var result;
     try {
       result = eval(code);

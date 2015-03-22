@@ -13,7 +13,27 @@
         {{/each}}
         </div>
       {{/each}}
-      </div>    
+      </div>
+      <div style='display: table; text-align: left; margin: 0 auto;'>
+        <div style='display: table-row'>
+          <span style='display: table-cell; font-weight: bold; padding: 3px;'>Path</span>
+          <span style='display: table-cell; font-weight: bold; padding: 3px;'>isWinner</span>
+          <span style='display: table-cell; font-weight: bold; padding: 3px;'>moves</span>
+        </div>
+      {{#each allPaths}}
+        <div style='display: table-row'>
+          <span style='display: table-cell; padding: 3px;'>
+            {{this.name}}
+          </span>
+          <span style='display: table-cell; padding: 3px;'>
+            {{isWinner}}
+          </span>
+          <span style='display: table-cell; padding: 3px;'>
+            {{moves}}
+          </span>
+        </div>
+      {{/each}}
+      </div>
     </div>
   </section>
 </template>
