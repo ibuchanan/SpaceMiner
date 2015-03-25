@@ -1,4 +1,22 @@
-Template.program.created = function() {
+function updateUserProgram(userProgram) {
+  userProgram.lastSaved = new Date();
+  var obj = _.omit(userProgram, '_id', 'version');
+  UserPrograms.update(userProgram._id,
+    {
+      $set: obj,
+      $inc: {'version': 1}
+    },
+    {
+      removeEmptyStrings: false
+    }
+  );
+}
+
+function getUserProgramForCurrentUser(program) {
+  return UserPrograms.findOneForUser(program, Meteor.userId());
+}
+
+Template.editorProgram.created = function() {
   this._instanceId = Meteor.uuid();
 };
 
@@ -8,41 +26,36 @@ function getEditor(template) {
   return editor;
 }
 
-Template.program.rendered = function() {
-  if (!_.has(this.data, 'contentEditable')) this.data = {
-    contentEditable : true,
-    script: '',
-    useStringify: true
-  };
+Template.editorProgram.rendered = function() {
+  var userProgram = getUserProgramForCurrentUser(this.data.program);
+  this.data.program = userProgram;
   var editor = getEditor(this);
   editor.setTheme("ace/theme/chrome");
   var session = editor.getSession();
   session.setMode("ace/mode/javascript");
-  var script = this.data.script;
+  var code = this.data.program.code;
   editor.setOptions({
-    maxLines: 50,
+    maxLines: 18,
+    minLines: 18,
     fontSize: 20,
     showPrintMargin: false,
-    readOnly: !this.data.contentEditable,
-    highlightActiveLine: this.data.contentEditable,
-    highlightGutterLine: this.data.contentEditable
+    readOnly: false,
+    highlightActiveLine: true,
+    highlightGutterLine: true
   });
 
   session.setOptions({useWorker: false});
   session.setTabSize(2);
-  session.setValue(script);
+  session.setValue(code);
 
   editor.renderer.setPadding(20);
-  if (!this.data.contentEditable) {
-    editor.renderer.$cursorLayer.element.style.opacity = 0;
-  }
 }
 
 function getId(instance) {
   return instance._instanceId;
 }
 
-Template.program.helpers({
+Template.editorProgram.helpers({
   getId: function() {
     return getId(Template.instance());
   },
@@ -54,27 +67,31 @@ Template.program.helpers({
   }
 });
 
-Template.program.events({
+Template.editorProgram.events({
+  'click .changesSave': function(evt, template) {
+    var editor = getEditor(template);
+    var code = editor.getSession().getValue();
+    template.data.program.code = code;
+    updateUserProgram(template.data.program);
+  },
   'click .execute': function(evt, template) {
     var editor = getEditor(template);
     var program = $(template.firstNode);
     var useStringify = this.useStringify;
-    var disp = program.find('.display');
+    var output = program.find('.ePrg-output');
     var code = editor.getSession().getValue();
-    disp.text('').hide();
+    output.text('').hide();
     var printed = false;
-    var realConsole = console;
     var console = {
       log : function(val) {
         printed = true;
-        disp.append(val + "\n");
+        output.append(val + "\n");
       }
     };
     var print = console.log;
-    
     var printb = function(val) {
       printed = true;
-      disp.append(val);
+      output.append(val);
     }
 
     var printArray = function(array) {
@@ -99,43 +116,23 @@ Template.program.events({
       result = "*Error executing program*";
       window.console.error(ex);
     }
-    disp.parents().show();
+    output.parents().show();
     if(!printed) {
       if (useStringify === 'true') {
         result = JSON.stringify(result, ' ', 2);
       }
-      disp.text(result).fadeIn();
+      output.text(result).fadeIn();
     } else {
-      disp.fadeIn();
+      output.fadeIn();
     }
-    var dispContainer = program.find('.displayContainer');
-    dispContainer.effect('highlight', {color:'green'});
-
-    program.find('.unexecuted')
-      .removeClass('unexecuted fa-square-o')
-      .addClass('executed fa-check-square-o');
-
-    var execute = program.find('.execute');
-    execute.removeClass('btn-success').addClass('btn-primary');
-    execute.find('.command').text('Re-execute');
+    var outputContainer = program.find('.ePrg-outputContainer');
+    outputContainer.effect('highlight', {color:'green'});
   },
-  'click .reset': function(evt, template) {
+  'click .clear': function(evt, template) {
     var program = $(template.firstNode);
-    var disp = program.find('.display');
-
-    disp.parent().fadeOut('fast', function() { disp.empty(); });
-    
-    var execute = program.find('.execute');
-
-    execute.find('.executed')
-      .removeClass('executed fa-check-square-o')
-      .addClass('unexecuted fa-square-o');
-
-    execute.removeClass('btn-primary').addClass('btn-success');
-    execute.find('.command').text('Execute');    
-
-    program.effect('highlight', {color:'blue'});    
-    
-    program.find('.displayContainer').hide();
+    var output = program.find('.ePrg-output');
+    var outputContainer = program.find('.ePrg-outputContainer');
+    output.empty();
+    outputContainer.effect('highlight', {color:'blue'});
   }
 });

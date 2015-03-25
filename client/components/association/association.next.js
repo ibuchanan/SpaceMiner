@@ -1,13 +1,12 @@
-//Template.associationItem.rendered = function() {  
-Template.association.rendered = function() {    
+//Template.associationItem.rendered = function() {
+Template.association.rendered = function() {
   var el = $(this.firstNode);
   el.sortable({items:'.asc-item'});
-  el.disableSelection(); 
+  el.disableSelection();
 };
 
 Template.association.helpers({
   items: function() {
-
     var topics = [];
     var items = [];
 
@@ -33,8 +32,8 @@ Template.association.events({
     var correctCount = 0;
     var incorrectCount = 0;
     var totalCount = 0;
-    
-    template.findAll('.asc-topic').forEach(function(topic) {  
+
+    template.findAll('.asc-topic').forEach(function(topic) {
       totalCount++;
       var topicData = Blaze.getView(topic).templateInstance().data;
       var index = $(topic).index();
@@ -52,10 +51,10 @@ Template.association.events({
         incorrectCount++;
       }
     });
-    
+
     var tally = correctCount + " / " + totalCount;
     $(template.find('.asc-tally')).text(tally);
-  }  
+  }
 });
 
 Template.associationItem.events({
@@ -64,7 +63,7 @@ Template.associationItem.events({
     $el.fadeOut(250, function(){
         $el.insertBefore($el.prev());
         $el.fadeIn(250);
-    });  
+    });
   },
   'click .moveDown': function(evt) {
     var $el = $(evt.target).parent();
@@ -72,6 +71,5 @@ Template.associationItem.events({
       $el.insertAfter($el.next());
       $el.fadeIn(250);
     });
-  } 
-  
-})
+  }
+});

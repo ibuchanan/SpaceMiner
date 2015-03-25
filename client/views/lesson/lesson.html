@@ -1,28 +1,24 @@
 <template name='lesson'>
   <div class='container-fluid lesson'>
-    <section class='row'>           
+    <section class='row'>
       <article class='lesson'>
         <h1 style='text-align: center'><span class='label label-danger'>{{lessonTitle}} <span class='fa fa-graduation-cap'></span></span></h1>
         <h6 style='text-align: center'><i>{{lastViewed}}</i></h6>
         <ul class='nav nav-tabs'>
-        {{#each lesson.sections}}
+          {{#each lesson.sections}}
           {{> sectionNav}}
-        {{/each}}
+          {{/each}}
         </ul>
         {{#each lesson.sections}}
-          {{> section}}
+        {{> section}}
         {{/each}}
-        
-        <!--
-        {{#if challengeReady}}
-        <h2>Code Challenge!</h2>
-        <p>Now, you're ready to write some code. Never seen code before? Don't worry, we're going to tell you what to type at first. It's best to just dive right in, so click the button below to take the code challenge!
-        </p>
-        <a class='btn btn-success challengeShow' href="/challenge/variables">Take code challenge <span class='fa fa-code'></span></a>
-        {{/if}}
-        -->
       </article>
     </section>
+    {{#if rendered}}
+    <div class='row lesson-continue'>
+      <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
+    </div>
+    {{/if}}
   </div>
 </template>
 
@@ -32,7 +28,7 @@
   <nav style='text-align: center'>
     <ul class='pagination'>
       {{#each parts}}
-        {{> partNav}}    
+        {{> partNav}}
       {{/each}}
     </ul>
   </nav>
@@ -51,26 +47,23 @@
 </template>
 
 <template name='partNav'>
-{{#if current}}  
+{{#if current}}
   <li class='active'><a href="#" class='partNav'>{{partIndex}}</a></li>
 {{else}}
   <li><a href="#" class='partNav'>{{partIndex}}</a></li>
-{{/if}}  
+{{/if}}
 </template>
 
 <template name='paragraph'>
   <div class='lesson-part alert' id='part{{index}}'>
     <p class='paragraph'>
-      {{{text}}} 
+      {{{text}}}
     </p>
-    <br/>
-    <br/>
-    <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
   </div>
-</template>  
+</template>
 
 <template name='quickCheck'>
-  <div id='part{{index}}'> 
+  <div id='part{{index}}'>
     <section class='quickCheck'>
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
@@ -83,18 +76,18 @@
           <br />
           <div class="input-group">
             <input type='text' class='quickCheckInput form-control' />
-            <span class="input-group-btn">          
-              <button class='btn btn-success quickCheckSubmit'>Check answer <span class='fa fa-check'></span></button>     
+            <span class="input-group-btn">
+              <button class='btn btn-success quickCheckSubmit'>Check answer <span class='fa fa-check'></span></button>
             </span>
           </div>
-        </div>              
-      </div>          
+        </div>
+      </div>
     </section>
   </div>
 </template>
 
 <template name='popquiz'>
-  <div id='part{{index}}'>   
+  <div id='part{{index}}'>
     <section class='popquiz'>
       <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         <div class="panel panel-default">
@@ -108,12 +101,12 @@
           <div id="quiz" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
             <div class="panel-body">
               {{#each questions}}
-                {{> question}}          
+                {{> question}}
               {{/each}}
             </div>
           </div>
         </div>
-      </div>          
+      </div>
     </section>
   </div>
 </template>

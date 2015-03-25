@@ -221,12 +221,21 @@ strong.line-thru: {
 }
 
 .sectionWrapper {
-  background-color: rgba(96,96,96,0.25);
+  /* background-color: rgba(96,96,96,0.25); */
+}
+
+.lesson-parts {
+  background-color: rgba(141,6,58,0.5);
 }
 
 .lesson-part {
-  background-color: rgba(141,6,58,0.5);
   padding: 8px;
+}
+
+.lesson-continue {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 .lesson-section-nav {

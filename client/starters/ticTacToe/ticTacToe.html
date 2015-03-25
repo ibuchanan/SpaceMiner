@@ -6,13 +6,15 @@
       <h4>Game ID: {{game._id}}</h4>
       <h3>Turn: {{game.turn}}</h3>
       <div class='ttt-board'>
-      {{#each rows}}
-        <div class='ttt-row'>
-        {{#each row}}
-        <div class='ttt-cell'>{{move}}</div>
+        <div class='ttt-rowGroup'>  
+        {{#each rows}}
+          <div class='ttt-row'>
+          {{#each row}}
+            <div class='ttt-cell'>{{move}}</div>
+          {{/each}} 
+          </div>
         {{/each}}
         </div>
-      {{/each}}
       </div>
       <div style='display: table; text-align: left; margin: 0 auto;'>
         <div style='display: table-row'>

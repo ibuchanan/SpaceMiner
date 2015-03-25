@@ -1,0 +1,12 @@
+.editor .nav-tabs {
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.editor .nav-pills {
+  text-align: left;
+}
+
+.editor {
+  display: block;
+}

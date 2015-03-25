@@ -1,4 +1,4 @@
-var lesson;
+var lesson = null;
 var lessonProgress;
 var lessonDep = new Deps.Dependency;
 
@@ -32,15 +32,13 @@ function setupWindowGlobals() {
 
 Template.lesson.rendered = function() {
   setupWindowGlobals();
-  
+
   //var id = Router.current().params._id;
   var id = Router.current().params.query.id;
-  console.log(id);
 
   // Insane: not sure why I have to do this, but it prevents errors...
   Lessons.update({_id: id}, {$inc: {views:1}}, function(err, count) {
     lesson = Router.current().data();
-    
     var secIndex = Router.current().params.query.sec;
     var partIndex = Router.current().params.query.part;
 
@@ -96,7 +94,7 @@ Template.lesson.helpers({
     answeredDep.depend();
     var lesson = getLesson();
     if (!lesson) return;
-    var questions = lesson.questions;    
+    var questions = lesson.questions;
     var ready = _.every(questions, (question)=> {
       return question.correct;
     });
@@ -105,11 +103,15 @@ Template.lesson.helpers({
     }
     return ready;
   },
-  lessonTitle: function() {    
-    var lesson = getLesson();    
-    if (!lesson) return '';    
+  lessonTitle: function() {
+    var lesson = getLesson();
+    if (!lesson) return '';
     return 'Lesson: ' + lesson.title;
-  }  
+  },
+  rendered: function() {
+    var lesson = getLesson();
+    return lesson !== null;
+  }
 });
 
 Template.popquiz.helpers({
@@ -170,7 +172,27 @@ Template.lesson.events({
   'click .prev': function() {
     var index = currentSecIndex.get(); 
     currentSecIndex.set(index-1);
-  }
+  },
+  'click .continue': function(evt, template) {
+    var index = currentSecIndex.get();     
+    var lesson = getLesson();
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
+    var parts = lesson.sections[index].parts;
+    var partIndex = currentPartIndex.get();
+    if (partIndex < parts.length - 1) {
+      var nextIndex = partIndex + 1;
+      currentPartIndex.set(nextIndex);
+      console.log('changing:');
+      console.log(partIndex);
+      console.log(nextIndex);
+      updateLessonProgressPartLastViewed(lessonProgress, index, nextIndex);
+    }
+    if (partIndex === parts.length -1) {
+      currentSecIndex.set(index+1);
+      currentPartIndex.set(0);
+      updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
+    }
+  },  
 });
 
 Template.partNav.helpers({
@@ -202,26 +224,6 @@ _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
 });
 
 var sharedEvents = {
-  'click .continue': function(evt, template) {
-    var index = currentSecIndex.get();     
-    var lesson = getLesson();
-    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
-    var parts = lesson.sections[index].parts;
-    if (template.data.index < parts.length - 1) {
-      var partIndex = currentPartIndex.get();
-      var nextIndex = partIndex + 1;
-      currentPartIndex.set(nextIndex);
-      console.log('changing:');
-      console.log(partIndex);
-      console.log(nextIndex);
-      updateLessonProgressPartLastViewed(lessonProgress, index, nextIndex);
-    }
-    if (template.data.index === parts.length -1) {
-      currentSecIndex.set(index+1);
-      currentPartIndex.set(0);
-      updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
-    }
-  },
   'click .quickCheckSubmit': (evt, template)=> {
     var input = $(template.find('.quickCheckInput')).val();
     var index = currentSecIndex.get();
