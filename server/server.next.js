@@ -154,9 +154,9 @@ function createTrainingLevels() {
     "updatedBy":"admin",
     "userId":"admin",
     "version":1
-  }; 
-  
-  createTrainingLevel('boxStep', 'Box Step', 
+  };
+
+  createTrainingLevel('boxStep', 'Box Step',
     {
       tile : "fiery.png",
       enemy : "cyclopsRed.png",
@@ -177,10 +177,10 @@ function createTrainingLevels() {
       'gccgcccgccgcccgccg',
       'gccgcccgccgcccgccg',
       'ggggcccggggcccgggg'
-     ]                      
+     ]
   );
-  
-  createTrainingLevel('mightySquare', 'Mighty Square', 
+
+  createTrainingLevel('mightySquare', 'Mighty Square',
     {
       tile : "plasma.png",
       enemy : "goonGreen.png",
@@ -201,10 +201,10 @@ function createTrainingLevels() {
       'ccccgccccccccgcccc',
       'ccccggggggggggcccc',
       'cccccccccccccccccc',
-     ]                      
-  );  
-      
-  createTrainingLevel('mightierSquares', 'Mightier Squares', 
+     ]
+  );
+
+  createTrainingLevel('mightierSquares', 'Mightier Squares',
     {
       tile : "golden.png",
       enemy : "brainPink.png",
@@ -225,10 +225,10 @@ function createTrainingLevels() {
       'ccccgccccccccgcccc',
       'ccccggggggggggcccc',
       'cccccccccccccccccc',
-     ]                      
+     ]
   );
-  
-  createTrainingLevel('rectangles', 'Rectangles', 
+
+  createTrainingLevel('rectangles', 'Rectangles',
     {
       tile : "golden.png",
       enemy : "brainPink.png",
@@ -248,11 +248,11 @@ function createTrainingLevels() {
       'ggcggcggcggcggcggc',
       'ggcggcggcggcggcggc',
       'ggcggcggcggcggcggc',
-      'ggcggcggcggcggcggc'      
-     ]                      
-  );  
-  
-  createTrainingLevel('columns', 'Columns', 
+      'ggcggcggcggcggcggc'
+     ]
+  );
+
+  createTrainingLevel('columns', 'Columns',
     {
       tile : "golden.png",
       enemy : "brainPink.png",
@@ -273,10 +273,10 @@ function createTrainingLevels() {
       'gcgcgcgcgcgcgcgcgc',
       'gcgcgcgcgcgcgcgcgc',
       'gcgcgcgcgcgcgcgcgc'
-    ]                      
+    ]
   );
-  
-  createTrainingLevel('rows', 'Rows', 
+
+  createTrainingLevel('rows', 'Rows',
     {
       tile : "golden.png",
       enemy : "brainPink.png",
@@ -297,10 +297,10 @@ function createTrainingLevels() {
       'cccccccccccccccccc',
       'gggggggggggggggggg',
       'cccccccccccccccccc'
-    ]                      
+    ]
   );
-  
-  createTrainingLevel('jumps', 'Jumps', 
+
+  createTrainingLevel('jumps', 'Jumps',
     {
       tile : "golden.png",
       enemy : "brainPink.png",
@@ -321,9 +321,9 @@ function createTrainingLevels() {
       'cccccccccccccccccc',
       'gggggcgggggcgggggc',
       'cccccccccccccccccc'
-    ]                      
-  );  
-  
+    ]
+  );
+
   createTrainingLevel('crazyBoxes', 'Crazy Boxes', 
     {
       tile : "rockSwirly.png",
@@ -344,26 +344,26 @@ function createTrainingLevels() {
       'cccccccccccccccccc',
       'cggcggcggcggcggcgg',
       'cggcggcggcggcggcgg',
-      'cccccccccccccccccc'      
-     ]                      
-  );  
+      'cccccccccccccccccc'
+     ]
+  );
 }
 
 function createLessonsDefault() {
-  Lesson.defaultLessons.forEach((lesson)=> {
+  Lessons.defaultLessons.forEach((lesson)=> {
     Lessons.insert(lesson);
   });
 }
 
 function createTrainingLevel(id, name, sprites, worldRows) {
-  
+
   var spritesString = JSON.stringify(sprites);
   var worldRowsString = JSON.stringify(worldRows);
-    
+
   var level =  {
     "_id": id,
     name,
-    "phase":"training",    
+    "phase":"training",
     "published":false,
     "script":
 `var worldName = '${name}';

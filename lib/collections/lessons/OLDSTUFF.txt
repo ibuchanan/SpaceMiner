@@ -1,0 +1,30 @@
+/*
+           `Here's a very brief computer program written in the <b>JavaScript</b> programming language. JavaScript is built-in to all web modern web browsers that run on desktops, laptops, phones, and tablet devices:
+<br/>
+<br/>
+<pre><code>var userName = prompt("What is your name?");
+say("Hello there, " + userName + ". Welcome to your first programming mission! By the way, I noticed that your name is " + userName.length + " letters long and is " + userName.split("").reverse().join("") + " backwards!");</code></pre>
+<br/>
+<br/>
+Study this code for a moment before continuing. What do you think it's going to do just by looking at it?
+<br/>
+`,
+          `Here's the same program again. Do you have an hypothesis about what it will do yet? If so, press this button to run it: <button class='btn btn-primary' onclick="window.say=bootbox.alert;var code = $('#program').text();eval(code);">Execute program</button>
+<br/>
+<br/>
+<pre><code id='program'>var userName = prompt("What is your name?");
+var letterCount,
+    nameBackwards,
+    isPalindrome;
+if (userName !== null) {
+  letterCount = userName.length;
+  nameBackwards = userName.split("").reverse().join("");
+  if (userName === nameBackwards) {
+    isPalindrome = true;
+  } else {
+    isPalindrome = false;
+  }
+}
+say("Hello there, " + userName + ". Welcome to your first programming mission! By the way, I noticed that your name is " + letterCount + " letters long and is \\"" + nameBackwards + "\\" backwards! And it is " + isPalindrome + " that your name is spelled the same forwards and backwards, just in case you didn't already know that.");</code></pre>
+`
+*/
