@@ -13,6 +13,18 @@ var TicTacToe = (function() {
     return {
       move: function(row, col) {
         game.move(game.board, row, col, player);
+        // TODO move this hack?
+        game.turn = game.turn === 'X' ? 'O' : 'X';
+        GameTicTacToe.updateGame(game.getState());
+      }
+    }
+  }
+  
+  function board(moves) {
+    return {
+      get allMoves() { return JSON.parse(JSON.stringify(moves)); },
+      move: function(row, col, player) {
+        moves[row][col] = player;
       }
     }
   }
@@ -31,24 +43,25 @@ var TicTacToe = (function() {
   }());
 
   function getRow(game, rowNumber, name) {
-    return new Path(game, game.board[rowNumber], name);
+    console.log(game);
+    return new Path(game, game.board.allMoves[rowNumber], name);
   }
 
   function getCol(game, colNumber, name) {
-    return new Path(game, [getMove(game.board, 0,colNumber), getMove(game.board, 1, colNumber), getMove(game.board, 2, colNumber)], name);
+    return new Path(game, [getMove(game.board.allMoves, 0, colNumber), getMove(game.board.allMoves, 1, colNumber), getMove(game.board.allMoves, 2, colNumber)], name);
   }
 
   function getDiag(game, startY, startX, slope, name) {
     return new Path(game, [
-      getMove(game.board, startY, startX),
-      getMove(game.board, startY + slope.y, startX + slope.x),
-      getMove(game.board, startY + slope.y * 2, startX + slope.x * 2)
+      getMove(game.board.allMoves, startY, startX),
+      getMove(game.board.allMoves, startY + slope.y, startX + slope.x),
+      getMove(game.board.allMoves, startY + slope.y * 2, startX + slope.x * 2)
     ], name);
   }
 
   var defaults = {
     move: function(board, row, col, player) {
-      board[row][col] = player;
+      board.move(row, col, player);
     },
     detectWin: function(moves) {
       return moves[0] != E && moves[0] === moves[1] && moves[1] === moves[2];
@@ -61,15 +74,29 @@ var TicTacToe = (function() {
   };
 
   var Ttt = class {
-    constructor(id) {
+    constructor(id, userId) {
       this._id = id;
-      this.board = [
+      this.createdBy = userId;
+      this.board = board([
         [E, E, E],
         [E, E, E],
         [E, E, E]
-      ];
+      ]);
       this.turn = X;
       this.reset();
+    }
+    
+    getState() {
+      var gameState = _.pick(this, '_id', 'board', 'createdBy', 'turn');
+      gameState.board = gameState.board.allMoves;
+      return gameState;
+    }
+    
+    setState(gameState) {
+      this._id = gameState._id;
+      this.board = board(gameState.board);
+      this.turn = gameState.turn;
+      this.createdBy = gameState.createdBy;      
     }
 
     player(playerLetter) { return player(this, playerLetter); }
@@ -119,8 +146,20 @@ var TicTacToe = (function() {
   return Ttt;
 }());
 
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (decodeURIComponent(pair[0]) == variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  console.log('Query variable %s not found', variable);
+}
+
  function getGameId() {
-  var id = location.search.substr(1);
+  var id = getQueryVariable('gameId');
   if (!id) id = Meteor.uuid().replace(/[^0-9]|-/gi, '').toUpperCase().substr(1, 5);
   return id;
 }
@@ -137,22 +176,28 @@ function getMove(event) {
     col: colIndex
   };
 }
+  
+function getUpdatedGame(template, id) {
+  return function() {
+    var gameState = GameTicTacToe.findOne(id);
+    template.game.setState(gameState);
+    console.log("The game id:" + id);
+    return template.game;
+  };
+}  
 
 Template.ticTacToe.created = function() {
-  var id = getGameId();
-  var game = new TicTacToe(id);
-  this.game = new ReactiveVar(game);
+  this.ready = new ReactiveVar(false);
 };
 
 Template.ticTacToe.rendered = function() {
   // Yay, global
-  window.tttGame = this.game;
+  window.tttGame = { get : function() { return this.getGame(); } };
   window.onConsoleLoaded = function(sandbox) {
     var init = `Object.defineProperty(this, 'ttt', {
   get: function() {
     return {
-      get game() { return top.tttGame.get(); },
-      update: function() { top.tttGame.set(this.game); }
+      get game() { return top.tttGame.get(); }
     };
   }
 })`;
@@ -162,17 +207,23 @@ Template.ticTacToe.rendered = function() {
 };
 
 Template.ticTacToe.helpers({
+  ready: function() {
+    var ready = Template.instance().ready.get();
+    return ready ? ready : false;
+  },
   game: function() {
-    var game = Template.instance().game.get();
+    var game = Template.instance().getGame();
     return game;
   },
   rows: function() {
-    var game = Template.instance().game.get();
+    var game = Template.instance().getGame();
     var m = game.board;
-    return m;
+    console.log("all moves");
+    console.log(m.allMoves);
+    return m.allMoves;
   },
   allPaths: function() {
-    var game = Template.instance().game.get();
+    var game = Template.instance().getGame();
     var mapped = _.map(game.allPaths, function(path) {
       return _.pick(path, 'isWinner', 'moves', 'name');
     });
@@ -194,24 +245,42 @@ Template.ticTacToe.helpers({
 
 Template.ticTacToe.events({
   'click .ttt-cell': function (event, template) {
-    var game = template.game.get();
-    game.clicks++;
-    var move = getMove(event);
-    var row = move.row;
-    var col = move.col;
-    //if (game.moves[row][col] === '') game.moves[row][col] = game.turn;
-    game.player(game.turn).move(row, col);
-    game.turn = game.turn === 'X' ? 'O' : 'X';
-    template.game.set(game);
-    /*
-    var move = template.model.getMove(event);
-    template.model.scoreMove(move, game.turn, game.moves);
-    var nextTurn =template.model.getNextTurn(game.turn);
-    game.turn = nextTurn;
-    template.model.save(Games, game);
-    console.log(template.model.isBoardFull(game.moves));
-    console.log(template.model.getWinningMoves(game.moves));
-    */
+    var game = template.getGame();
+    // buzz off if not the right player
+    if (game.turn === template.myPlayer) {
+      var move = getMove(event);
+      var row = move.row;
+      var col = move.col;
+      game.player(game.turn).move(row, col);
+    } else {
+      console.warn("Not your turn right now...");
+    }
+  },
+  'click .join': function(event, template) {
+      var id = $(template.find('.gameId')).val();
+      var game = new TicTacToe(id, null);
+      template.game = game;  
+      template.getGame = getUpdatedGame(template, id);    
+      template.getGame();
+      template.myPlayer = 'O';
+      template.ready.set(id);
+  },
+  'click .start': function(event, template) {
+    var id = getGameId();
+    var game = new TicTacToe(id, Meteor.userId());
+    template.game = game;  
+    var gameState = game.getState();
+  
+    GameTicTacToe.insert(gameState, function(err, id) {
+      if (err) {
+        console.log("Err:");
+        console.log(err);
+      } else {
+        template.getGame = getUpdatedGame(template, id);    
+        template.myPlayer = 'X';
+        template.ready.set(id);
+      }
+    });  
   }
 });
 

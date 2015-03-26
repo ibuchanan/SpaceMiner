@@ -8,7 +8,7 @@
       gem: "pinkGem.png",
       player: "dark.png"
     },
-    world: [
+    board: [
       ["g", "c", "e", "t", "p"]
     ],
     worldOneRow: [
@@ -29,22 +29,44 @@
   };
 
   Template.spaceMinerWorld.created = function() {
-    var world = this.data.world;
+    var board = this.data.board;
     this.defaults = JSON.parse(JSON.stringify(defaults));
-    if (world) this.defaults.world = world;
+    if (board) this.defaults.board = board;
+    this.game = new ReactiveVar(this.defaults);    
   };
+  
+  Template.spaceMinerWorld.rendered = function() {
+    // Yay, global
+    window.smw = this.game;
+    window.onConsoleLoaded = function(sandbox) {
+      var init = `Object.defineProperty(this, 'smw', {
+    get: function() {
+      return {
+        get game() { return top.smw.get(); },
+        update: function() {
+          top.smw.set(this.game);
+        }
+      }
+    }
+  })`;
+      sandbox.model.iframeEval(init);
+    };
+  };  
 
   Template.spaceMinerWorld.helpers({
     rows: function() {
       var template = Template.instance();
-      var defaults = template.defaults;
-      var world = defaults.world;
+      var game = template.game.get();
+      console.log("theeeeeeeeeee game");
+      console.log(game);
+      if (!game) return [];
+      var board = game.board;
 
-      if (!_.isArray(world)) throw "world must be a valid array";
-      if (world.length === 0) {
-        world = defaults.worldOneRow;
+      if (!_.isArray(board)) throw "board must be a valid array";
+      if (board.length === 0) {
+        board = game.worldOneRow;
       }
-      var worldCopy = JSON.parse(JSON.stringify(defaults.world));
+      var boardCopy = JSON.parse(JSON.stringify(game.board));
             
       function copyRow(rowSource, rowTarget) {
         rowSource.forEach(function(cell, index) {
@@ -52,15 +74,15 @@
         });
       }
       
-      if (_.isArray(world[0])) {
-        world.forEach(function(row, rowIndex) {
-          copyRow(row, worldCopy[rowIndex]);
+      if (_.isArray(board[0])) {
+        board.forEach(function(row, rowIndex) {
+          copyRow(row, boardCopy[rowIndex]);
         });
       } else {
-        copyRow(world, worldCopy[0]);
+        copyRow(board, boardCopy[0]);
       }
 
-      return worldCopy;
+      return boardCopy;
     },
     cells: function() {
       var template = Template.instance();
