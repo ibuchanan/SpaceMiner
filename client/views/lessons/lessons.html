@@ -1,0 +1,12 @@
+<template name='lessons'>
+  <div class='container-fluid'>
+    <div class='row'>
+      <h1 style='text-align: center'><span class='label label-warning'><span class='fa fa-graduation-cap'></span> Lessons</span></h1>
+      <ul>
+        {{#each lessons}}
+        <li><a class='btn btn-sm btn-primary' target='_blank' href='/lesson?id={{two}}'>{{zero}}</a> - {{one}}</li>
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+</template>

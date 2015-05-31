@@ -26,6 +26,8 @@ var lessonDep = new Deps.Dependency;
 
 Template.lessonProgress.created = function() {
   lesson = Lessons.findOne({_id: Router.current().params.lessonId});
+  console.log('Id:' + Router.current().params.lessonId);
+  console.log("Lesson:" + lesson);
   var lessonProgress = LessonsProgress.findOne({
     userId: Meteor.userId(),
     lessonId: Router.current().params.lessonId
