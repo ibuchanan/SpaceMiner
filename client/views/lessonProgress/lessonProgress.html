@@ -1,8 +1,19 @@
 <template name='lessonProgress'>
 
 <div class='container-fluid'>
-  <div class='row'>
-    <h1 style='text-align: center'><span class='label label-warning'><span class='fa fa-search'></span> Lesson: {{lesson.title}}</span></h1>
+  <div class='row' style='text-align:center'>
+    <h1><span class='label label-warning'><span class='fa fa-search'></span> Lesson: {{lesson.title}}</span></h1>
+    <h3>{{description}}</h3>
+    <h3><span class='label label-primary'><span class='fa-tags fa'></span> Main topics:</span>
+    {{#each lesson.topics_main}}
+      <span class='label label-default'>{{this}}</span>
+    {{/each}}
+    </h3>
+    <h4><span class='label label-primary'><span class='fa-tags fa'></span> Sub-topics:</span>
+    {{#each lesson.topics_sub}}
+      <span class='label label-default'>{{this}}</span>
+    {{/each}}
+    </h4>
   </div>
   <div class='row'>
     <div class='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
@@ -17,13 +28,16 @@
 
 <template name="lessonProgress_section">
   {{#if mostRecent}}
-  <div style='background: darkgreen; padding: 2px'>
-    <h2><span class='label label-info'>{{title}}</span></h2>
+  <div style='background: darkgreen; padding: 2px; border: 2px solid gold; padding: 5px;'>
+    <h2><span class='fa fa-map-marker'></span>&nbsp;<span class='label label-info'><a href='{{lessonSecLink}}'>Section: {{title}}</a></span></h2>
+    <h5>{{description}}</h5>
+    <small><i>{{lastViewed}}</i></small>
   </div>
   {{else}}
-  <h2><span class='label label-info'>{{title}}</span></h2>
+  <h2><span class='label label-info'><a href='{{lessonSecLink}}'>Section: {{title}}</a></span></h2>
+  <h5>{{description}}</h5>
+  <small><i>{{lastViewed}}</i></small>
   {{/if}}
-  <i>{{lastViewed}}</i>
   <div>
   {{#each parts}}
     {{> lessonProgress_part}}
@@ -32,5 +46,5 @@
 </template>
 
 <template name="lessonProgress_part">
-  <div><span class='label label-primary'>{{index}}</span> <i>{{lastViewed}}</i></div>
+  <div><a href='{{lessonSecStepLink}}'><span class='label label-danger'><b>{{index}}:</b> {{title}}</span></a> <small><i>{{lastViewed}}</i></small></div>
 </template>
