@@ -1,8 +1,8 @@
 # SpaceMiner
 
-On July 20, 2269, exactly 300 years after humans landed on the Moon, we were contacted by a peaceful civilization from a distant solar system in our Milky Way Galaxy, but peace soon faced a colossal threat. didn't last long.tions with other civilizations in the Milky Way Galaxy. Contact with intelligent civilizations began after humans started receiving signals containing encoded photographic images of the Voyager (or is it Pioneer?) space probe that departed from Earth in 1977??.  Included along with the images were unmistakable images of intelligent beings, posing in spacesuits along side the craft.
+On July 20, 2269, exactly 300 years after humans landed on the Moon, we were contacted by a peaceful civilization from a distant solar system in our Milky Way Galaxy, but peace soon faced a colossal threat. didn't last long.tions with other civilizations in the Milky Way Galaxy. Contact with intelligent civilizations began after humans started receiving signals containing encoded photographic images of the Voyager 1 space probe that departed from Earth in 1977.  Included along with the images were unmistakable images of intelligent beings, posing in spacesuits along side the craft.
 
-The reception of this information was met with both excitement and fear on planet Earth, but paled in comparison to response when visitors from the civilation made their presence in Earth's orbit known with geometric light pulses visible to inhabitants of the entire planet at night.
+The reception of this information was met with both excitement and fear on planet Earth, but paled in comparison to the response when visitors from the civilization made their presence in Earth's orbit known with geometric light pulses visible to inhabitants of the entire planet at night.
 
 Over a period of several days these signals morphed into words, phrases, sentences, and then complete paragraphs in the languages understood by humans in the line of sight of the signals for that part of the sky. These messages made it clear that the visitors meant no harm, but were in fact in danger and wanted help from humans.
 
