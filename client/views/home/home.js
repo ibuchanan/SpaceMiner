@@ -67,6 +67,7 @@ var signals = AutoSignal.register('home', {
 
 Template.home.created = function() {
   Session.set('levelId', '');
+  Presence.presenceUpdate();
 };
 
 Template.home.helpers({

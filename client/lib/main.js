@@ -26,7 +26,10 @@ Meteor.startup(function () {
       placeholder: 'KrazyKoder',
       type: 'text',
       required: true
-    }                         
+    }
   ]
+  });
+  Accounts.onLogin(function() {
+    Presence.presenceUpdate();
   });
 });

@@ -29,6 +29,7 @@ fastclick@1.0.2
 follower-livedata@1.0.3
 geojson-utils@1.0.2
 github@1.1.2
+gwendall:auth-client-callbacks@0.1.0
 handlebars@1.0.2
 html-tools@1.0.3
 htmljs@1.0.3

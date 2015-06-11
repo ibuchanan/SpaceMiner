@@ -1,0 +1,26 @@
+<template name='missionCommand'>
+  <section class='container-fluid'>
+    <div class='row centered'>
+      <div class='col-md-10' style='overflow-y: scroll; min-height:100%'>
+        <h2 style='margin-top: 0px'><span class='label label-primary'>Intergalactic Messages</span></h2>
+        <ul class='list-group'>
+          {{#each messages}}
+            {{> message}}
+          {{/each}}
+        </ul>
+      </div>
+      <div class='col-md-2 centered'>
+        <h3 style='margin-top: 0px'><span class='label label-primary'>Explorers Online</span></h3>
+        <ul class='list-group'>
+        {{#each members}}
+          <li class='list-group-item'><span class='label label-default'>{{this}}</span></li>
+        {{/each}}
+        </ul>
+      </div>
+    </div>
+  </section>
+</template>
+
+<template name='message'>
+  <li class='list-group-item'><span class="label label-info">{{userName}}</span> {{text}}</li>
+</template>
