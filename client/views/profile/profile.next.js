@@ -1,12 +1,12 @@
 Template.profile.helpers({
-  nickname: function(){
-    return Meteor.user().profile.nickName;
+  nickname: function() {
+    return userName();
   },
   levels: function() {
     return Router.current().data();        
   },
-  mostRecentLesson : function(){
-    return Template.lessonProgress.mostRecent();
+  mostRecentLesson : function() {
+    return LessonsProgress.mostRecentLesson().title;
   }
   
 });

@@ -29,10 +29,8 @@ Template.lessonProgress.created = function() {
   var data = Router.current().data();
   lesson = data[0];
   lessonId = lesson._id;
-  console.log(lesson);
   var lessonProgress = data[1];
   LessonsProgress.overlayOnLesson(lesson, lessonProgress);
-  console.log(lesson);
 
   lessonDep.changed();
 };

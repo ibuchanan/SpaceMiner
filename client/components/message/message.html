@@ -1,8 +1,12 @@
 <template name='message'>
-  <div class='input-group'>
-    <input class='form-control message-input' type='text' />
-    <span class='input-group-btn'>
-      <button class='btn btn-success message-send' type='button'>Send</button>
-    </span>
+  <div class='message-app' style='background-color: {{backgroundColor}}'>
+    <h3>{{title}}</h3>
+    <h4>by {{author}}</h4>
+    <div class='input-group'>
+      <input class='form-control message-input' type='text' />
+      <span class='input-group-btn'>
+        <button class='btn btn-success message-send' type='button'>Send</button>
+      </span>
+    </div>
   </div>
 </template>
