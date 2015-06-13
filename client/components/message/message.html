@@ -1,5 +1,6 @@
 <template name='message'>
-  <div class='message-app' style='background-color: {{backgroundColor}}'>
+  <div class='message-app {{instanceId}}'>
+    <style>{{style}}</style>
     <h3>{{title}}</h3>
     <h4>by {{author}}</h4>
     <div class='input-group'>

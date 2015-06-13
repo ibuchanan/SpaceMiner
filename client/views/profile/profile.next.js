@@ -3,10 +3,9 @@ Template.profile.helpers({
     return userName();
   },
   levels: function() {
-    return Router.current().data();        
+    return Router.current().data();
   },
   mostRecentLesson : function() {
     return LessonsProgress.mostRecentLesson().title;
   }
-  
 });
