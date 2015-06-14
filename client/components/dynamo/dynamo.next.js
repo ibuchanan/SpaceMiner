@@ -114,8 +114,6 @@ Template.dynamo.created = function() {
       editors: ['all']
     }
   }
-  console.log('options:');
-  console.log(this.options);
   this.data.dynamo = userDynamo;
 };
 
