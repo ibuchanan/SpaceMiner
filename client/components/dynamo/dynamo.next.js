@@ -6,6 +6,9 @@ Example of a dynamic template to try:
 
 
 */
+function getUserDynamoForCurrentUser(dynamo) {
+  return UserDynamos.findOneForUser(dynamo, Meteor.userId(), true);
+}
 
 function makeCss(rules) {
   var css = '';
@@ -92,17 +95,28 @@ Template.dynamo.created = function() {
   this._templateId = 's' + Meteor.uuid();
   this.tmplData = new ReactiveVar(JSON.stringify(dataDefault));
   this.tmplDep = new Deps.Dependency();
+  var userDynamo = getUserDynamoForCurrentUser(this.data);
+  this.data.dynamo = userDynamo;
 };
 
 Template.dynamo.rendered = function() {
   render(this);
 };
 
+function getDynamoVal(instance, prop, defVal) {
+  var dynamo = instance.data.dynamo;
+  return dynamo ? dynamo[prop] : defVal;
+}
+
 Template.dynamo.helpers({
   instanceId: function() { return getId(Template.instance()); },
-  styleDefault: function() { return styleDefault; },
-  tmplDefault: function() { return tmplDefault; },
-  dataDefault: function() { return JSON.stringify(dataDefault, 2, ' '); },
+  styleDefault: function() { return getDynamoVal(Template.instance(), 'style', styleDefault); },
+  tmplDefault: function() { return getDynamoVal(Template.instance(), 'template', tmplDefault); },
+  dataDefault: function() {
+    var data = getDynamoVal(Template.instance(), 'data', dataDefault);
+    if (_.isString(data)) data = JSON.parse(data);
+    return JSON.stringify(data, 2, ' ');
+  },
   items: function() {
     Template.instance().tmplDep.depend();
     var data = Template.instance().tmplData.get();
@@ -132,5 +146,17 @@ function render(template) {
 Template.dynamo.events({
   'click .update': function(evt, template) {
     render(template);
+  },
+  'click .save': function(evt, template) {
+    console.log("temp data:");
+    console.log(template.data);
+    var instance = $(template.firstNode);
+    var tmpl = instance.find('.tmpl').val();
+    var style = instance.find('.style').val();
+    var data = instance.find('.data').val();
+    template.data.dynamo.template = tmpl
+    template.data.dynamo.style = style;
+    template.data.dynamo.data = data;
+    UserDynamos.updateUserDynamo(template.data.dynamo);
   }
 });
