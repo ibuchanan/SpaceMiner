@@ -1,3 +1,12 @@
+/*
+
+Example of a dynamic template to try:
+
+{{> message title="My Chatroom" author="Josh" style="* {background-color: red; color: yellow; border: 10px inset purple; text-align: center;} * .message-send { background: orange }"}}
+
+
+*/
+
 function makeCss(rules) {
   var css = '';
   _.each(rules, function(value, key) {
