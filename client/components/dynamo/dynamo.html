@@ -1,0 +1,18 @@
+<template name="dynamo">
+  <section class='dynamo {{instanceId}}'>
+    <h3>Data</h3>
+    <textarea class='data'>{{dataDefault}}</textarea>
+    <h3>Template</h3>
+    <textarea class='tmpl'>{{{tmplDefault}}}</textarea>
+    <h3>Style</h3>
+    <textarea class='style'>{{styleDefault}}</textarea>
+    <br />
+    <button class='btn btn-success btn-sm update'>Update</button>
+    <hr />
+    {{#each items}}
+      {{> Template.dynamic template=_templateId data=this }}
+    {{/each}}
+  </section>
+</template>
+
+
