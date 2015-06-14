@@ -18,8 +18,8 @@ function makeCss(rules) {
   return ' {\n' + css + '}';
 }
 
-function updateTemplate(tmpl, style, templateId) {
-  var compiled = SpacebarsCompiler.compile("<section class='{{id}}'><style>{{styles}}</style>" + tmpl + "</section>",
+function updateTemplate(dynamo, templateId) {
+  var compiled = SpacebarsCompiler.compile("<section class='{{id}}'><style>{{styles}}</style>" + dynamo.template + "</section>",
     { isTemplate: true });
   var renderer = eval(compiled);
   if (Template[templateId]) delete Template[templateId];
@@ -28,8 +28,8 @@ function updateTemplate(tmpl, style, templateId) {
 
   dynamo_template.created = function() {
     this.id = templateId;
-    this.tmpl = tmpl;
-    this.style = style;
+    this.tmpl = dynamo.template;
+    this.style = dynamo.style;
   };
 
   dynamo_template.helpers({
@@ -40,6 +40,15 @@ function updateTemplate(tmpl, style, templateId) {
       return style;
     }
   });
+}
+
+function updateDynamoFromUI(dynamo, root) {
+  var tmpl = root.find('.tmpl').val();
+  var style = root.find('.style').val();
+  var data = root.find('.data').val();
+  dynamo.template = tmpl;
+  dynamo.style = style;
+  dynamo.data = data;
 }
 
 var tmplDefault = "<div>\n" +
@@ -96,6 +105,17 @@ Template.dynamo.created = function() {
   this.tmplData = new ReactiveVar(JSON.stringify(dataDefault));
   this.tmplDep = new Deps.Dependency();
   var userDynamo = getUserDynamoForCurrentUser(this.data);
+  if (this.data.options) {
+    this.options = this.data.options;
+    if (_.isString(this.options)) this.options = JSON.parse(this.options);
+  } else {
+    this.options = {
+      mode: 'edit',
+      editors: ['all']
+    }
+  }
+  console.log('options:');
+  console.log(this.options);
   this.data.dynamo = userDynamo;
 };
 
@@ -117,6 +137,11 @@ Template.dynamo.helpers({
     if (_.isString(data)) data = JSON.parse(data);
     return JSON.stringify(data, 2, ' ');
   },
+  isEdit: function() {
+    var options = Template.instance().options;
+    var isEdit = options.mode === 'edit';
+    return isEdit;
+  },
   items: function() {
     Template.instance().tmplDep.depend();
     var data = Template.instance().tmplData.get();
@@ -134,29 +159,19 @@ Template.dynamo.helpers({
 });
 
 function render(template) {
-  var instance = $(template.firstNode);
-  var val = instance.find('.tmpl').val();
-  var style = instance.find('.style').val();
-  updateTemplate(val, style, template._templateId);
-  var data = instance.find('.data').val();
-  template.tmplData.set(data);
+  var dynamo = template.data.dynamo;
+  updateTemplate(dynamo, template._templateId);
+  template.tmplData.set(template.data.dynamo.data);
   template.tmplDep.changed();
 }
 
 Template.dynamo.events({
   'click .update': function(evt, template) {
+    updateDynamoFromUI(template.data.dynamo, $(template.firstNode));
     render(template);
   },
   'click .save': function(evt, template) {
-    console.log("temp data:");
-    console.log(template.data);
-    var instance = $(template.firstNode);
-    var tmpl = instance.find('.tmpl').val();
-    var style = instance.find('.style').val();
-    var data = instance.find('.data').val();
-    template.data.dynamo.template = tmpl
-    template.data.dynamo.style = style;
-    template.data.dynamo.data = data;
+    updateDynamoFromUI(template.data.dynamo, $(template.firstNode));
     UserDynamos.updateUserDynamo(template.data.dynamo);
   }
 });
