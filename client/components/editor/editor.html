@@ -2,9 +2,9 @@
   <div class='container-fluid editor'>
     <div class='row'>
       <div class='col-xs-12 col-sm-6'>
-        {{> Template.dynamic template=templateName data=templateDataContext}}        
+        {{> Template.dynamic template=templateName data=templateDataContext}}
       </div>
-      <div class='col-cs-12 col-sm-6'>
+      <div class='col-xs-12 col-sm-6'>
         <div role='tabpanel'>
           <ul class='nav nav-tabs' role='tablist'>
             <li role='presentation' class='active'><a href='#{{editorTabId}}' aria-controls='editor' role='tab' data-toggle='tab'>Editor</a></li>
@@ -16,7 +16,7 @@
             </div>
             <div role='tabpanel' class='tab-pane' id='{{consoleTabId}}'>
               <iframe src='/lessonSmall.html' style='width:100%; height:560px;'></iframe>
-            </div>        
+            </div>
           </div>
         </div>
       </div>
