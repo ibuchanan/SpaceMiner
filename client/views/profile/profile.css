@@ -1,3 +1,7 @@
 .profile {
   text-align: center;
 }
+
+.profile .profilePrograms {
+  text-align: left;
+}

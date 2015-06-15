@@ -10,6 +10,23 @@ function getUserDynamoForCurrentUser(dynamo) {
   return UserDynamos.findOneForUser(dynamo, Meteor.userId(), true);
 }
 
+function createId() {
+  return 's' +  Meteor.uuid();
+}
+
+function makeIdProperties(instance, props) {
+  window.T = instance;
+  console.log(instance);
+  _.each(props, function(prop) {
+    instance[prop] = createId();
+    var helper  = {};
+    helper[prop] = function() {
+      return Template.instance()[prop];
+    };
+    instance.view.template.helpers(helper);
+  });
+}
+
 function makeCss(rules) {
   var css = '';
   _.each(rules, function(value, key) {
@@ -51,58 +68,49 @@ function updateDynamoFromUI(dynamo, root) {
   dynamo.data = data;
 }
 
-var tmplDefault = "<div>\n" +
-" <div class='name'>Name is: {{name}}</div>\n" +
-" <div class='age'>Age: {{age}}</div>\n" +
-" {{#each board}}\n" +
-"  <div>\n" +
-"   {{#each this}}\n" +
-"    {{this}}\n" +
-"   {{/each}}\n" +
-"  </div>\n" +
-" {{/each}}\n" +
-"</div>";
-
-var styleDefault = "* {\n" +
-"  color: blue;\n" +
-"  background: green;\n" +
-"}\n" +
-"* .name {\n" +
-" color: yellow;\n" +
-"}\n" +
-"* .age {\n" +
-" color: orange;\n" +
-"}\n";
-
-var dataDefault = [
-  {
-    "name": "Jogo",
-    "age": 11,
-    "board": [
-      ["o", "x", "x"],
-      ["x", "o", "o"],
-      ["o", "x", "o"]
-    ]
-  },
-  {
-    "name": "Ceth",
-    "age": 12,
-    "board": [
-      ["x", "x", "x"],
-      ["o", "x", "o"],
-      ["o", "o", "o"]
-    ]
-  }
-];
-
 function getId(instance) {
   return instance._instanceId;
 }
 
+function getEditor(template, editorName) {
+  var editorId = template[editorName + 'EditorId'];
+  var editor = ace.edit(editorId);
+  console.log('editor');
+  console.log(editor);
+  return editor;
+}
+
+function configureEditor(editor, lang, code) {
+  editor.setTheme("ace/theme/chrome");
+  var session = editor.getSession();
+  session.setMode('ace/mode/' + lang);
+  editor.setOptions({
+    maxLines: 18,
+    minLines: 18,
+    fontSize: 20,
+    showPrintMargin: false,
+    readOnly: false,
+    highlightActiveLine: true,
+    highlightGutterLine: true
+  });
+
+  session.setOptions({useWorker: false});
+  session.setTabSize(2);
+  session.setValue(code);
+
+  editor.renderer.setPadding(20);
+}
+
 Template.dynamo.created = function() {
-  this._instanceId = 's' + Meteor.uuid();
-  this._templateId = 's' + Meteor.uuid();
-  this.tmplData = new ReactiveVar(JSON.stringify(dataDefault));
+  this._instanceId = createId();
+  this._templateId = createId();
+  makeIdProperties(this, [
+    'templateTabId', 'templateEditorId',
+    'styleTabId', 'styleEditorId',
+    'dataTabId', 'dataEditorId',
+    'resultTabId'
+    ]);
+  this.tmplData = new ReactiveVar({});
   this.tmplDep = new Deps.Dependency();
   var userDynamo = getUserDynamoForCurrentUser(this.data);
   if (this.data.options) {
@@ -119,20 +127,30 @@ Template.dynamo.created = function() {
 
 Template.dynamo.rendered = function() {
   render(this);
+  configureEditor(getEditor(this, 'template'), 'html', this.data.dynamo.template);
+  configureEditor(getEditor(this, 'style'), 'css', this.data.dynamo.style);
+  configureEditor(getEditor(this, 'data'), 'json', this.data.dynamo.data);
 };
 
-function getDynamoVal(instance, prop, defVal) {
+function getDynamoVal(instance, prop) {
   var dynamo = instance.data.dynamo;
-  return dynamo ? dynamo[prop] : defVal;
+  return dynamo ? dynamo[prop] : '';
 }
 
 Template.dynamo.helpers({
   instanceId: function() { return getId(Template.instance()); },
-  styleDefault: function() { return getDynamoVal(Template.instance(), 'style', styleDefault); },
-  tmplDefault: function() { return getDynamoVal(Template.instance(), 'template', tmplDefault); },
+  styleDefault: function() { return getDynamoVal(Template.instance(), 'style'); },
+  tmplDefault: function() { return getDynamoVal(Template.instance(), 'template'); },
   dataDefault: function() {
-    var data = getDynamoVal(Template.instance(), 'data', dataDefault);
-    if (_.isString(data)) data = JSON.parse(data);
+    var data = getDynamoVal(Template.instance(), 'data');
+    if (_.isString(data)) {
+      try {
+        data = JSON.parse(data);
+      }
+      catch (ex) {
+        return '';
+      }
+    }
     return JSON.stringify(data, 2, ' ');
   },
   isEdit: function() {
@@ -143,7 +161,12 @@ Template.dynamo.helpers({
   items: function() {
     Template.instance().tmplDep.depend();
     var data = Template.instance().tmplData.get();
-    var obj = JSON.parse(data);
+    var obj = {};
+    try {
+      obj = JSON.parse(data);
+    } catch (ex) {
+      // do nothing...
+    }
     var templateId = Template.instance()._templateId;
     if(_.isArray(obj)) {
       _.each(obj, function(item) {
@@ -151,6 +174,7 @@ Template.dynamo.helpers({
       })
     } else {
       obj._templateId = templateId;
+      obj = [obj]; // Arrayify this lonely solo object into a lonely, solo array.
     }
     return obj;
   }

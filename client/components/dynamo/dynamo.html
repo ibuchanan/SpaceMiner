@@ -1,20 +1,37 @@
 <template name="dynamo">
   <section class='dynamo {{instanceId}}'>
     {{#if isEdit}}
-      <h3>Data</h3>
-      <textarea class='data'>{{dataDefault}}</textarea>
-      <h3>Template</h3>
-      <textarea class='tmpl'>{{{tmplDefault}}}</textarea>
-      <h3>Style</h3>
-      <textarea class='style'>{{styleDefault}}</textarea>
-      <br />
       <button class='btn btn-success btn-sm update'>Update</button>
       <button class='btn btn-primary btn-sm save'>Save</button>
-      <hr />
+      <div role='tabpanel'>
+        <ul class='nav nav-tabs' role='tablist'>
+          <li role='presentation' class='active'><a href='#{{templateTabId}}' aria-controls='template' role='tab' data-toggle='tab'>Template</a></li>
+          <li role="presentation"><a href='#{{styleTabId}}' aria-controls='style' role='tab' data-toggle='tab'>Style</a></li>
+          <li role="presentation"><a href='#{{dataTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Data</a></li>
+          <li role="presentation"><a href='#{{resultTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Result</a></li>
+        </ul>
+        <div class='tab-content'>
+          <div role='tabpanel' class='tab-pane active' id='{{templateTabId}}'>
+            <div id='{{templateEditorId}}' class='d-editor'></div>
+          </div>
+          <div role='tabpanel' class='tab-pane' id='{{styleTabId}}'>
+            <div id='{{styleEditorId}}' class='d-editor'></div>
+          </div>
+          <div role='tabpanel' class='tab-pane' id='{{dataTabId}}'>
+            <div id='{{dataEditorId}}' class='d-editor'></div>
+          </div>
+          <div role='tabpanel' class='tab-pane' id='{{resultTabId}}'>
+            {{#each items}}
+              {{> Template.dynamic template=_templateId data=this }}
+            {{/each}}
+          </div>
+        </div>
+      </div>
+    {{else}}
+      {{#each items}}
+        {{> Template.dynamic template=_templateId data=this }}
+      {{/each}}
     {{/if}}
-    {{#each items}}
-      {{> Template.dynamic template=_templateId data=this }}
-    {{/each}}
   </section>
 </template>
 
