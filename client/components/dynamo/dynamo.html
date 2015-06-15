@@ -1,10 +1,8 @@
 <template name="dynamo">
   <section class='dynamo {{instanceId}}'>
     {{#if isEdit}}
-      <button class='btn btn-success btn-sm update'>Update</button>
-      <button class='btn btn-primary btn-sm save'>Save</button>
       <div role='tabpanel'>
-        <ul class='nav nav-tabs' role='tablist'>
+        <ul class='nav nav-tabs' role='tablist' id='{{tabsNavId}}'>
           <li role='presentation' class='active'><a href='#{{templateTabId}}' aria-controls='template' role='tab' data-toggle='tab'>Template</a></li>
           <li role="presentation"><a href='#{{styleTabId}}' aria-controls='style' role='tab' data-toggle='tab'>Style</a></li>
           <li role="presentation"><a href='#{{dataTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Data</a></li>
@@ -12,18 +10,48 @@
         </ul>
         <div class='tab-content'>
           <div role='tabpanel' class='tab-pane active' id='{{templateTabId}}'>
-            <div id='{{templateEditorId}}' class='d-editor'></div>
+            <div class='well well-sm'>
+              <h4>Template code in Hypertext Markup Language (HTML) in <a href='https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md' target='_blank'>Meteor Spacebars format</a></h4>
+              <p class='d-commands'>
+                <button class='btn btn-success btn-sm update'><span class="fa fa-play" style="margin-top: 2px"></span>&nbsp;Render</button>
+                <button class='btn btn-warning btn-sm save'><span class='fa fa-save'></span>&nbsp;Save Changes</button>
+              </p>
+              <div id='{{templateEditorId}}' class='d-editor'></div>
+            </div>
           </div>
+
           <div role='tabpanel' class='tab-pane' id='{{styleTabId}}'>
-            <div id='{{styleEditorId}}' class='d-editor'></div>
+            <div class='well well-sm'>
+              <h4>Style code in <a href='https://developer.mozilla.org/en-US/docs/Web/CSS/Reference' target='_blank'>Cascasing Style Sheet (CSS) format</a></h4>
+              <i>Note: you must prefix selectors with an * character in this editor</i>
+              <p class='d-commands'>
+                <button class='btn btn-success btn-sm update'><span class="fa fa-play" style="margin-top: 2px"></span>&nbsp;Render</button>
+                <button class='btn btn-warning btn-sm save'><span class='fa fa-save'></span>&nbsp;Save Changes</button>
+              </p>
+              <div id='{{styleEditorId}}' class='d-editor'></div>
+            </div>
           </div>
+
           <div role='tabpanel' class='tab-pane' id='{{dataTabId}}'>
-            <div id='{{dataEditorId}}' class='d-editor'></div>
+            <div class='well well-sm'>
+              <h4>Data code in <a href='http://www.w3resource.com/JSON/introduction.php' target='_blank'>JavaScript Object Notation (JSON) format</a></h4>
+              <i>Note: you must surround keys with double-qoutes in JSON. Examples: <code>{"key": "value"}</code> and <code>{"number": 100}</code></i>
+              <p class='d-commands'>
+                <button class='btn btn-success btn-sm update'><span class="fa fa-play" style="margin-top: 2px"></span>&nbsp;Render</button>
+                <button class='btn btn-warning btn-sm save'><span class='fa fa-save'></span>&nbsp;Save Changes</button>
+              </p>
+              <div id='{{dataEditorId}}' class='d-editor'></div>
+            </div>
           </div>
+
           <div role='tabpanel' class='tab-pane' id='{{resultTabId}}'>
-            {{#each items}}
-              {{> Template.dynamic template=_templateId data=this }}
-            {{/each}}
+            <div class='well well-sm'>
+              <h4>Your code rendered</h4>
+              <p>Click <button class='btn btn-warning btn-sm save'><span class='fa fa-save'></span>&nbsp;Save Changes</button> to save your code to the server</p>
+              {{#each items}}
+                {{> Template.dynamic template=_templateId data=this }}
+              {{/each}}
+            </div>
           </div>
         </div>
       </div>

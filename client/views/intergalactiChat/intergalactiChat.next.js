@@ -24,7 +24,7 @@ Template.intergalactiChat.helpers({
   },
   members: function() {
     membersDep.depend();
-    return Presence.presenceFromMinutes(5);
+    return Presence.presenceFromMinutes(120);
   }
 });
 

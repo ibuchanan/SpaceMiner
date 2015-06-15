@@ -27,12 +27,14 @@ Template.message.events({
     var text =  $(template.find('.message-input')).val();
     if (text) message(text);
     else alert('No message to send. Please type a message first.');
+    $(template.find('.message-input')).val('');
   },
   'keypress .message-input': function(evt, template) {
     if (event.charCode == 13) {
       var text =  $(template.find('.message-input')).val();
       if (text) message(text);
       else alert('No message to send. Please type a message first.');
+      $(template.find('.message-input')).val('');
     }
   }
 });

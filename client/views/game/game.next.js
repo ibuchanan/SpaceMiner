@@ -443,14 +443,14 @@ function move(props) {
     }
    }
  }
- runStep(1); 
+ runStep(1);
 }
 window.move = move;
 
 /*
 
 path(
-'4 left', 
+'4 left',
 '2 up',
 '1 right',
 '5 up',

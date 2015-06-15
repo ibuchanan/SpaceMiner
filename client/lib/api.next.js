@@ -163,7 +163,7 @@ ccgccccccccccccgcc`);
     this.player.scoreInc(this.collisions().gem.scoreInc);
     this.player.ammoInc(this.collisions().gem.ammoInc);
     this.soundPlay(this.collisions().gem.soundPlay);
-  }  
+  }
   onEnemyCollision(hitPlayer) {
     this.livesDec();
     hitPlayer.destroy();
@@ -181,9 +181,9 @@ this.Enemy = class {
   constructor(q, enemy) {
     this.q = q;
     this.qobj = enemy;
-    
+
     Enemy.defineWrappers(this);
-    
+
     this.qobj.p.speedDefault = 150;
   }
   speedSet(speed) {
@@ -202,24 +202,30 @@ this.Enemy = class {
   start() {
     this.qobj.p.speed = this.qobj.p.speedDefault;
   }
-  
+
   static defineWrappers(obj) {
     // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
     // move the quintus code into here and dispense with the facades
     obj.move = function() {
       move(obj.qobj.p, ...arguments);
     };
-    
+
     obj.teleport = function(x, y) {
       obj.x = x;
       obj.y = y;
     };
-    
+
     obj.teleporter = function(x, y) {
       return function() {
         obj.teleport(x, y);
       }
-    };    
+    };
+
+    obj.message = function(text) {
+      return function() {
+        message(text);
+      }
+    };
   }
 }
 
@@ -291,6 +297,12 @@ You can also use the shortcut form like this:
         obj.teleport(x, y);
       }
     };
+
+    obj.message = function(text) {
+      return function() {
+        message(text);
+      }
+    }
   }
   
   scoreInc(amount) {

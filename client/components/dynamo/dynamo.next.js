@@ -15,8 +15,6 @@ function createId() {
 }
 
 function makeIdProperties(instance, props) {
-  window.T = instance;
-  console.log(instance);
   _.each(props, function(prop) {
     instance[prop] = createId();
     var helper  = {};
@@ -59,10 +57,11 @@ function updateTemplate(dynamo, templateId) {
   });
 }
 
-function updateDynamoFromUI(dynamo, root) {
-  var tmpl = root.find('.tmpl').val();
-  var style = root.find('.style').val();
-  var data = root.find('.data').val();
+function updateDynamoFromUI(template) {
+  var dynamo = template.data.dynamo;
+  var tmpl = getEditor(template, 'template').getSession().getValue();
+  var style = getEditor(template, 'style').getSession().getValue();
+  var data = getEditor(template, 'data').getSession().getValue();
   dynamo.template = tmpl;
   dynamo.style = style;
   dynamo.data = data;
@@ -75,8 +74,6 @@ function getId(instance) {
 function getEditor(template, editorName) {
   var editorId = template[editorName + 'EditorId'];
   var editor = ace.edit(editorId);
-  console.log('editor');
-  console.log(editor);
   return editor;
 }
 
@@ -108,10 +105,12 @@ Template.dynamo.created = function() {
     'templateTabId', 'templateEditorId',
     'styleTabId', 'styleEditorId',
     'dataTabId', 'dataEditorId',
+    'tabsNavId',
     'resultTabId'
     ]);
   this.tmplData = new ReactiveVar({});
   this.tmplDep = new Deps.Dependency();
+  this.tabSelected = this.data.tabSelected;
   var userDynamo = getUserDynamoForCurrentUser(this.data);
   if (this.data.options) {
     this.options = this.data.options;
@@ -130,6 +129,10 @@ Template.dynamo.rendered = function() {
   configureEditor(getEditor(this, 'template'), 'html', this.data.dynamo.template);
   configureEditor(getEditor(this, 'style'), 'css', this.data.dynamo.style);
   configureEditor(getEditor(this, 'data'), 'json', this.data.dynamo.data);
+
+  if (this.tabSelected) {
+    tabSelect(this, this.tabSelected);
+  }
 };
 
 function getDynamoVal(instance, prop) {
@@ -187,13 +190,18 @@ function render(template) {
   template.tmplDep.changed();
 }
 
+function tabSelect(template, tabName) {
+  $('#' + template.tabsNavId + ' a[href="#' + template[tabName + 'TabId'] + '"]').tab('show');
+}
+
 Template.dynamo.events({
   'click .update': function(evt, template) {
-    updateDynamoFromUI(template.data.dynamo, $(template.firstNode));
+    updateDynamoFromUI(template);
     render(template);
+    tabSelect(template, 'result');
   },
   'click .save': function(evt, template) {
-    updateDynamoFromUI(template.data.dynamo, $(template.firstNode));
+    updateDynamoFromUI(template);
     UserDynamos.updateUserDynamo(template.data.dynamo);
   }
 });

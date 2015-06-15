@@ -347,6 +347,54 @@ function createTrainingLevels() {
       'cccccccccccccccccc'
      ]
   );
+
+  createTrainingLevel('motion', 'Motion',
+    {
+      tile : "rockSwirly.png",
+      enemy : "cyclopsRed.png",
+      coin : "pink.png",
+      gem : "ruby.png",
+      player : "dark.png"
+    },
+    [
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttgtttttttt',
+      'pcccccccgggccccccc',
+      'tttttttttgtttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt',
+      'tttttttttctttttttt'
+     ]
+  );
+
+  createTrainingLevel('maze', 'Maze',
+    {
+      tile : "golden.png",
+      enemy : "brainPink.png",
+      coin : "pink.png",
+      gem : "emerald.png",
+      player : "light.png"
+    },
+    [
+      'tttttttttctttttttt',
+      'tttccccccctttttttt',
+      'tttctttttctttttttt',
+      'tttctttttctttttttt',
+      'tttctttttgtttttttt',
+      'pccctttttgggccccct',
+      'ttttttttttttttttct',
+      'tcccccccccttttttct',
+      'tctttttttcttttttct',
+      'tctttttttcttttttct',
+      'tccccccctcccccccct',
+      'tttttttttttttttttt'
+     ]
+  );
 }
 
 function createLessonsDefault() {

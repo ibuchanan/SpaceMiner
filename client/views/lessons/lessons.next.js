@@ -14,10 +14,11 @@ Template.lessons.helpers({
         ['The JavaScript Language with Cheatsheets', 'See all the fundamentals about the most popular programming language in the world'],
     */
     return [
+        ['Mission', 'Introduction to SpaceMiner and coding', 'mission'],
         ['Expressions', 'Express yourself in code!', 'expressions'],
         // ['Values', 'Tell JavaScript stuff it can understand', 'values'],
         // ['Statements', 'Specify what a program does', 'statements'],
-        ['Operators', 'Compare, question, calculate, combine, and remember stuff', 'operators'],      
+        ['Operators', 'Compare, question, calculate, combine, and remember stuff', 'operators'],
         ['Conditionals and Arrays', 'Test values and decide whether or not to run statements', 'conditionals'],
         ['Variables', 'Store basic values in memory', 'variables'],
         ['Functions', 'Group useful code into reusable chunks', 'functions'],
