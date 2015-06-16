@@ -45,6 +45,7 @@ function updateTemplate(dynamo, templateId) {
     this.id = templateId;
     this.tmpl = dynamo.template;
     this.style = dynamo.style;
+    this.js = dynamo.js;
   };
 
   dynamo_template.helpers({
@@ -55,16 +56,27 @@ function updateTemplate(dynamo, templateId) {
       return style;
     }
   });
+
+  // Apply user code into the dynamic dynamo:
+  try {
+    (function() {
+      var Template = dynamo_template;
+      var js = dynamo.js;
+      var func = `(function(){${js}}())`;
+      eval(func);
+    }());
+  } catch(ex) {
+    console.error('Exception attempting to create dynamo component:');
+    console.error(ex);
+  }
 }
 
 function updateDynamoFromUI(template) {
   var dynamo = template.data.dynamo;
-  var tmpl = getEditor(template, 'template').getSession().getValue();
-  var style = getEditor(template, 'style').getSession().getValue();
-  var data = getEditor(template, 'data').getSession().getValue();
-  dynamo.template = tmpl;
-  dynamo.style = style;
-  dynamo.data = data;
+  _.each(['template', 'style', 'data', 'js'], function(item) {
+    var val = getEditor(template, item).getSession().getValue();
+    dynamo[item] = val;
+  });
 }
 
 function getId(instance) {
@@ -105,6 +117,7 @@ Template.dynamo.created = function() {
     'templateTabId', 'templateEditorId',
     'styleTabId', 'styleEditorId',
     'dataTabId', 'dataEditorId',
+    'jsTabId', 'jsEditorId',
     'tabsNavId',
     'resultTabId'
     ]);
@@ -128,6 +141,7 @@ Template.dynamo.rendered = function() {
   render(this);
   configureEditor(getEditor(this, 'template'), 'html', this.data.dynamo.template);
   configureEditor(getEditor(this, 'style'), 'css', this.data.dynamo.style);
+  configureEditor(getEditor(this, 'js'), 'javascript', this.data.dynamo.js);
   configureEditor(getEditor(this, 'data'), 'json', this.data.dynamo.data);
 
   if (this.tabSelected) {
