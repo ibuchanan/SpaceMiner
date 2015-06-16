@@ -1,18 +1,30 @@
+var progDep = new Deps.Dependency();
+
+Template.profile.created = function() {
+  this.data = Router.current().data();
+};
+
 Template.profile.helpers({
-  nickname: function() {
-    return userName();
+  nickName: function() {
+    return Template.instance().data.user.profile.nickName;
+  },
+  ownerName: function() {
+    if (Template.instance().data.isNotSelf) return Template.instance().data.user.profile.nickName;
+    return 'you';
   },
   levels: function() {
-    return Router.current().data();
+    return Template.instance().data.levels;
   },
   mostRecentLesson : function() {
     return LessonsProgress.mostRecentLesson().title;
   },
   mostRecentLessonLink : function(){
-  return LessonsProgress.mostRecentLessonLink();
+    return LessonsProgress.mostRecentLessonLink();
   },
-  hasProgram: function(dynamoName) {
-    return UserDynamos.findOneForUser({name:dynamoName}, Meteor.userId()) !== null;
+  dynamos: function() {
+    return Template.instance().data.dynamos;
+  },
+  userId: function() {
+    return Template.instance().data.userId;
   }
-
 });

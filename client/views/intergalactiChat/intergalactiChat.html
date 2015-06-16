@@ -51,7 +51,8 @@
           <!-- <div class="panel-body"></div> -->
           <ul class='list-group'>
             {{#each members}}
-            <li class='list-group-item list-group-item-info'><span class='label label-primary'>{{this}}</span></li>
+            <li class='list-group-item list-group-item-info'><span class='label label-primary'>
+              {{> profileLink name=this target='_blank'}}</span></li>
             {{/each}}
           </ul>
         </div>
@@ -61,5 +62,5 @@
 </template>
 
 <template name='intergalactiChat_message'>
-  <li class='list-group-item'><span class="label label-warning">{{userName}}</span> {{text}} <small class='text-muted'>{{dateStamp}}</small></li>
+  <li class='list-group-item'><span class="label label-warning">{{>profileLink name=userName target='_blank'}}</span> {{text}} <small class='text-muted'>{{dateStamp}}</small></li>
 </template>

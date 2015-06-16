@@ -6,8 +6,8 @@ Example of a dynamic template to try:
 
 
 */
-function getUserDynamoForCurrentUser(dynamo) {
-  return UserDynamos.findOneForUser(dynamo, Meteor.userId(), true);
+function getUserDynamo(dynamo) {
+  return UserDynamos.findOneForUser(dynamo, dynamo.userId, true);
 }
 
 function createId() {
@@ -111,7 +111,7 @@ Template.dynamo.created = function() {
   this.tmplData = new ReactiveVar({});
   this.tmplDep = new Deps.Dependency();
   this.tabSelected = this.data.tabSelected;
-  var userDynamo = getUserDynamoForCurrentUser(this.data);
+  var userDynamo = getUserDynamo(this.data);
   if (this.data.options) {
     this.options = this.data.options;
     if (_.isString(this.options)) this.options = JSON.parse(this.options);

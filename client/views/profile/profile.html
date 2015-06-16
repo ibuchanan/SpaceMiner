@@ -1,11 +1,17 @@
 <template name="profile">
   <section class='profile'>
-    <h1>{{nickname}}</h1>
+    <h1>{{nickName}}</h1>
+    {{#unless isNotSelf}}
     <h1><span class='label label-success'><span class= 'fa fa-play-circle-o'></span>&nbsp;<a href='{{mostRecentLessonLink}}'>Continue:&nbsp;{{mostRecentLesson}}</a></span></h1>
+    {{/unless}}
     <div class='container-fluid'>
       <div class='col-md-7 col-sm-12'>
-        <h2><span class='label label-info'><span class='fa fa-trophy'></span>&nbsp;Your Worlds</span></h2>
+        <h2><span class='label label-info'><span class='fa fa-trophy'></span>&nbsp;Worlds by {{ownerName}}</span></h2>
+        {{#if isNotSelf}}
+        <p>You can play them</p>
+        {{else}}
         <p>You can edit or delete them</p>
+        {{/if}}
         <div class='levelsContainer levels container-fluid'>
           <div class='col-md-12'>
             <div class="row">
@@ -17,17 +23,13 @@
         </div>
       </div>
       <div class='col-md-5 col-sm-12'>
-        <h2><span class='label label-info'><span class='fa fa-code'></span>&nbsp;Your Programs</span></h2>
-        <p>These are programs you've built during lessons</p>
+        <h2><span class='label label-info'><span class='fa fa-code'></span>&nbsp;Programs by {{ownerName}}</span></h2>
+        <p>These are programs built by {{ownerName}} during lessons</p>
         <div class='profilePrograms'>
-          <p>&nbsp;</p>
-          {{#if hasProgram 'message'}}
-            {{> dynamo name='message' options='{"mode":"view"}' }}
-          {{/if}}
-          {{#if hasProgram 'user-data'}}
-            {{> dynamo name='user-data' options='{"mode":"view"}' }}
-            <hr />
-          {{/if}}
+          {{#each dynamos}}
+            {{> dynamo name=this.name options='{"mode":"view"}' userId=userId }}
+            <p style='margin-top:8px'>&nbsp;</p>
+          {{/each}}
         </div>
       </div>
     </div>
