@@ -1,5 +1,5 @@
 // Default handlers for game events
-this.OnWon = function() {  
+this.OnWon = function() {
 }
 
 if (this.game) this.game.reset();
@@ -63,7 +63,7 @@ Template.game.created = function() {
   }
 };
 
-Template.game.rendered = function() {    
+Template.game.rendered = function() {
   var args = argify(this.data);
   signals.gameLoadStarted.dispatch(args.level);
   gameOpen.set(true); // Manual since we could not hear the event published from the home module
@@ -75,7 +75,7 @@ Template.game.rendered = function() {
       gameShow();
       signals.gameLoadCompleted.dispatch(args.level);
       q.stageScene(args.level);
-      gameFocus();      
+      gameFocus();
     });
   }, { enableSound: args.enableSound } );
 };
@@ -138,9 +138,9 @@ Template.game.helpers({
 
 Template.game.events({
   'click .levelsShow': function() {
-    signals.gameHidden.dispatch();    
+    signals.gameHidden.dispatch();
   },
-  'click .gamePause': function() {    
+  'click .gamePause': function() {
     game.pause();
     gamePaused.set(true);
   },
@@ -152,7 +152,7 @@ Template.game.events({
   },
   'click .gameReset': function() {
     game.unpause();
-    gamePaused.set(false);    
+    gamePaused.set(false);
     game.reset();
     gameShow();
     gameFocus();
@@ -168,7 +168,7 @@ Template.game.events({
     levelDoc.published = false;
     levelDoc.phase = 'forked';
     Levels.insert(levelDoc, function(err, forkedLevelId) {
-      window.open('/levelCustomize/' + forkedLevelId, '_blank');      
+      window.open('/levelCustomize/' + forkedLevelId, '_blank');
     });
   },
   'click .chatSend': function() {
@@ -177,7 +177,7 @@ Template.game.events({
     var level = levelId;
     LevelsChat.insert({ message, user, level });
   }
-  
+
 });
 
 var SPRITE_PLAYER = 1;
@@ -194,8 +194,8 @@ function levelPlay(q, levelId, callback) {
     q.compileSheets("basicShot.png","shot.json");
     // TODO remove hack
     var world = q.assets[levelId + 'World'];
-    callback(q, world);    
-  }, {reload:true});  
+    callback(q, world);
+  }, {reload:true});
 }
 
 function levelMapCreate(q, levelMapId) {
@@ -206,12 +206,12 @@ function levelMapCreate(q, levelMapId) {
         dataAsset: levelMapId + ".lvl",
         sheet: 'tiles'
       });
-    },        
-    setup: function() {      
+    },
+    setup: function() {
       // Clone the top level array
       var tiles = this.p.tiles = this.p.tiles.concat();
       var size = this.p.tileW;
-      
+
       var map = {
         '-': 'Dot',
         'G': 'Tower',
@@ -236,24 +236,24 @@ function levelMapCreate(q, levelMapId) {
       }
     }
   });
-  
+
   q.scene(levelMapId, function(stage) {
     var map = stage.collisionLayer(new q["Level" + levelMapId]());
     map.setup();
     var score = new q.Score();
     var box = stage.insert(new q.UI.Container({
       //x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
-      x: 25, y: 5, fill: 'rgba(0,0,0,0.5)'      
+      x: 25, y: 5, fill: 'rgba(0,0,0,0.5)'
     }));
     box.insert(score);
     box.fit();
-  });      
+  });
 }
 
 function getDefaults() {
   return Game.getDefaults();
 }
-      
+
 function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
     var funcCode = createOverrideFuncCode(worldScript, defaults);
@@ -261,7 +261,7 @@ function parseWorldDefinitionFromScript(worldScript, defaults) {
     var obj = {};
     if (_.isFunction(func)) {
       obj = func(defaults);
-      return obj;      
+      return obj;
     } else {
       throw "parseWorldDefinitionFromScript could not parse function from code: " + funcScript;
     }
@@ -293,9 +293,9 @@ function __merge__(obj1, obj2) {
 function createOverrideFuncCode(worldScript, defaults) {
   var script = 'function(defaults) {\n' +
       '  var __obj__ = {};\n';
-  
+
   script += '\n  /* Begin user code */\n\n  ' + worldScript +'\n\n  /* End user code */\n'; 
-  
+
   _.each(defaults, function(value, key) {
     if (value.constructor === Object) {
       script += `\n  try { __obj__.${key} = __merge__(defaults.${key}, ${key}); }\n`
@@ -304,9 +304,9 @@ function createOverrideFuncCode(worldScript, defaults) {
     }
     script += `  catch(e) { __obj__.${key} = defaults.${key}; }\n`;
   });
-  
+
   script += '\n  return __obj__;\n}';
-  
+
   return script;
 }
 
@@ -731,63 +731,96 @@ var worldBuild = {
     img.src = Q.assetUrl("levelTiles/", src);
   };
   Q.assetTypes.til = 'Tile';
-  
+
+  function travelAdjust(direction, val) {
+    console.log('we made it to travelAdjust:');
+    console.log(val);
+    var overage = val % 16;
+    console.log('adjust:');
+    console.log(val);
+    console.log(overage);
+    if (overage > 0)  {
+      if (direction === 'right' || direction === 'down') {
+        val -= overage;
+        console.log('rd:');
+        console.log(val);
+        return val;
+      }
+      if (direction === 'left' || direction === 'up')  {
+        val += overage;
+        console.log('lu:');
+        console.log(val);
+        return val;
+      }
+    }
+    return val;
+  }
+
   function handleTravel(p) {
-    console.log("travel");
-    console.log(p.travel);
-    
     var dest = p.travel.destination;
+    var direction = p.travel.direction;
     var next = p.travel.next;
-    if (p.travel.direction === 'left') {
+    console.log('handleTravel:');
+    console.log(dest);
+    if (direction === 'left') {
       if (p.x <= (dest+16)) {
         p.x = dest;
         p.directionOld = p.direction;
-        p.speed = 0;            
+        p.speed = 0;
         game.setTimeout(125, function() {
-          p.x = dest;
+          p.x = travelAdjust(direction, dest);
           if (next) next();
         });
         delete p.travel;
       }
     }
-    if (p.travel && p.travel.direction === 'right') {
+    if (p.travel && direction === 'right') {
+      console.log('right');
       if (p.x >= (dest-16)) {
-        p.directionOld = p.direction;            
+        console.log('in dest-16:' + p.x + ' ' + (dest-16));
+        p.directionOld = p.direction;
         p.speed = 0;
         p.x = dest;
         game.setTimeout(125, function() {
-          p.x = dest;
-          if (next) next();              
+          console.log('here we are in the callback at last...');
+          console.log(travelAdjust);
+          var val = travelAdjust(direction, dest);
+          console.log('timeout:');
+          console.log(val);
+          p.x = val;
+          console.log('p.x now:');
+          console.log(p.x);
+          if (next) next();
         });
         delete p.travel;
       }
     }
-    if (p.travel && p.travel.direction === 'up') {
+    if (p.travel && direction === 'up') {
       if (p.y <= (dest+16)) {
-        p.directionOld = p.direction;            
+        p.directionOld = p.direction;
         p.speed = 0;
         p.y = dest;
         game.setTimeout(125, function() {
-          p.y = dest;
-          if (next) next();              
-        }); 
+          p.y = travelAdjust(direction, dest);
+          if (next) next();
+        });
         delete p.travel;
       }
     }
-    if (p.travel && p.travel.direction === 'down') {
+    if (p.travel && direction === 'down') {
       if (p.y >= (dest-16)) {
         p.directionOld = p.direction;
         p.speed = 0;
         p.y = dest;
         game.setTimeout(125, function() {
-          p.y = dest;
-          if (next) next();              
+          p.y = travelAdjust(direction, dest);
+          if (next) next();
         });
         delete p.travel;
       }
-    }    
+    }
   }
-  
+
   Q.component("towerManControls", {
     // default properties to add onto our entity
     defaults: { speed:200, /*direction: 'up' */ },
@@ -821,34 +854,34 @@ var worldBuild = {
       } else if(p.vy < 0) {
         p.angle = 0;
       }
-       
+
       // grab a direction from the input
       p.direction = Q.inputs.left ? 'left' :
       Q.inputs.right ? 'right' :
       Q.inputs.up ? 'up' :
       Q.inputs.down ? 'down' : p.direction;
-      
+
       // If any inputs, then turn on the gas
       var weWantTheGas = Q.inputs.right || Q.inputs.left || Q.inputs.down || Q.inputs.up;
-      if (weWantTheGas) p.speed = 200;      
-      
+      if (weWantTheGas) p.speed = 200;
+
       // based on our direction, try to add velocity
       // in that direction
       switch(p.direction) {
         case "left": p.vx = -p.speed;
-             p.vy = 0;  
+             p.vy = 0;
              break;
-        case "right":p.vx = p.speed; 
-             p.vy = 0;  
+        case "right":p.vx = p.speed;
+             p.vy = 0;
              break;
-        case "up":   p.vy = -p.speed; 
+        case "up":   p.vy = -p.speed;
              p.vx = 0;
              break;
-        case "down": p.vy = p.speed; 
+        case "down": p.vy = p.speed;
              p.vx = 0;
              break;
       }
-      
+      if (game.onScan) game.onScan();
       if (p.travel) handleTravel(p);
     }
   });
@@ -864,15 +897,15 @@ var worldBuild = {
       Q.state.on("change.score", this, "scoreChange");
     },
     scoreChange: function(score) {
-      if (score <= 99999) { 
-        score = ("" + score); 
+      if (score <= 99999) {
+        score = ("" + score);
       }
       this.p.label = score;
     }
   });
 
   Q.Sprite.extend("Player", {
-    init: function(p) {      
+    init: function(p) {
       this._super(p,{
         sheet:"player",
         type: SPRITE_PLAYER,
@@ -959,9 +992,8 @@ var worldBuild = {
           entity.p.canFire = true; 
         });
       }
-    } 
+    }
   });
-  
 
   function centersWithinRange(obj1, obj2, range) {
     var obj1X = obj1.p.x;
@@ -971,9 +1003,9 @@ var worldBuild = {
     var distX = Math.abs(obj1X - obj2X);
     var distY = Math.abs(obj1Y - obj2Y);
     return distX < range && distY  < range;
-  } 
+  }
   var COL_RANGE = 16;
-  
+
   // Create the Dot sprite
   Q.Sprite.extend("Dot", {
     init: function(p) {
@@ -1025,7 +1057,7 @@ var worldBuild = {
       if (col) {
         this.destroy();
         this.stage.dotCount--;
-        game.onGemCollision();      
+        game.onGemCollision();
         if(this.stage.dotCount === 0) {
           onLevelComplete();
         }
@@ -1060,14 +1092,14 @@ var worldBuild = {
         case "up":   p.vy = -p.speed; break;
         case "down": p.vy = p.speed; break;
       }
-      
+
       if (p.travel) handleTravel(p);
-      
+
       else {
         if(Math.random() < p.switchPercent / 100) {
           this.tryDirection();
         }
-      }    
+      }
     },
 
     tryDirection: function() {
@@ -1116,7 +1148,7 @@ var worldBuild = {
             Q.stage().insert(newEnemy);
           });
         }
-      }      
+      }
       if(col.obj.isA("Player")) {
         if (!col.obj.p.cloaked === true) {
           die(this);
@@ -1140,38 +1172,38 @@ var worldBuild = {
               game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
               col++;
               game.player.move(
-                boxWidth - 1 +' '+'right', 
-                boxHeight - 1 + ' ' + 'down', 
-                boxWidth -1 + ' ' + 'left',  
+                boxWidth - 1 +' '+'right',
+                boxHeight - 1 + ' ' + 'down',
+                boxWidth -1 + ' ' + 'left',
                 boxHeight -1 + ' ' + 'up',
                 getGems);
             }
             else if(row < maxV-1){
                row++;
-               col = 0; 
+               col = 0;
                game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
                col++;
-               game.player.move(boxWidth - 1 +' '+'right', boxHeight - 1 + ' ' + 'down', boxWidth -1 + ' ' + 
+               game.player.move(boxWidth - 1 +' '+'right', boxHeight - 1 + ' ' + 'down', boxWidth -1 + ' ' +
                'left',  boxHeight -1 + ' ' + 'up',getGems);
            }
-       }  
+       }
      }
         getGems();
   }
   Q.load("sprites.json, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
     /* var levelId = Router.current().params.levelId;
-    if (levelId) levelPlay(levelId);  
+    if (levelId) levelPlay(levelId);
     */
     console.log("Calling back with Q after loading assets!")
     callback(Q);
   });
-  
+
   return Q;
 }
 
 this.gameFocus = function() {
   Meteor.setTimeout(function() {
-    $("#game").focus();  
+    $("#game").focus();
   }, 125);
 }
 
@@ -1179,4 +1211,3 @@ this.gameShow = function() {
   Session.set('gameVisible', true);
   Session.set('gameComplete', false);
 }
-

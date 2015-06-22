@@ -17,14 +17,14 @@ function defineProperties(target, source, props) {
   });
 }
 
-this.Game = class {  
+this.Game = class {
   constructor(q, world) {
     this.timeOuts = [];
     this.q = q;
     this.levelId = "";
     this.world = world;
     if (_.isString(world)) this.levelId = world;
-    if (_.isObject(world)) { 
+    if (_.isObject(world)) {
       this.levelId = world._id;
       this.resetState();
     } else {
@@ -35,8 +35,8 @@ this.Game = class {
   get player() {
     var qPlayer = this.q('Player').items[0];
     var player = new Player(this.q, qPlayer);
-    defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);    
-    return player;    
+    defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);
+    return player;
   }
   get enemies() {
     var qEnemies = this.q('Enemy');
@@ -49,11 +49,13 @@ this.Game = class {
     return enemies;
   }
   setTimeout(delay, func) {
-    this.timeOuts.push(setTimeout(func, delay));
+    console.log('setTimeout:');
+    console.log(delay)
+    this.timeOuts.push(Meteor.setTimeout(func, delay));
   }
   cancelTimeouts() {
     for(var i = 0; i < this.timeOuts.length; i++) {
-      clearTimeout(this.timeOuts[i]);
+      Meteor.clearTimeout(this.timeOuts[i]);
     }
   }
   static getDefaults() {
@@ -102,13 +104,13 @@ ccgccccccccccccgcc`);
           soundPlay: 'gem1.wav'
         }
       }
-    };    
+    };
   }
   get worldName() {
     // TODO decouple Levels ?
     if (!this.world) return "No world loaded...";
     return this.world.worldName;
-  }  
+  }
   get enableEnemyRespawn() {
     return this.world.enableEnemyRespawn;
   }
@@ -137,12 +139,12 @@ ccgccccccccccccgcc`);
   resetState() {
     this.cancelTimeouts();
     this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives });
-  }  
+  }
   pause() {
     this.q.pauseGame();
     this.paused = true;
-  }  
-  unpause() {    
+  }
+  unpause() {
     this.q.unpauseGame();
     this.paused = false;
   }
@@ -174,6 +176,8 @@ ccgccccccccccccgcc`);
     } else {
       this.reset();
     }
+  }
+  onScan() {
   }
 }
 
@@ -207,7 +211,8 @@ this.Enemy = class {
     // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
     // move the quintus code into here and dispense with the facades
     obj.move = function() {
-      move(obj.qobj.p, ...arguments);
+      var items = Array.prototype.slice.call(arguments);
+      move(obj.qobj.p, ...items);
     };
 
     obj.teleport = function(x, y) {
@@ -229,16 +234,16 @@ this.Enemy = class {
   }
 }
 
-this.Player = class { 
+this.Player = class {
   constructor(q, player) {
     var that = this;
     this.q = q;
     this.qobj = player;
-    
+
     Player.defineWrappers(this);
-    
+
     this.qobj.p.speedDefault = 200;
-    
+
     var move = this.move;
     var moveHelp =
 `
@@ -269,15 +274,16 @@ You can also use the shortcut form like this:
       return text.replace(/\n\n\n+/g, "\n\n");
     }
   }
-  
+
   static defineWrappers(obj) {
     // Thin facades on top of the quintus sprite. Not sure, but maybe we should just
     // move the quintus code into here and dispense with the facades
     obj.fire = function() {
       obj.qobj.fire();
-    }; 
+    };
     obj.move = function() {
-      move(obj.qobj.p, ...arguments);
+      var items = Array.prototype.slice.call(arguments);
+      move(obj.qobj.p, ...items);
     };
     obj.cloak = function() {
       obj.qobj.p.cloaked = true;
@@ -297,20 +303,85 @@ You can also use the shortcut form like this:
         obj.teleport(x, y);
       }
     };
-
     obj.message = function(text) {
       return function() {
         message(text);
       }
+    };
+    obj.turn = function(direction) {
+      var adjust = function(val, subtract) {
+        var posOrNeg = subtract ? -1 : 1;
+        return val + ((val % 16) * posOrNeg);
+      };
+
+      var that = this;
+      this.speed = 0;
+
+      if (this.direction === 'up') this.y = adjust(this.y, true);
+      else if (this.direction === 'down') this.y = adjust(this.y);
+      else if (this.direction === 'left') this.x = adjust(this.x, true);
+      else if (this.direction === 'right') this.x = adjust(this.x);
+
+      game.setTimeout(125, function() {
+        that.speed = 200;
+        that.direction = direction;
+      });
+    };
+    obj.scope = function(...directions) {
+      var maxCount = 19;
+      var scopes = {};
+
+      const dist = 32;
+      const distModifiers = {
+        up: { x: 0, y: -dist },
+        down: { x: 0, y: dist },
+        left: { x: -dist, y: 0 },
+        right: { x: dist, y: 0 }
+      };
+
+      distModifiers.u = distModifiers.up;
+      distModifiers.d = distModifiers.down;
+      distModifiers.l = distModifiers.left;
+      distModifiers.r = distModifiers.right;
+
+      const SPRITE_TILES = 2;
+      const SPRITE_ENEMY = 4;
+      const SPRITE_DOT = 8;
+
+      const collisionMask = SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT;
+
+      if (directions.length < 1) directions = ['left', 'right', 'up', 'down'];
+
+      for (var i = 0; i < directions.length; i++) {
+        var direction = directions[i];
+        var x = obj.x;
+        var y = obj.y;
+        var items = [];
+
+        for (var j = 0; j < maxCount; j++) {
+          x = x + distModifiers[direction].x;
+          y = y + distModifiers[direction].y;
+          var item = Q.stage().locate(x, y, collisionMask);
+          if (item) items.push(item.p.sheet);
+          else items.push(null);
+        }
+
+        scopes[direction] = items;
+      }
+
+      var keys = _.keys(scopes);
+
+      if (keys.length === 1) return _.pairs(scopes)[0][1];
+      return scopes;
     }
   }
-  
+
   scoreInc(amount) {
     this.q.state.inc('score', amount);
-  }  
+  }
   scoreDec(amount) {
     this.q.state.dec('score', amount);
-  }  
+  }
   scoreGet() {
     return this.q.state.get('score');
   }

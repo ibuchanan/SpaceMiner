@@ -1,9 +1,3 @@
-var progDep = new Deps.Dependency();
-
-Template.profile.created = function() {
-  this.data = Router.current().data();
-};
-
 Template.profile.helpers({
   nickName: function() {
     return Template.instance().data.user.profile.nickName;
