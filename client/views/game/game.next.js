@@ -51,8 +51,6 @@ function toggleCoords() {
 }
 
 Template.game.created = function() {
-  console.log("THE DATA:");
-  console.log(this.data);
   var args = argify(this.data);
   levelId = args.level;
   if (args.buttons && _.isArray(args.buttons)) {
@@ -315,13 +313,13 @@ function worldOverride(overrides, world) {
     return world;
   }
   var worldCopy = JSON.parse(JSON.stringify(world));
-  
+
   function copyRow(rowSource, rowTarget) {
     rowSource.forEach(function(cell, index) {
       rowTarget[index] = cell;
     });
   }
-  
+
   if (_.isArray(overrides[0])) {
     overrides.forEach(function(row, rowIndex) {
       copyRow(row, worldCopy[rowIndex]);
@@ -329,19 +327,19 @@ function worldOverride(overrides, world) {
   } else {
     copyRow(overrides, worldCopy[0]);
   }
-  
+
   return worldCopy;
 }
 
 function createBoardFromWorld(world, worldDefault) {
   var worldCopy = worldOverride(world, worldDefault);
-  
+
   // Now assure left and right borders are all tiles
   worldCopy.forEach(function(row) {
     row.push('t');
     row.unshift('t');
   });
-  
+
   // And, the top and bottom rows are all tiles
   var borderRow = 'tttttttttttttttttttt'.split('');
   worldCopy.push(borderRow);
@@ -363,13 +361,17 @@ function Qloaded() {
   return window.Q !== undefined;
 }
 
+function playerStop() {
+  Q.inputs.up = Q.inputs.down = Q.inputs.left = Q.inputs.right = false;
+}
+
 function _move(props, cells, direction, next) {
   var distance = cells * 32;
   var destination = 0;
-  
+
   direction = direction || 'left';
   direction = direction.toLowerCase();
-  
+
   var directionMap = {
     'left': 'left',
     'l': 'left',
@@ -380,28 +382,52 @@ function _move(props, cells, direction, next) {
     'down': 'down',
     'd': 'down'
   };
-  
+
   direction = directionMap[direction];
-  
   direction = direction || 'left';
-  
+
   if (direction === 'left' || direction === 'up') {
     distance = -distance;
   }
   if (direction === 'left' || direction === 'right') {
     destination = props.x + distance;
+    //destination = props.destX + distance;
   } else {
     destination = props.y + distance;
+    //destination = props.destY + distance;
   }
-  props.travel = { direction: direction, destination: destination, next: next };
-  props.direction = direction;
+
+  props.travel = {
+    direction: direction,
+    destination: destination,
+    next: next,
+    step: function(p) {
+      Q.inputs[this.direction] = true;
+
+      if ((this.direction === 'right' || this.direction === 'left') &&
+          p.x === this.destination)
+      {
+        playerStop();
+        delete p.travel;
+        if (this.next) this.next();
+      }
+      else if  ((this.direction === 'up' || this.direction === 'down') &&
+               p.y === this.destination)
+      {
+        playerStop();
+        delete p.travel;
+        if (this.next) this.next();
+      }
+    }
+  };
+
   if (props.speed === 0) props.speed = props.speedDefault;
-  console.log("def: " + props.speedDefault);
 }
 window._move = _move;
 
 function move(props) {
  var args = arguments;
+ var firstStep = true;
  function runStep(index) {
    var nextIndex = index+1;
    if (index < args.length) {
@@ -434,11 +460,10 @@ function move(props) {
         game.setTimeout(100, function() {
           runStep(nextIndex);
         });
-      }
-      else {
+      } else {
         _move(props, num, step[1], function() {
            runStep(nextIndex);
-        });        
+        });
       }
     }
    }
@@ -447,30 +472,16 @@ function move(props) {
 }
 window.move = move;
 
-/*
-
-path(
-'4 left',
-'2 up',
-'1 right',
-'5 up',
-'4 left',
-'13 right'
-);
-
-*/
-
-
-function configureQuintus(callback, options) {  
+function configureQuintus(callback, options) {
   /*
   if (Qloaded()) {
     callback(window.Q);
     return window.Q;
   }
   */
-  
+
   if (!options) options = { enableSound: true };
-  
+
   function configureCanvas(q) {
     var setup = q.setup('game', {
       width: 640, height: 448, scaleToFit: true
@@ -480,7 +491,7 @@ function configureQuintus(callback, options) {
     q.input.keyboardControls();
     q.input.joypadControls();
   }
-  
+
   var modules = ["Sprites", "Scenes", "Input", "2D", "UI"];
   var audioSupported = [];
   if (options.enableSound) {
@@ -488,18 +499,18 @@ function configureQuintus(callback, options) {
     audioSupported.push("wav");
   }
   var includes = modules.join(", ");
-  
+
   Q = window.Q = Quintus({
     development: true,
     audioSupported: audioSupported });
   Q.include(includes);
   configureCanvas(Q);
-  
+
   QuintusOverrides.override(Q);
 
   Q.gravityX = 0;
   Q.gravityY = 0;
-  
+
   function getRows(rowStrings) {
     var rows = _.map(rowStrings, function(row) {
       if (_.isString(row)) return row.split('');
@@ -507,33 +518,33 @@ function configureQuintus(callback, options) {
     });
     return rows;
   }
-  
+
   Q.loadAssetLevel = function(key,src,callback,errorCallback) {
     var fileParts = src.split("."), worldName = fileParts[0];
     Q.loadAssetOther(key, "/collectionapi/levels/" + worldName, function(key, val) {
       var obj = JSON.parse(val)[0];
       var board = obj.board;
       board = boardFromText(board);
-      
+
       /* Now check if this is a level that has a 'script' instead */
-      
+
       var defaults = getDefaults();
       if (_.has(obj, 'script') && _.isString(obj.script)) {
-        var world = parseWorldDefinitionFromScript(obj.script, defaults);        
+        var world = parseWorldDefinitionFromScript(obj.script, defaults);
         // TODO remove hack
         world._id = worldName;
         Q.assets[worldName + 'World'] = world;
-        
+
         // First, if a world property was set, layer it over the defaults
         var worldSprites = worldOverride(world.world, defaults.world);
         console.info(worldSprites);
-        
+
         // Second, if a worldRows property was set, layer that over the world
         if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
           var overrides = getRows(world.worldRows);
           worldSprites = worldOverride(overrides, worldSprites);
         }
-        
+
         // Third, if worldCoords was set, layer that on top of the world
         if (_.isObject(world.worldCoords) && _.keys(world.worldCoords).length > 0) {
           _.each(world.worldCoords, function(value, key) {
@@ -546,42 +557,42 @@ function configureQuintus(callback, options) {
             worldSprites[row][col] = value;
           });
         }
-        
+
         // Fourth, process the worldBuild directions
         if(_.isObject(world.worldBuild) && _.keys(world.worldBuild).length > 0) {
           var group = function(g) {
             var start = g.start || null;
             var sprites = g.sprites || [];
             var repeat = g.repeat || 'x 1'; // '[full|[count[ x|y]]
-            
+
             sprites = getRows(sprites);
-            
+
             return {
               start,
               repeat,
               sprites
             };
           };
-          
+
           var groups = function(gs) {
             if (!_.isArray(gs)) return [];
             else {
               return _.map(gs, group);
             }
           };
-          
+
           var worldBuild = world.worldBuild;
-          
+
           var gs = [];
           if (_.isObject(worldBuild) && _.isArray(worldBuild.groups)) {
             gs = groups(worldBuild.groups); 
           } else if (_.isObject(worldBuild)) {
             gs = [ group(worldBuild) ];
           }
-          
+
           var startingRow = 0,
               startingCol = 0;
-          
+
           // Now let's iterate...
           _.each(gs, function(g) {
             var start = g.start;
@@ -593,10 +604,10 @@ function configureQuintus(callback, options) {
               startingRow = parseInt(coords[0]);
               startingCol = parseInt(coords[1]);
             }
-            
+
             var worldWidth = worldSprites[0].length;
             var worldHeight = worldSprites.length;
-                        
+
             var iterations = 1;
             var repeatDirection = 'x';
             var repeatParts = repeat.split(' ');
@@ -608,20 +619,20 @@ function configureQuintus(callback, options) {
             if (repeatParts.length > 1) {
               repeatDirection = repeatParts[1];
             }
-            
+
             // Find max length of the spriteparts
             var width = sprites[0].length;
             _.each(sprites, function(row) {
               if (row.length > width) width = row.length;
             });
             var height = sprites.length;
-            
-            // Adapt to bounds           
+
+            // Adapt to bounds
             if (startingRow > worldHeight) startingRow = worldHeight - height;
             if (startingCol > worldWidth) startingCol = worldWidth - width;
             if (startingRow + height > worldHeight) startingRow = worldHeight - height;
             if (startingCol + width > worldWidth) startingCol = worldWidth - width;
-                      
+
             var wrappedAtRow = 0;
             var wrappedAtCol = 0;
 
@@ -642,12 +653,12 @@ function configureQuintus(callback, options) {
                     if (cell !== '.') {
                       var thisCol = currentStartingCol + colIndex;
                       if (thisCol < worldWidth) {
-                        worldSprites[thisRow][thisCol] = cell;                      
+                        worldSprites[thisRow][thisCol] = cell;
                       }
                     }
-                  });                  
+                  });
                 });
-                startingRow += height;                
+                startingRow += height;
               }
               else if (repeatDirection === 'x') {
                 for(var colIndex = 0; colIndex < width; colIndex++) {
@@ -665,20 +676,20 @@ function configureQuintus(callback, options) {
                        var thisRow = currentStartingRow + rowIndex;
                        worldSprites[thisRow][thisCol] = cell;
                      }
-                   } 
+                   }
                   });
-                }                
+                }
                 startingCol += (width);
               }
             }
           });
-        }        
+        }
 /*
 
 var worldName = "Space Miner";
 ''
 var worldBuild = {
-    groups : [ 
+    groups : [
         {
         start: '2,2',
         repeat: '4 y',
@@ -686,11 +697,8 @@ var worldBuild = {
         }
     ]
 };
-    
-    
 
 */
-        
         // TODO: is the second param necessary any more?
         board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
       } else {
@@ -698,7 +706,7 @@ var worldBuild = {
         defaults.worldName = obj.name;
         Q.assets[worldName + 'World'] = defaults;
       }
-      
+
       Q.assets[key] = board;
 
       // TODO fix hack
@@ -714,7 +722,7 @@ var worldBuild = {
       callback(key, Q.assets[key]);
     }, errorCallback);
   };
-  Q.assetTypes.lvl = 'Level'; 
+  Q.assetTypes.lvl = 'Level';
 
   Q.loadAssetSprite = function(key,src,callback,errorCallback) {
     var img = new Image();
@@ -733,158 +741,19 @@ var worldBuild = {
   Q.assetTypes.til = 'Tile';
 
   function travelAdjust(direction, val) {
-    console.log('we made it to travelAdjust:');
-    console.log(val);
     var overage = val % 16;
-    console.log('adjust:');
-    console.log(val);
-    console.log(overage);
     if (overage > 0)  {
       if (direction === 'right' || direction === 'down') {
         val -= overage;
-        console.log('rd:');
-        console.log(val);
         return val;
       }
       if (direction === 'left' || direction === 'up')  {
         val += overage;
-        console.log('lu:');
-        console.log(val);
         return val;
       }
     }
     return val;
   }
-
-  function handleTravel(p) {
-    var dest = p.travel.destination;
-    var direction = p.travel.direction;
-    var next = p.travel.next;
-    console.log('handleTravel:');
-    console.log(dest);
-    if (direction === 'left') {
-      if (p.x <= (dest+16)) {
-        p.x = dest;
-        p.directionOld = p.direction;
-        p.speed = 0;
-        game.setTimeout(125, function() {
-          p.x = travelAdjust(direction, dest);
-          if (next) next();
-        });
-        delete p.travel;
-      }
-    }
-    if (p.travel && direction === 'right') {
-      console.log('right');
-      if (p.x >= (dest-16)) {
-        console.log('in dest-16:' + p.x + ' ' + (dest-16));
-        p.directionOld = p.direction;
-        p.speed = 0;
-        p.x = dest;
-        game.setTimeout(125, function() {
-          console.log('here we are in the callback at last...');
-          console.log(travelAdjust);
-          var val = travelAdjust(direction, dest);
-          console.log('timeout:');
-          console.log(val);
-          p.x = val;
-          console.log('p.x now:');
-          console.log(p.x);
-          if (next) next();
-        });
-        delete p.travel;
-      }
-    }
-    if (p.travel && direction === 'up') {
-      if (p.y <= (dest+16)) {
-        p.directionOld = p.direction;
-        p.speed = 0;
-        p.y = dest;
-        game.setTimeout(125, function() {
-          p.y = travelAdjust(direction, dest);
-          if (next) next();
-        });
-        delete p.travel;
-      }
-    }
-    if (p.travel && direction === 'down') {
-      if (p.y >= (dest-16)) {
-        p.directionOld = p.direction;
-        p.speed = 0;
-        p.y = dest;
-        game.setTimeout(125, function() {
-          p.y = travelAdjust(direction, dest);
-          if (next) next();
-        });
-        delete p.travel;
-      }
-    }
-  }
-
-  Q.component("towerManControls", {
-    // default properties to add onto our entity
-    defaults: { speed:200, /*direction: 'up' */ },
-
-    // called when the component is added to
-    // an entity
-    added: function() {
-      var p = this.entity.p;
-
-      // add in our default properties
-      Q._defaults(p,this.defaults);
-
-      // every time our entity steps
-      // call our step method
-      this.entity.on("step",this,"step");
-    },
-
-    step: function(dt) {
-      // grab the entity's properties
-      // for easy reference
-      var p = this.entity.p;
-
-      // rotate the player
-      // based on our velocity
-      if(p.vx > 0) {
-        p.angle = 90;
-      } else if(p.vx < 0) {
-        p.angle = -90;
-      } else if(p.vy > 0) {
-        p.angle = 180;
-      } else if(p.vy < 0) {
-        p.angle = 0;
-      }
-
-      // grab a direction from the input
-      p.direction = Q.inputs.left ? 'left' :
-      Q.inputs.right ? 'right' :
-      Q.inputs.up ? 'up' :
-      Q.inputs.down ? 'down' : p.direction;
-
-      // If any inputs, then turn on the gas
-      var weWantTheGas = Q.inputs.right || Q.inputs.left || Q.inputs.down || Q.inputs.up;
-      if (weWantTheGas) p.speed = 200;
-
-      // based on our direction, try to add velocity
-      // in that direction
-      switch(p.direction) {
-        case "left": p.vx = -p.speed;
-             p.vy = 0;
-             break;
-        case "right":p.vx = p.speed;
-             p.vy = 0;
-             break;
-        case "up":   p.vy = -p.speed;
-             p.vx = 0;
-             break;
-        case "down": p.vy = p.speed;
-             p.vx = 0;
-             break;
-      }
-      if (game.onScan) game.onScan();
-      if (p.travel) handleTravel(p);
-    }
-  });
 
   Q.UI.Button.extend("Score", {
     init: function(p) {
@@ -904,6 +773,97 @@ var worldBuild = {
     }
   });
 
+  Q.component("playerControls", {
+    // default properties to add onto our entity
+    defaults: { speed:200 },
+
+    added: function() {
+      var p = this.entity.p;
+
+      // add in our default properties
+      Q._defaults(p,this.defaults);
+
+      if(!p.stepDistance) { p.stepDistance = 32; }
+      if(!p.stepDelay) { p.stepDelay = 0.2; }
+
+      p.stepWait = 0;
+      this.entity.on("step",this,"step");
+      this.entity.on("hit", this, "hit");
+    },
+
+    hit: function(col) {
+      //this.entity.stage.collide(this.entity);
+      if (game.onCollide) game.onCollide.call(this, col);
+
+      var p = this.entity.p;
+
+      /*
+      if(p.stepping) {
+        p.stepping = false;
+        p.x = p.origX;
+        p.y = p.origY;
+      }
+      */
+    },
+
+    step: function(dt) {
+      var p = this.entity.p;
+
+      var moved = false;
+      p.stepWait -= dt;
+
+      if(p.stepping) {
+        p.x += p.diffX * dt / p.stepDelay;
+        p.y += p.diffY * dt / p.stepDelay;
+      }
+
+      var doneWithTravel = false;
+
+      if(p.stepWait > 0) { return; }
+      if(p.stepping) {
+        p.x = p.destX;
+        p.y = p.destY;
+        if (p.travel) {
+          p.travel.step(p);
+          doneWithTravel = true;
+        }
+      }
+      p.stepping = false;
+
+      p.diffX = 0;
+      p.diffY = 0;
+
+      if(Q.inputs.left) {
+        p.diffX = -p.stepDistance;
+        p.angle = -90;
+      } else if(Q.inputs.right) {
+        p.diffX = p.stepDistance;
+        p.angle = 90;
+      }
+
+      if(Q.inputs.up) {
+        p.diffY = -p.stepDistance;
+        p.angle = 0;
+      } else if(Q.inputs.down) {
+        p.diffY = p.stepDistance;
+        p.angle = 180;
+      }
+
+      if(p.diffY || p.diffX ) {
+        p.stepping = true;
+        p.origX = p.x;
+        p.origY = p.y;
+        p.destX = p.x + p.diffX;
+        p.destY = p.y + p.diffY;
+        p.stepWait = p.stepDelay;
+      }
+
+      if (!doneWithTravel && p.travel) {
+        p.travel.step(p);
+      }
+    }
+  });
+
   Q.Sprite.extend("Player", {
     init: function(p) {
       this._super(p,{
@@ -911,9 +871,10 @@ var worldBuild = {
         type: SPRITE_PLAYER,
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
       });
-      this.add("2d, towerManControls, laser");
+      this.add("2d, playerControls, laser");
     }
   });
+
   Q.Sprite.extend("Shot", {
     init: function(p) {
       this._super(p,{
@@ -926,13 +887,13 @@ var worldBuild = {
     },
     step: function(dt){
       this.stage.collide(this);
-      if(this.p.angle == 0){
+      if(this.p.angle === 0){
         this.p.x += this.p.speed * dt;
-      } 
-      else if(this.p.angle == 180){
+      }
+      else if(this.p.angle === 180){
         this.p.x -= this.p.speed * dt;
       }
-      else if(this.p.angle == -90){
+      else if(this.p.angle === -90){
         this.p.y -= this.p.speed * dt;
       }
       else{
@@ -946,9 +907,8 @@ var worldBuild = {
       this.destroy();
     },
     erase: function(collision) {
-      //console.log('collision');
       this.destroy();
-    }  
+    }
   });
   Q.component("laser",{
     added : function(){
@@ -963,9 +923,9 @@ var worldBuild = {
             this.p.shots.splice(i,1);
           }
         }
-        if(Q.inputs['fire']){
+        if(Q.inputs.fire){
           this.fire();
-        }  
+        }
       },
       fire: function(){
         var shot;
@@ -1002,7 +962,7 @@ var worldBuild = {
     var obj2Y = obj2.p.y;
     var distX = Math.abs(obj1X - obj2X);
     var distY = Math.abs(obj1Y - obj2Y);
-    return distX < range && distY  < range;
+    return distX < range && distY < range;
   }
   var COL_RANGE = 16;
 
@@ -1025,7 +985,7 @@ var worldBuild = {
     // When a dot is hit..
     sensor: function() {
       var col = centersWithinRange(this, arguments[0], COL_RANGE);
-      if (col) {        
+      if (col) {
         this.destroy();
         this.stage.dotCount--;
         game.onCoinCollision();
@@ -1062,7 +1022,7 @@ var worldBuild = {
           onLevelComplete();
         }
       }
-    }  
+    }
   });
 
   // Return a x and y location from a row and column
@@ -1150,7 +1110,7 @@ var worldBuild = {
         }
       }
       if(col.obj.isA("Player")) {
-        if (!col.obj.p.cloaked === true) {
+        if (col.obj.p.cloaked !== true) {
           die(this);
           game.onEnemyCollision(col.obj);
         }

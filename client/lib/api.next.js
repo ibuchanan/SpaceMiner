@@ -49,8 +49,6 @@ this.Game = class {
     return enemies;
   }
   setTimeout(delay, func) {
-    console.log('setTimeout:');
-    console.log(delay)
     this.timeOuts.push(Meteor.setTimeout(func, delay));
   }
   cancelTimeouts() {
@@ -315,17 +313,14 @@ You can also use the shortcut form like this:
       };
 
       var that = this;
-      this.speed = 0;
 
-      if (this.direction === 'up') this.y = adjust(this.y, true);
-      else if (this.direction === 'down') this.y = adjust(this.y);
-      else if (this.direction === 'left') this.x = adjust(this.x, true);
-      else if (this.direction === 'right') this.x = adjust(this.x);
+      if (that.direction === 'up') that.y = adjust(that.y, true);
+      else if (that.direction === 'down') that.y = adjust(that.y);
+      else if (that.direction === 'left') that.x = adjust(that.x, true);
+      else if (that.direction === 'right') that.x = adjust(that.x);
 
-      game.setTimeout(125, function() {
-        that.speed = 200;
-        that.direction = direction;
-      });
+      that.speed = 200;
+      that.direction = direction;
     };
     obj.scope = function(...directions) {
       var maxCount = 19;
@@ -352,15 +347,35 @@ You can also use the shortcut form like this:
 
       if (directions.length < 1) directions = ['left', 'right', 'up', 'down'];
 
+      var adjust = function(val, subtract) {
+        var posOrNeg = subtract ? -1 : 1;
+        return val + ((val % 16) * posOrNeg);
+      };
+
       for (var i = 0; i < directions.length; i++) {
-        var direction = directions[i];
         var x = obj.x;
         var y = obj.y;
+
+        if (obj.direction === 'up') y = adjust(y, true);
+        else if (obj.direction === 'down') y = adjust(y);
+        else if (obj.direction === 'left') x = adjust(x, true);
+        else if (obj.direction === 'right') x = adjust(x);
+
+        var direction = directions[i];
         var items = [];
+
+        if (window.DBUG) {
+          console.log('looking in:' + direction);
+          console.log('curr: ' + obj.x + ':' + obj.y);
+          console.log('adjusted: ' + x + ':' + y)
+        }
 
         for (var j = 0; j < maxCount; j++) {
           x = x + distModifiers[direction].x;
           y = y + distModifiers[direction].y;
+          if (window.DBUG) {
+            console.log('next direction shift: ' + x + ':' + y);
+          }
           var item = Q.stage().locate(x, y, collisionMask);
           if (item) items.push(item.p.sheet);
           else items.push(null);
