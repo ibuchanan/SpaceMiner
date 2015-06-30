@@ -193,7 +193,7 @@ this.Enemy = class {
     this.qobj.p.speed = speed;
   }
   speedGet() {
-    return this.qobj.p.speed;    
+    return this.qobj.p.speed;
   }
   freeze() {
     this.qobj.p.speed = 0;
@@ -307,6 +307,9 @@ You can also use the shortcut form like this:
       }
     };
     obj.turn = function(direction) {
+      Q.inputs.left = Q.inputs.right = Q.inputs.down = Q.inputs.up = false;
+      Q.inputs[direction] = true;
+      /*
       var adjust = function(val, subtract) {
         var posOrNeg = subtract ? -1 : 1;
         return val + ((val % 16) * posOrNeg);
@@ -321,7 +324,9 @@ You can also use the shortcut form like this:
 
       that.speed = 200;
       that.direction = direction;
+      */
     };
+
     obj.scope = function(...directions) {
       var maxCount = 19;
       var scopes = {};

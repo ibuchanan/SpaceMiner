@@ -761,7 +761,7 @@ var worldBuild = {
         label: "000000",
         fontColor: "yellow",
         x:50,
-        y:10
+        y:0
       });
       Q.state.on("change.score", this, "scoreChange");
     },
@@ -792,75 +792,109 @@ var worldBuild = {
     },
 
     hit: function(col) {
-      //this.entity.stage.collide(this.entity);
       if (game.onCollide) game.onCollide.call(this, col);
 
       var p = this.entity.p;
 
-      /*
-      if(p.stepping) {
-        p.stepping = false;
+      window.C = col;
+
+      if (col.tile && p.stepping) {
+        console.log('it is a tile');
+        console.log(col);
+        //if (col.collided && col.obj.p.sheet === 'tiles' && p.stepping) {
+        p.stepping = false; // TODO no idea why not working right...
         p.x = p.origX;
-        p.y = p.origY;
+        p.y = p.origY + 5;
+      } else {
+        //p.stepping = true;
       }
-      */
     },
 
     step: function(dt) {
       var p = this.entity.p;
-
-      var moved = false;
-      p.stepWait -= dt;
-
-      if(p.stepping) {
-        p.x += p.diffX * dt / p.stepDelay;
-        p.y += p.diffY * dt / p.stepDelay;
-      }
-
       var doneWithTravel = false;
 
-      if(p.stepWait > 0) { return; }
-      if(p.stepping) {
-        p.x = p.destX;
-        p.y = p.destY;
-        if (p.travel) {
-          p.travel.step(p);
-          doneWithTravel = true;
+      var adjust_waiting_time_based_on_elapsed_time = function(elapsedTime) {
+        p.stepWait -= elapsedTime;
+      };
+
+      var still_waiting = function() {
+        return p.stepWait > 0;
+      };
+
+      var move_sprite_to_x_and_y_locations_if_still_stepping_and_apply_travel_if_needed = function() {
+        if(p.stepping) {
+          p.x = p.destX;
+          p.y = p.destY;
+          if (p.travel) {
+            p.travel.step(p);
+            doneWithTravel = true;
+          }
         }
-      }
-      p.stepping = false;
+      };
 
-      p.diffX = 0;
-      p.diffY = 0;
+      var adjust_diffX_and_diffY_based_on_direction = function() {
+        p.diffX = 0;
+        p.diffY = 0;
 
-      if(Q.inputs.left) {
-        p.diffX = -p.stepDistance;
-        p.angle = -90;
-      } else if(Q.inputs.right) {
-        p.diffX = p.stepDistance;
-        p.angle = 90;
-      }
+        if(Q.inputs.left) {
+          p.diffX = -p.stepDistance;
+          p.angle = -90;
+        } else if(Q.inputs.right) {
+          p.diffX = p.stepDistance;
+          p.angle = 90;
+        }
 
-      if(Q.inputs.up) {
-        p.diffY = -p.stepDistance;
-        p.angle = 0;
-      } else if(Q.inputs.down) {
-        p.diffY = p.stepDistance;
-        p.angle = 180;
-      }
+        if(Q.inputs.up) {
+          p.diffY = -p.stepDistance;
+          p.angle = 0;
+        } else if(Q.inputs.down) {
+          p.diffY = p.stepDistance;
+          p.angle = 180;
+        }
 
-      if(p.diffY || p.diffX ) {
-        p.stepping = true;
-        p.origX = p.x;
-        p.origY = p.y;
-        p.destX = p.x + p.diffX;
-        p.destY = p.y + p.diffY;
-        p.stepWait = p.stepDelay;
-      }
+        if(p.stepping) {
+          p.x += p.diffX * dt / p.stepDelay;
+          p.y += p.diffY * dt / p.stepDelay;
+        }
+      };
 
-      if (!doneWithTravel && p.travel) {
-        p.travel.step(p);
-      }
+      var apply_travel_if_needed_and_not_done_traveling_yet = function() {
+        if (!doneWithTravel && p.travel) {
+          p.travel.step(p);
+        }
+      };
+
+      var stop_stepping = function() {
+        p.stepping = false;
+      };
+
+      var adjust_origin_and_dest_positions_and_resume_waiting_and_stepping_when_any_diffY_or_diffX = function() {
+        if(p.diffY || p.diffX ) {
+          p.stepping = true;
+          p.origX = p.x;
+          p.origY = p.y;
+          p.destX = p.x + p.diffX;
+          p.destY = p.y + p.diffY;
+          p.stepWait = p.stepDelay;
+        }
+      };
+
+      game.onScan();
+
+      adjust_waiting_time_based_on_elapsed_time(dt);
+
+      if (still_waiting()) return;
+
+      move_sprite_to_x_and_y_locations_if_still_stepping_and_apply_travel_if_needed();
+
+      adjust_diffX_and_diffY_based_on_direction();
+
+      apply_travel_if_needed_and_not_done_traveling_yet();
+
+      stop_stepping();
+
+      adjust_origin_and_dest_positions_and_resume_waiting_and_stepping_when_any_diffY_or_diffX();
     }
   });
 
