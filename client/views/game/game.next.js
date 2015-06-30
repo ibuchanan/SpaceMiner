@@ -805,8 +805,9 @@ var worldBuild = {
         p.stepping = false; // TODO no idea why not working right...
         p.x = p.origX;
         p.y = p.origY + 5;
+        console.log('origY when is col.tile:' + p.origY);
       } else {
-        //p.stepping = true;
+        console.log('origY when not col.tile:' + p.origY);
       }
     },
 
