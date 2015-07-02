@@ -804,7 +804,7 @@ var worldBuild = {
         //if (col.collided && col.obj.p.sheet === 'tiles' && p.stepping) {
         p.stepping = false; // TODO no idea why not working right...
         p.x = p.origX;
-        p.y = p.origY + 5;
+        p.y = p.origY;;
         console.log('origY when is col.tile:' + p.origY);
       } else {
         console.log('origY when not col.tile:' + p.origY);
@@ -826,6 +826,7 @@ var worldBuild = {
       var move_sprite_to_x_and_y_locations_if_still_stepping_and_apply_travel_if_needed = function() {
         if(p.stepping) {
           p.x = p.destX;
+          console.log('The destY: ' + p.destY);
           p.y = p.destY;
           if (p.travel) {
             p.travel.step(p);
@@ -856,7 +857,9 @@ var worldBuild = {
 
         if(p.stepping) {
           p.x += p.diffX * dt / p.stepDelay;
-          p.y += p.diffY * dt / p.stepDelay;
+          var nextY = p.y + p.diffY * dt / p.stepDelay;
+          console.log(`nextY is: ${nextY}`);
+          p.y = nextY;
         }
       };
 
