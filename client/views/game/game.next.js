@@ -801,13 +801,14 @@ var worldBuild = {
       if (col.tile && p.stepping) {
         console.log('it is a tile');
         console.log(col);
-        //if (col.collided && col.obj.p.sheet === 'tiles' && p.stepping) {
-        p.stepping = false; // TODO no idea why not working right...
-        p.x = p.origX;
-        p.y = p.origY;;
-        console.log('origY when is col.tile:' + p.origY);
-      } else {
-        console.log('origY when not col.tile:' + p.origY);
+        if (col.collided && col.obj.p.sheet === 'tiles' && p.stepping) {
+          p.stepping = false; // TODO no idea why not working right...
+          p.x = p.origX;
+          p.y = p.origY;;
+          console.log('origY when is col.tile:' + p.origY);
+        } else {
+          console.log('origY when not col.tile:' + p.origY);
+        }
       }
     },
 
@@ -1002,7 +1003,7 @@ var worldBuild = {
     var distY = Math.abs(obj1Y - obj2Y);
     return distX < range && distY < range;
   }
-  var COL_RANGE = 16;
+  var COL_RANGE = 32;
 
   // Create the Dot sprite
   Q.Sprite.extend("Dot", {
