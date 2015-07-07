@@ -2526,9 +2526,13 @@ Quintus["2D"] = function(Q) {
     collide: function(obj) {
       var p = this.p,
           objP = obj.c || obj.p,
-	  	    cx = Math.floor(objP.cx),
-          cy = Math.floor(objP.cy),
-	  	    tileStartX = Math.floor((objP.x - cx - p.x) / p.tileW),
+	  	    cx = objP.cx,
+          cy = objP.cy;
+      if (objP.angle === 180) {
+        cx = Math.floor(cx);
+        cy = Math.floor(cy);
+      }
+	  	var tileStartX = Math.floor((objP.x - cx - p.x) / p.tileW),
           tileStartY = Math.floor((objP.y - cy - p.y) / p.tileH),
           tileEndX =  Math.ceil((objP.x - cx + objP.w - p.x) / p.tileW),
           tileEndY =  Math.ceil((objP.y - cy + objP.h - p.y) / p.tileH),
