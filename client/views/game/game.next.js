@@ -796,18 +796,11 @@ var worldBuild = {
 
       var p = this.entity.p;
 
-      window.C = col;
-
-      if (col.tile && p.stepping) {
-        console.log('it is a tile');
-        console.log(col);
-        if (col.collided && col.obj.p.sheet === 'tiles' && p.stepping) {
+      if (col.tile) {
+        if (col.collided && col.obj.p.sheet === 'tiles') {
           p.stepping = false; // TODO no idea why not working right...
           p.x = p.origX;
-          p.y = p.origY;;
-          console.log('origY when is col.tile:' + p.origY);
-        } else {
-          console.log('origY when not col.tile:' + p.origY);
+          p.y = p.origY;
         }
       }
     },
@@ -820,6 +813,14 @@ var worldBuild = {
         p.stepWait -= elapsedTime;
       };
 
+      var adjust_x_and_y_if_still_stepping = function() {
+        if(p.stepping) {
+          p.x += p.diffX * dt / p.stepDelay;
+          var nextY = p.y + p.diffY * dt / p.stepDelay;
+          p.y = nextY;
+        }
+      };
+
       var still_waiting = function() {
         return p.stepWait > 0;
       };
@@ -827,7 +828,6 @@ var worldBuild = {
       var move_sprite_to_x_and_y_locations_if_still_stepping_and_apply_travel_if_needed = function() {
         if(p.stepping) {
           p.x = p.destX;
-          console.log('The destY: ' + p.destY);
           p.y = p.destY;
           if (p.travel) {
             p.travel.step(p);
@@ -855,13 +855,6 @@ var worldBuild = {
           p.diffY = p.stepDistance;
           p.angle = 180;
         }
-
-        if(p.stepping) {
-          p.x += p.diffX * dt / p.stepDelay;
-          var nextY = p.y + p.diffY * dt / p.stepDelay;
-          console.log(`nextY is: ${nextY}`);
-          p.y = nextY;
-        }
       };
 
       var apply_travel_if_needed_and_not_done_traveling_yet = function() {
@@ -888,6 +881,8 @@ var worldBuild = {
       game.onScan();
 
       adjust_waiting_time_based_on_elapsed_time(dt);
+
+      adjust_x_and_y_if_still_stepping();
 
       if (still_waiting()) return;
 

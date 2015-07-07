@@ -2528,10 +2528,12 @@ Quintus["2D"] = function(Q) {
           objP = obj.c || obj.p,
 	  	    cx = objP.cx,
           cy = objP.cy;
+      // Fix for SpaceMiner #20
       if (objP.angle === 180) {
         cx = Math.floor(cx);
         cy = Math.floor(cy);
       }
+
 	  	var tileStartX = Math.floor((objP.x - cx - p.x) / p.tileW),
           tileStartY = Math.floor((objP.y - cy - p.y) / p.tileH),
           tileEndX =  Math.ceil((objP.x - cx + objP.w - p.x) / p.tileW),
