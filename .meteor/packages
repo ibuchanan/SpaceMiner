@@ -6,16 +6,14 @@
 standard-app-packages
 autopublish
 insecure
-collection-api
+mrt:collection-api
 meteorhacks:npm
-npm-container
 jquery
 underscore
 accounts-password
-bootstrap-3
-accounts-ui-bootstrap-3
-ace-embed
-animated-each
+mrt:bootstrap-3
+ian:accounts-ui-bootstrap-3
+mrt:ace-embed
 mquandalle:harmony
 zvictor:mongodb-server-aggregation
 maazalik:highcharts
@@ -37,3 +35,4 @@ dsyko:jquery-ui-touch-punch
 iamkevingreen:mixitup
 gwendall:auth-client-callbacks
 spacebars-compiler
+npm-container

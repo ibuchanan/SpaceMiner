@@ -1,1 +1,1 @@
-ROOT_URL=http://supersonic-box-14-130414.use1.nitrousbox.com IMAGES_BASE=/home/action/SpaceMiner/public/images/ meteor
+ROOT_URL=http://supersonic-box-113463.nitrousapp.com IMAGES_BASE=/home/action/SpaceMiner/public/images/ /usr/local/bin/meteor
