@@ -843,17 +843,21 @@ var worldBuild = {
         if(Q.inputs.left) {
           p.diffX = -p.stepDistance;
           p.angle = -90;
+          p.direction = 'left';
         } else if(Q.inputs.right) {
           p.diffX = p.stepDistance;
           p.angle = 90;
+          p.direction = 'right';
         }
 
         if(Q.inputs.up) {
           p.diffY = -p.stepDistance;
           p.angle = 0;
+          p.direction = 'up';
         } else if(Q.inputs.down) {
           p.diffY = p.stepDistance;
           p.angle = 180;
+          p.direction = 'down';
         }
       };
 
