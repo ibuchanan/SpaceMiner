@@ -135,6 +135,30 @@ Template.dynamo.created = function() {
     }
   }
   this.data.dynamo = userDynamo;
+  
+  var showTab = function() { return true; };
+  var hideTab = function() { return false; };
+  
+  var allTabs = ['Template', 'Style', 'Script', 'Data', 'Result']; 
+  var tabsToShow;  
+  
+  if (this.data.tabs) {
+    tabsToShow = _.intersection(allTabs, this.data.tabs);
+    var tabsToHide = _.difference(this.data.tabs, allTabs);
+        
+    _.each(tabsToHide, function(tab) {
+      var hide = {};
+      hide['tab' + tab] = hideTab;
+      Template.dynamo.helpers(hide);
+    });
+  } else {
+    tabsToShow = allTabs;
+  }
+  _.each(tabsToShow, function(tab) {
+    var show = {};
+    show['tab' + tab] = showTab;
+    Template.dynamo.helpers(show);
+  });
 };
 
 Template.dynamo.rendered = function() {

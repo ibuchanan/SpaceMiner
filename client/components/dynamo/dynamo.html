@@ -3,13 +3,14 @@
     {{#if isEdit}}
       <div role='tabpanel'>
         <ul class='nav nav-tabs' role='tablist' id='{{tabsNavId}}'>
-          <li role='presentation' class='active'><a href='#{{templateTabId}}' aria-controls='template' role='tab' data-toggle='tab'>Template</a></li>
-          <li role="presentation"><a href='#{{styleTabId}}' aria-controls='style' role='tab' data-toggle='tab'>Style</a></li>
-          <li role="presentation"><a href='#{{jsTabId}}' aria-controls='js' role='tab' data-toggle='tab'>Script</a></li>
-          <li role="presentation"><a href='#{{dataTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Data</a></li>
-          <li role="presentation"><a href='#{{resultTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Result</a></li>
+          {{#if tabTemplate}}<li role='presentation' class='active'><a href='#{{templateTabId}}' aria-controls='template' role='tab' data-toggle='tab'>Template</a></li>{{/if}}
+          {{#if tabStyle}}<li role="presentation"><a href='#{{styleTabId}}' aria-controls='style' role='tab' data-toggle='tab'>Style</a></li>{{/if}}
+          {{#if tabScript}}<li role="presentation"><a href='#{{jsTabId}}' aria-controls='js' role='tab' data-toggle='tab'>Script</a></li>{{/if}}
+          {{#if tabData}}<li role="presentation"><a href='#{{dataTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Data</a></li>{{/if}}
+          {{#if tabResult}}<li role="presentation"><a href='#{{resultTabId}}' aria-controls='data' role='tab' data-toggle='tab'>Result</a></li>{{/if}}
         </ul>
         <div class='tab-content'>
+          {{#if tabTemplate}}
           <div role='tabpanel' class='tab-pane active' id='{{templateTabId}}'>
             <div class='well well-sm'>
               <h4>Template code in Hypertext Markup Language (HTML) in <a href='https://github.com/meteor/meteor/blob/devel/packages/spacebars/README.md' target='_blank'>Meteor Spacebars format</a></h4>
@@ -20,7 +21,9 @@
               <div id='{{templateEditorId}}' class='d-editor'></div>
             </div>
           </div>
-
+          {{/if}}
+          
+          {{#if tabStyle}}
           <div role='tabpanel' class='tab-pane' id='{{styleTabId}}'>
             <div class='well well-sm'>
               <h4>Style code in <a href='https://developer.mozilla.org/en-US/docs/Web/CSS/Reference' target='_blank'>Cascasing Style Sheet (CSS) format</a></h4>
@@ -32,7 +35,9 @@
               <div id='{{styleEditorId}}' class='d-editor'></div>
             </div>
           </div>
+          {{/if}}
 
+          {{#if tabScript}}
           <div role='tabpanel' class='tab-pane' id='{{jsTabId}}'>
             <div class='well well-sm'>
               <h4>Program code in <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript' target='_blank'>JavaScript</a> using the <a href='http://docs.meteor.com/#/basic/' target='_blank'>Meteor framework</a></h4>
@@ -43,7 +48,9 @@
               <div id='{{jsEditorId}}' class='d-editor'></div>
             </div>
           </div>
-
+          {{/if}}
+          
+          {{#if tabData}}
           <div role='tabpanel' class='tab-pane' id='{{dataTabId}}'>
             <div class='well well-sm'>
               <h4>Data code in <a href='http://www.w3resource.com/JSON/introduction.php' target='_blank'>JavaScript Object Notation (JSON) format</a></h4>
@@ -55,7 +62,9 @@
               <div id='{{dataEditorId}}' class='d-editor'></div>
             </div>
           </div>
-
+          {{/if}}
+          
+          {{#if tabResult}}
           <div role='tabpanel' class='tab-pane' id='{{resultTabId}}'>
             <div class='well well-sm'>
               <h4>Your code rendered</h4>
@@ -65,6 +74,7 @@
               {{/each}}
             </div>
           </div>
+          {{/if}}          
         </div>
       </div>
     {{else}}
