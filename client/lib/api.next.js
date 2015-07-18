@@ -136,6 +136,7 @@ ccgccccccccccccgcc`);
   }
   resetState() {
     this.cancelTimeouts();
+    this.q.inputs.up = this.q.inputs.down = this.q.inputs.left = this.q.inputs.right = false;
     this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives });
   }
   pause() {
@@ -281,6 +282,7 @@ You can also use the shortcut form like this:
     };
     obj.move = function() {
       var items = Array.prototype.slice.call(arguments);
+      obj.stop(); // TODO this does not seem to solve the entire problem
       move(obj.qobj.p, ...items);
     };
     obj.cloak = function() {
@@ -307,26 +309,12 @@ You can also use the shortcut form like this:
       }
     };
     obj.turn = function(direction) {
-      Q.inputs.left = Q.inputs.right = Q.inputs.down = Q.inputs.up = false;
-      Q.inputs[direction] = true;
-      /*
-      var adjust = function(val, subtract) {
-        var posOrNeg = subtract ? -1 : 1;
-        return val + ((val % 16) * posOrNeg);
-      };
-
-      var that = this;
-
-      if (that.direction === 'up') that.y = adjust(that.y, true);
-      else if (that.direction === 'down') that.y = adjust(that.y);
-      else if (that.direction === 'left') that.x = adjust(that.x, true);
-      else if (that.direction === 'right') that.x = adjust(that.x);
-
-      that.speed = 200;
-      that.direction = direction;
-      */
+      obj.stop();
+      obj.q.inputs[direction] = true;
     };
-
+    obj.stop = function() {
+      obj.q.inputs.up = obj.q.inputs.down = obj.q.inputs.left = obj.q.inputs.right = false; 
+    };  
     obj.scope = function(...directions) {
       var maxCount = 19;
       var scopes = {};
@@ -381,7 +369,7 @@ You can also use the shortcut form like this:
           if (window.DBUG) {
             console.log('next direction shift: ' + x + ':' + y);
           }
-          var item = Q.stage().locate(x, y, collisionMask);
+          var item = obj.q.stage().locate(x, y, collisionMask);
           if (item) items.push(item.p.sheet);
           else items.push(null);
         }
