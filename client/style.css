@@ -238,6 +238,25 @@ strong.line-thru: {
   text-align: center;
 }
 
+.lesson-sections {
+  padding-bottom: 12px;
+  background-color: #333;
+}
+
+.lesson-sections-nav-line {
+  content:"";
+  position: absolute;
+  z-index: 0;
+  top: 75px;
+  bottom: 75px;
+  left: 50%;
+  border-left: 3px inset rgba(0, 0, 0, 0.6);
+}
+
+.lesson-section-nav-container {
+  margin-bottom: 12px;
+}
+
 .lesson-section-nav {
   font-size:55%; 
   text-align:center;
@@ -246,13 +265,25 @@ strong.line-thru: {
   background: #222;
 }
 
-.nav-tabs > li, .nav-pills > li {
+.lesson-section-steps .pagination {
+  margin-top: 0px;
+}
+
+.sectionNav {
+  text-align: center;
+}
+
+.sectionNav .badge {
+  margin-top: 6px;
+}
+
+.nav-tabs > li /*, .nav-pills > li*/ {
     float:none;
     display:inline-block;
     *display:inline; /* ie7 fix */
      zoom:1; /* hasLayout ie7 trigger */
 }
 
-.nav-tabs, .nav-pills {
+.nav-tabs /*, .nav-pills*/ {
     text-align:center;
 }

@@ -2,16 +2,30 @@
   <div class='container-fluid lesson'>
     <section class='row'>
       <article class='lesson'>
-        <h1 style='text-align: center'><span class='label label-danger'>{{lessonTitle}} <span class='fa fa-graduation-cap'></span></span></h1>
-        <h6 style='text-align: center'><i>{{lastViewed}}</i></h6>
-        <ul class='nav nav-tabs'>
-          {{#each lesson.sections}}
-          {{> sectionNav}}
-          {{/each}}
-        </ul>
-        {{#each lesson.sections}}
-        {{> section}}
-        {{/each}}
+        <div>
+          <h1 style='text-align: center'><span class='label label-danger'>{{lessonTitle}} <span class='fa fa-graduation-cap'></span></span></h1>        
+          <h6 style='text-align: center'><i>{{lastViewed}}</i></h6>
+        </div>
+        <div class='container-fluid'>
+          <div class='row'>
+            <div class='col-sm-2 lesson-sections'>
+              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'>Sections <span class='fa fa-book'></span></span></h2>
+              <div style='overflow-y: scroll; max-height: 500px; padding-right: 16px;'>
+                <div class='lesson-sections-nav-line'></div>
+                <ul class='nav nav-pills nav-stacked'>
+                  {{#each lesson.sections}}
+                  {{> sectionNav}}
+                  {{/each}}
+                </ul>
+              </div>
+            </div>
+            <div class='col-sm-10'>
+              {{#each lesson.sections}}
+              {{> section}}
+              {{/each}}          
+            </div>
+          </div>
+        </div>
       </article>
     </section>
     {{#if rendered}}
@@ -25,8 +39,10 @@
 <template name='section'>
 <div class='sectionWrapper'>
 {{#if current}}
-  <nav style='text-align: center'>
+  <h2 style='margin-top: 0px;'><span class='label label-info'>Current Section: {{title}}</span></h2>
+  <nav class='lesson-section-steps'>
     <ul class='pagination'>
+      <li><a class="partNav" style='font-weight: bold; color: white'>Steps <span class='fa fa-bookmark'></span></a></li>
       {{#each parts}}
         {{> partNav}}
       {{/each}}
@@ -34,7 +50,7 @@
   </nav>
   {{#each parts}}
     {{#if currentPart}}
-      <h6 style='text-align: center; margin-top: -10px'><i>{{lastViewedPart}}</i></h6>
+      <h6 style='margin-top: -10px; margin-left: 4px;'><i>{{lastViewedPart}}</i></h6>
       {{> Template.dynamic template=type data=this}}
     {{/if}}
   {{/each}}
@@ -43,7 +59,9 @@
 </template>
 
 <template name='sectionNav'>
-  <li role="presentation" class="{{current}}"><a href="#" class='sectionNav'>{{title}} <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span><div class='lesson-section-nav'>{{lastViewed}}</div></a></li>
+  <li role="presentation" class="{{current}} lesson-section-nav-container"><a href="#" class='sectionNav'>{{title}}<div class='lesson-section-nav'>{{lastViewed}}</div>
+    <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span></a>
+  </li>
 </template>
 
 <template name='partNav'>

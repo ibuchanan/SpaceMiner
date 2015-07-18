@@ -123,6 +123,11 @@ Template.section.helpers({
     var index = currentSecIndex.get();    
     return this.index === index;
   },
+  title: function() {
+    var index = currentSecIndex.get();
+    var lesson = getLesson();
+    return lesson.sections[index].title;
+  },
   currentPart: function() {
    var index = currentPartIndex.get();
    return this.index === index;
