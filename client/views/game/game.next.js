@@ -472,6 +472,19 @@ function move(props) {
 }
 window.move = move;
 
+function command(cmd, ...args) {
+  if (cmd === 'move') {
+    let [x, y, ...moves] = args;
+    return {
+      x,
+      y,
+      moves
+    };
+  }
+  return {};
+};
+window.command = command;
+
 function configureQuintus(callback, options) {
   /*
   if (Qloaded()) {

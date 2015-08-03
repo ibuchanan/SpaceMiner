@@ -109,24 +109,32 @@ Template.editorProgram.events({
       update: function() { window.tttGame.set(this.game); }
     };
 
-    var result;
-    try {
-      result = eval(code);
-    } catch(ex) {
-      result = "*Error executing program*";
-      window.console.error(ex);
-    }
-    output.parents().show();
-    if(!printed) {
-      if (useStringify === 'true') {
-        result = JSON.stringify(result, ' ', 2);
+    Meteor.call('es6compile', [code], function(err, talkBabelToMe) {
+      var result;
+      if (err) {
+        result = "*Error executing program*";
+        window.console.error(err);
+      } else {
+        try {
+          window.BABEL_RESULT = talkBabelToMe;
+          result = eval(talkBabelToMe.code);
+        } catch(ex) {
+          result = "*Error executing program*";
+          window.console.error(ex);
+        } 
       }
-      output.text(result).fadeIn();
-    } else {
-      output.fadeIn();
-    }
-    var outputContainer = program.find('.ePrg-outputContainer');
-    outputContainer.effect('highlight', {color:'green'});
+      output.parents().show();
+      if(!printed) {
+        if (useStringify === 'true') {
+          result = JSON.stringify(result, ' ', 2);
+        }
+        output.text(result).fadeIn();
+      } else {
+        output.fadeIn();
+      }
+      var outputContainer = program.find('.ePrg-outputContainer');
+      outputContainer.effect('highlight', {color:'green'});        
+    });
   },
   'click .clear': function(evt, template) {
     var program = $(template.firstNode);
