@@ -36,3 +36,4 @@ iamkevingreen:mixitup
 gwendall:auth-client-callbacks
 spacebars-compiler
 npm-container
+babel-compiler

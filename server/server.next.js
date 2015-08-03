@@ -569,6 +569,11 @@ Meteor.startup(function() {
           });
         });        
         return future.wait();
+      },
+      'es6compile': (code)=> {
+        var babelOptions = Babel.getDefaultOptions();
+        var talkBabelToMe = Babel.compile(code, babelOptions);
+        return talkBabelToMe;        
       }
     });  
   
