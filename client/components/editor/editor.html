@@ -1,10 +1,12 @@
 <template name='editor'>
   <div class='container-fluid editor'>
     <div class='row'>
-      <div class='col-xs-12 col-sm-6'>
+      <div class='col-sm-12'>
         {{> Template.dynamic template=templateName data=templateDataContext}}
       </div>
-      <div class='col-xs-12 col-sm-6'>
+    </div>
+    <div class='row'>   
+      <div class='col-sm-12'>
         <div role='tabpanel'>
           <ul class='nav nav-tabs' role='tablist'>
             <li role='presentation' class='active'><a href='#{{editorTabId}}' aria-controls='editor' role='tab' data-toggle='tab'>Editor</a></li>

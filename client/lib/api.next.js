@@ -17,6 +17,66 @@ function defineProperties(target, source, props) {
   });
 }
 
+function GameWorld(defaults, q) {
+  defaults.q = q;
+  
+  // TODO add an "add" method that would allow actual addition, not just replacement
+  defaults.setSprite = function(sprite, x, y) {
+    if (x < 1) x = 1;
+    if (y < 1) y = 1;
+    if (x > 18) x = 18;
+    if (y > 13) y = 13;
+
+    let spritesMap = {
+      '-': 'blank',
+      '': 'blank',
+      ' ': 'blank',
+      't': 'Tile',
+      'tile': 'Tile',
+      'g': 'Tower',
+      'gem': 'Tower',
+      'c': 'Dot',
+      'coin': 'Dot',
+      'e': 'Enemy',
+      'enemy': 'Enemy',
+      'p': 'Player',
+      'player': 'Player'
+    };
+    sprite = sprite || '-';
+    sprite = sprite.toLowerCase();
+    let spriteClass = spritesMap[sprite];
+
+    var levelName;
+    for (var p in this.q) {
+      if (p.indexOf('Level') === 0) {
+        levelName = p;
+        break;
+      }
+    }
+
+    if (!levelName) return;
+
+    let lvl = this.q(levelName).items[0];
+    let targetPos = this.q.tilePos(x, y);
+    let currentSprite = this.q.stage().locate(targetPos.x, targetPos.y);
+    if (currentSprite) {
+      currentSprite.destroy();
+    }
+    else {
+      lvl.setTile(x, y, 0);
+    }
+
+    if (spriteClass === 'Tile' || spriteClass === 'blank') {
+      let spriteNum = spriteClass === 'Tile' ? 1 : 0;
+      lvl.setTile(x, y, spriteNum);
+    } else {
+      this.q.stage().insert(new this.q[spriteClass](this.q.tilePos(x, y)));
+    }
+  };
+  
+  return defaults;
+}
+
 this.Game = class {
   constructor(q, world) {
     this.timeOuts = [];
@@ -26,9 +86,10 @@ this.Game = class {
     if (_.isString(world)) this.levelId = world;
     if (_.isObject(world)) {
       this.levelId = world._id;
+      this.world = GameWorld(this.world, q);
       this.resetState();
     } else {
-      this.world = Game.getDefaults();
+      this.world = GameWorld(Game.getDefaults(), q);
     }
     this.paused = false;
   }
@@ -101,7 +162,7 @@ ccgccccccccccccgcc`);
           ammoInc: 1,
           soundPlay: 'gem1.wav'
         }
-      }
+      }      
     };
   }
   get worldName() {
@@ -178,6 +239,7 @@ ccgccccccccccccgcc`);
   }
   onScan() {
   }
+
 }
 
 this.Enemy = class {
