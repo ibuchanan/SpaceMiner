@@ -485,6 +485,24 @@ function command(cmd, ...args) {
 };
 window.command = command;
 
+function run(name, ...args) {
+  var execute = function(resolve) {
+    game.player[name](...args, resolve);
+  };
+  return new Promise(execute);
+}
+window.run = run;
+
+var range = max => {
+ let cur = 0;
+ return {
+   [Symbol.iterator]: function*() {
+     while (cur < max) yield cur++;
+   }
+ }
+};
+window.range = range;
+
 function configureQuintus(callback, options) {
   /*
   if (Qloaded()) {
@@ -1080,6 +1098,10 @@ var worldBuild = {
   // in our tile map
   Q.tilePos = function(col,row) {
     return { x: col*32 + 16, y: row*32 + 16 };
+  }
+
+  Q.gridPos = function(x, y) {
+    return { x: (x - 16)/32, y: (y - 16)/32 };
   }
 
   Q.component("enemyControls", {

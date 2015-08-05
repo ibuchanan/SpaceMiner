@@ -555,28 +555,31 @@ Meteor.startup(function() {
     Meteor.methods({
       'levelSave': (id, levelDto)=> {
         createLevelRecord(levelDto, (levelDtoPoweredUp)=> {
-            Levels.upsert(id, {$set: levelDtoPoweredUp});          
+            Levels.upsert(id, {$set: levelDtoPoweredUp});
         });
       },
       'levelUpdate': (id, props, buildStepUpdateCounts)=> {
-        var future = new Future();    
+        var future = new Future();
         createLevelRecord(props, (propsPoweredUp)=> {
-          Levels.update(id, { 
+          Levels.update(id, {
             $set: propsPoweredUp,
             $inc : buildStepUpdateCounts
           }, function() {
             future.return(true);
           });
-        });        
+        });
         return future.wait();
       },
       'es6compile': (code)=> {
-        var babelOptions = Babel.getDefaultOptions();
+        var babelOptions = Babel.getDefaultOptions(); //{meteorAsyncAwait:true});
+        babelOptions.stage = 1;
+        console.log(babelOptions);
         var talkBabelToMe = Babel.compile(code, babelOptions);
-        return talkBabelToMe;        
+        console.log(talkBabelToMe);
+        return talkBabelToMe;
       }
-    });  
-  
+    });
+
     /*
     ServiceConfiguration.configurations.upsert(
       { service: "meetup" },

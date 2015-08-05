@@ -17,16 +17,34 @@ function defineProperties(target, source, props) {
   });
 }
 
+var getDropSpot = (forward) => {
+  var direction = game.player.direction;
+  var pos = { x: game.player.x, y: game.player.y };
+  var offset = forward ? 32 : -32;
+  if (direction === 'down') { pos.y += offset; }
+  if (direction === 'up') { pos.y -= offset; }
+  if (direction === 'left') { pos.x -= offset; }
+  if (direction === 'right') { pos.x += offset; }
+  var gridPos = Q.gridPos(pos.x, pos.y);
+  return gridPos;
+};
+
 function GameWorld(defaults, q) {
   defaults.q = q;
-  
-  // TODO add an "add" method that would allow actual addition, not just replacement
-  defaults.setSprite = function(sprite, x, y) {
-    if (x < 1) x = 1;
-    if (y < 1) y = 1;
-    if (x > 18) x = 18;
-    if (y > 13) y = 13;
 
+  // TODO add an "add" method that would allow actual addition, not just replacement
+  defaults.setSprite = function(sprite, x=false, y) {
+    let gridPos;
+    if (_.isBoolean(x)) {
+      gridPos = getDropSpot(x);
+      x = gridPos.x;
+      y = gridPos.y;
+    } else {
+      if (x < 1) x = 1;
+      if (y < 1) y = 1;
+      if (x > 18) x = 18;
+      if (y > 13) y = 13;
+    }
     let spritesMap = {
       '-': 'blank',
       '': 'blank',
@@ -73,7 +91,7 @@ function GameWorld(defaults, q) {
       this.q.stage().insert(new this.q[spriteClass](this.q.tilePos(x, y)));
     }
   };
-  
+
   return defaults;
 }
 
