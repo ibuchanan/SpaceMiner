@@ -444,50 +444,76 @@ let moveString = m => {
   return m[direction] + ' ' + direction;
 }
 
-function move(props) {
- var args = arguments;
- var firstStep = true;
- function runStep(index) {
-   var nextIndex = index+1;
-   if (index < args.length) {
-     var arg = args[index];
-     if (_.isString(arg) && arg.indexOf(' ') === -1) {
-       var cmd = arg.toLowerCase();
-       var map = {
-         'cloak': game.player.cloak,
-         'fire' : game.player.fire,
-       };
-       if (_.has(map, cmd))  {
-         map[cmd]();
-       }
-       runStep(nextIndex);
-     } else  if (_.isFunction(args[index])) {
-       args[index]();
-       runStep(nextIndex);
-     } else {
-      var step = args[index].split(' ');
-      var num = parseInt(step[0]);
-      var y = parseInt(step[1]);
-      if (!_.isNaN(y)) {
-        num++;
-        y++;
-        props.speed = 0;
-        props.directionOld = props.direction;
-        props.direction = '';
-        props.x = (num * 32) + 16;
-        props.y = (y * 32 + 16);
-        game.setTimeout(100, function() {
-          runStep(nextIndex);
-        });
-      } else {
-        _move(props, num, step[1], function() {
-           runStep(nextIndex);
-        });
-      }
-    }
-   }
+let moveNeedsPlayerProps = arg => {
+  if (!_.isObject(arg)) return true;
+  if (_.isObject(arg) && !_.has(arg, 'spriteProperties')) return true;
+};
+
+let makeMoves = moves => moves.map(move => {
+  if (_.isObject(move)) return moveString(move);
+  return move;
+});
+
+function move(...args) {
+ let [props, ...moveArgs] = args;
+ if (moveNeedsPlayerProps(props)) {
+  props = game.player.qobj.p;
+  if (moveArgs.length > 0) {
+    moveArgs.unshift(args[0]);
+  } else {
+    moveArgs = [args[0]];
+  }
  }
- runStep(1);
+ let execute = (resolve) => {
+   let moves = makeMoves(moveArgs);
+   let firstStep = true;
+   let runStep = index => {
+     var nextIndex = index+1;
+     if (index < moves.length) {
+       var move = moves[index];
+       if (_.isString(move) && move.indexOf(' ') === -1) {
+         var cmd = move.toLowerCase();
+         var map = {
+           'cloak': game.player.cloak,
+           'fire' : game.player.fire,
+         };
+         if (_.has(map, cmd))  {
+           map[cmd]();
+         }
+         runStep(nextIndex);
+       } else  if (_.isFunction(moves[index])) {
+         moves[index]();
+         runStep(nextIndex);
+       } else {
+        var step = moves[index].split(' ');
+        var num = parseInt(step[0]);
+        var y = parseInt(step[1]);
+        if (!_.isNaN(y)) {
+          num++;
+          y++;
+          props.speed = 0;
+          props.directionOld = props.direction;
+          props.direction = '';
+          props.x = (num * 32) + 16;
+          props.y = (y * 32 + 16);
+          game.setTimeout(100, function() {
+            runStep(nextIndex);
+          });
+        } else {
+          _move(props, num, step[1], function() {
+             runStep(nextIndex);
+          });
+        }
+      }
+     }
+     else {
+       console.log('We are resolving...');
+       resolve();
+     }
+   }
+   runStep(0);
+ };
+ return new Promise(execute);
 }
 window.move = move;
 
@@ -505,10 +531,7 @@ function command(cmd, ...args) {
 window.command = command;
 
 function run(name, ...args) {
-  let moves = args.map(move => {
-    if (_.isObject(move)) return moveString(move);
-    return move;
-  });
+  let moves = makeMoves(args);
   var execute = function(resolve) {
     game.player[name](...moves, resolve);
   };
