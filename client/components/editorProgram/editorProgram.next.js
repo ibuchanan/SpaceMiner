@@ -109,19 +109,19 @@ Template.editorProgram.events({
       update: function() { window.tttGame.set(this.game); }
     };
 
-    Meteor.call('es6compile', [code], function(err, talkBabelToMe) {
+    Meteor.call('es6compile', [code], (err, talkBabelToMe) => {
       var result;
       if (err) {
         result = "*Error executing program*";
         window.console.error(err);
       } else {
         try {
-          window.BABEL_RESULT = talkBabelToMe;
-          result = eval(talkBabelToMe.code);
+          window.BABEL_CODE = talkBabelToMe;
+          result = eval(talkBabelToMe);
         } catch(ex) {
           result = "*Error executing program*";
           window.console.error(ex);
-        } 
+        }
       }
       output.parents().show();
       if(!printed) {
@@ -133,7 +133,7 @@ Template.editorProgram.events({
         output.fadeIn();
       }
       var outputContainer = program.find('.ePrg-outputContainer');
-      outputContainer.effect('highlight', {color:'green'});        
+      outputContainer.effect('highlight', {color:'green'});
     });
   },
   'click .clear': function(evt, template) {

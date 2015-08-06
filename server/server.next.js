@@ -12,6 +12,7 @@ if (process.env.IMAGES_BASE) {
 }
 
 var gm = Meteor.npmRequire('gm');
+var babel = Meteor.npmRequire('babel-core');
 
 function createLevelRecord(levelDto, callback) {  
   var root = IMAGES_BASE + 'spriteParts/';
@@ -570,13 +571,13 @@ Meteor.startup(function() {
         });
         return future.wait();
       },
-      'es6compile': (code)=> {
-        var babelOptions = Babel.getDefaultOptions(); //{meteorAsyncAwait:true});
-        babelOptions.stage = 1;
-        console.log(babelOptions);
-        var talkBabelToMe = Babel.compile(code, babelOptions);
-        console.log(talkBabelToMe);
-        return talkBabelToMe;
+      'es6compile': source => {
+        let code =
+`(async () => {
+${source}
+}());`;
+        let result = babel.transform(code, {stage:1, ast:false});
+        return result.code;
       }
     });
 
@@ -592,13 +593,13 @@ Meteor.startup(function() {
       { $set: { clientId: "e0dcb6c6b3c3c2c21f4e", secret: "45617166c064898848a38c6063a072350ffe4191" } }
     );
     */
-    
+
     // spaceminer.mod.bz:
     ServiceConfiguration.configurations.upsert(
       { service: "github" },
       { $set: { clientId: "64c121033426202d78cc", secret: "c15a3093da1e2bc973ee63544f83172d1a490598" } }
     );
-  
+
     cleanDbAndCreateDefaultRecords();
     configureCORS();
     configureCollectionAPI();
