@@ -425,6 +425,25 @@ function _move(props, cells, direction, next) {
 }
 window._move = _move;
 
+let r, right, l, left, u, up, d, down, pt, point;
+
+r = right = r => { return {r} };
+l = left = l => { return {l} };
+d = down = d => { return {d} };
+u = up = u => { return {u} };
+pt = point = (x, y) => x + ' ' + y;
+
+window.r = window.right = r;
+window.u = window.up = u;
+window.l = window.left = l;
+window.d = window.down = d;
+window.pt = window.point = pt;
+
+let moveString = m => {
+  let direction = Object.keys(m)[0]
+  return m[direction] + ' ' + direction;
+}
+
 function move(props) {
  var args = arguments;
  var firstStep = true;
@@ -486,8 +505,12 @@ function command(cmd, ...args) {
 window.command = command;
 
 function run(name, ...args) {
+  let moves = args.map(move => {
+    if (_.isObject(move)) return moveString(move);
+    return move;
+  });
   var execute = function(resolve) {
-    game.player[name](...args, resolve);
+    game.player[name](...moves, resolve);
   };
   return new Promise(execute);
 }
