@@ -595,10 +595,12 @@ ${source}
     */
 
     // spaceminer.mod.bz:
+    /*
     ServiceConfiguration.configurations.upsert(
       { service: "github" },
       { $set: { clientId: "64c121033426202d78cc", secret: "c15a3093da1e2bc973ee63544f83172d1a490598" } }
     );
+    */
 
     cleanDbAndCreateDefaultRecords();
     configureCORS();
