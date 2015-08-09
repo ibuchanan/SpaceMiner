@@ -22,6 +22,9 @@ Template.editorProgram.created = function() {
 
 function getEditor(template) {
   var id = getId(template);
+  for (let path of ['modePath', 'themePath', 'workerPath', 'basePath']) {
+    ace.config.set(path, '/packages/mrt_ace-embed/ace');
+  }
   var editor = ace.edit(id);
   return editor;
 }
@@ -29,7 +32,7 @@ function getEditor(template) {
 Template.editorProgram.rendered = function() {
   var userProgram = getUserProgramForCurrentUser(this.data.program);
   this.data.program = userProgram;
-  var editor = getEditor(this);
+  let editor = getEditor(this);
   editor.setTheme("ace/theme/chrome");
   var session = editor.getSession();
   session.setMode("ace/mode/javascript");

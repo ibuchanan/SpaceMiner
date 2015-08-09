@@ -83,8 +83,15 @@ function getId(instance) {
   return instance._instanceId;
 }
 
+let aceEditorPathSet = false;
+
 function getEditor(template, editorName) {
   var editorId = template[editorName + 'EditorId'];
+  if (!aceEditorPathSet) {
+    for (let path of ['modePath', 'themePath', 'workerPath', 'basePath']) {
+      ace.config.set(path, '/packages/mrt_ace-embed/ace');
+    }
+  }
   var editor = ace.edit(editorId);
   return editor;
 }

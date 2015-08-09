@@ -2,8 +2,15 @@ Template.program.created = function() {
   this._instanceId = Meteor.uuid();
 };
 
+let aceEditorPathSet = false;
+
 function getEditor(template) {
   var id = getId(template);
+  if (!aceEditorPathSet) {
+    for (let path of ['modePath', 'themePath', 'workerPath', 'basePath']) {
+      ace.config.set(path, '/packages/mrt_ace-embed/ace');
+    }
+  }
   var editor = ace.edit(id);
   return editor;
 }
