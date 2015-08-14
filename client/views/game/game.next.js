@@ -256,7 +256,16 @@ function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
     let funcCode = createOverrideFuncCode(worldScript, defaults);
     funcCode = funcCode.replace('(function (defaults', 'return (function (defaults');
-    funcCode = funcCode = '(function(defaults) {\n' + funcCode;
+    funcCode = funcCode = `(function(defaults) {
+var rules = [];
+var addRules = function() {
+  for (var _i = 0; _i < arguments.length; _i++) {
+    rules.push(arguments[_i]);
+  }
+}
+var addrules = addRules;
+
+${funcCode}`;
     funcCode = funcCode.replace('return __obj__;\n})', 'return __obj__;\n})(defaults)\n});');
     let func = eval(funcCode); // yep, "eval can be harmful"
     var obj = {};
@@ -601,7 +610,7 @@ let Rule = class {
 };
 window.rule = definition => new Rule(definition);
 
-let wall = ({
+let walln = ({
   start = {
     x : 1,
     y : 1
@@ -610,7 +619,6 @@ let wall = ({
   dir = 'r',
   sprite = 't'
   } = {}) => {
-  console.log("the sprite: " + sprite);
   if (dir === 'r' || dir === 'right') {
     if (size > 18) size = 18;
     if (start.x > 1 && (start.x + size > 18)) {
@@ -648,13 +656,13 @@ let wall = ({
     }
   }
 };
-window.wall = wall;
+window.walln = walln;
 // Examples:
 //wall();
 //wall({size:16, dir:'l', start:{x:16,y:1}});
 //wall({size:10, dir:'u', start:{x:1,y:10}});
 
-let box = ({
+let boxn = ({
   start = {
     x : 1,
     y : 1
@@ -663,12 +671,12 @@ let box = ({
   sprite = 't'
   } = {}) => {
 
-  wall({start, size, sprite, dir:'r'});
-  wall({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd'});
-  wall({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l'});
-  wall({start: { x : start.x, y: start.y + size - 1}, size, sprite, dir : 'u'});
+  walln({start, size, sprite, dir:'r'});
+  walln({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd'});
+  walln({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l'});
+  walln({start: { x : start.x, y: start.y + size - 1}, size, sprite, dir : 'u'});
 };
-window.box = box;
+window.boxn = boxn;
 
 // Examples:
 //box();
@@ -677,7 +685,7 @@ window.box = box;
 //box({start:{x:7,y:7}, size: 4, sprite: 't'});
 //box({start:{x:5,y:5}, size: 5, sprite: 't'});
 
-let block = ({
+let blockn = ({
   start = {
     x : 1,
     y : 1
@@ -686,10 +694,10 @@ let block = ({
   sprite = 't'
   } = {}) => {
   for(let y = start.y; y < start.y + size; y++) {
-    wall({start: {x:start.x, y:y}, size, sprite, dir: 'r'});
+    walln({start: {x:start.x, y:y}, size, sprite, dir: 'r'});
   }
 };
-window.block = block;
+window.blockn = blockn;
 // Examples:
 //block({start:{x:1,y:1}, size: 5, sprite:'g'});
 
@@ -703,6 +711,83 @@ let invoke = (list, funcName, ...args) => {
 Array.prototype.invoke = function(funcName, ...args) {
   invoke(this, funcName, ...args);
 };
+
+let at = (x=1, y=1) => ({start:{x:x, y:y}});
+let sprite = (type='t') => ({sprite:type});
+let dir = (direction='d') => ({dir:direction});
+window.at = at;
+window.sprite = sprite;
+window.dir = dir;
+
+let makeFuncs = (factoryFunc, funcLongNames) => {
+  funcLongNames.map(funcLongName => {
+    let initial = funcLongName[0];
+    window[funcLongName] = window[initial] = () => factoryFunc(initial);
+  });
+};
+makeFuncs(sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
+makeFuncs(dir, ['left', 'right', 'up', 'down']);
+
+window.len = window.size = window.height = window.width = (dimension) => ({size:dimension});
+
+let shapeDefer = shape => (...opts) => {
+  let props = {};
+  for (let opt of opts) {
+    let val = opt;
+    if (typeof opt === 'function') val = opt();
+    Object.assign(props, val);
+  }
+  return () => window[shape + 'n'](props);
+};
+
+['box', 'block', 'wall'].map((shape) => window[shape] = shapeDefer(shape))
+
+let funcCombine = opts => {
+  let runAllFuncs = () => {};
+  if (opts.length > 0) {
+    runAllFuncs = () => {
+      for(let fun of opts) {
+        if (typeof fun === 'function') fun();
+      }
+    };
+  }
+  return runAllFuncs;
+};
+
+let wait = (milliseconds, ...opts) => {
+  let waiter = () => {
+    console.log('execing waiter');
+    game.setTimeout(milliseconds, funcCombine(opts));
+  }
+  return waiter;
+};
+window.wait = wait;
+
+let score = (...opts) => {
+  let props = {};
+  if (opts.length < 2) throw "Must pass at least two arguments to score(...) function";
+  // Assume number here:
+  let scoreMin = parseInt(opts.shift());
+  props.score = scoreMin;
+  props.then = funcCombine(opts);
+  return props;
+};
+window.score = score;
+
+let rules = (..._rules) => _rules;
+window.rules = rules;
+
+// Example:
+/*
+game.world.rules = rules(
+  score(400, box(gem, size(5), at(2,2))),
+  score(1000, wait(3000,
+    wall(enemy, at(4,1)),
+    wall(tile, left, at(4,4))
+    )
+  )
+);
+*/
 
 function configureQuintus(callback, options) {
   /*
