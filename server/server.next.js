@@ -560,7 +560,10 @@ Meteor.startup(function() {
         });
       },
       'levelUpdate': (id, props, buildStepUpdateCounts)=> {
-        var future = new Future();
+        let future = new Future();
+        // TODO remove this code if we get it handled on client
+        //let result = babel.transform(props.script, {stage:1, ast:false});
+        //props.script = result.code;
         createLevelRecord(props, (propsPoweredUp)=> {
           Levels.update(id, {
             $set: propsPoweredUp,
@@ -573,9 +576,17 @@ Meteor.startup(function() {
       },
       'es6compile': source => {
         let code =
-`(async () => {
+`(async (defaults) => {
 ${source}
 }());`;
+        let result = babel.transform(code, {stage:1, ast:false});
+        return result.code;
+      },
+      'es6compileDeclaration': source => {
+        let code =
+`(defaults) => {
+${source}
+};`;
         let result = babel.transform(code, {stage:1, ast:false});
         return result.code;
       }

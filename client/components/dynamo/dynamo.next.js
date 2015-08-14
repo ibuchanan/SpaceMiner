@@ -148,8 +148,8 @@ Template.dynamo.created = function() {
   
   var allTabs = ['Template', 'Style', 'Script', 'Data', 'Result']; 
   var tabsToShow;  
-  
-  if (this.data.tabs) {
+  // TODO: figure out why this is busted
+  if (false/*this.data.tabs*/) {
     tabsToShow = _.intersection(allTabs, this.data.tabs);
     var tabsToHide = _.difference(this.data.tabs, allTabs);
         

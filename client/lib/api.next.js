@@ -110,6 +110,7 @@ this.Game = class {
       this.world = GameWorld(Game.getDefaults(), q);
     }
     this.paused = false;
+    this._realizedRules = [];
   }
   get player() {
     var qPlayer = this.q('Player').items[0];
@@ -180,7 +181,9 @@ ccgccccccccccccgcc`);
           ammoInc: 1,
           soundPlay: 'gem1.wav'
         }
-      }      
+      },
+      scoreChanged: '(function(score) {})',
+      rules: []
     };
   }
   get worldName() {
@@ -194,8 +197,28 @@ ccgccccccccccccgcc`);
   enemy() {
     return this.world.enemy;
   }
+  enemyKill(enemy) {
+    enemy.destroy();
+    if (this.enableEnemyRespawn) {
+      this.setTimeout(this.enemy().respawnDelay, function(){
+        let newEnemy = new this.q.Enemy(this.q.tilePos(10,7));
+        let speedUp = enemy.p.speed;
+        newEnemy.p.speed = speedUp + this.enemy().increaseSpeedBy;
+        this.q.stage().insert(newEnemy);
+      });
+    }
+  }
   collisions() {
     return this.world.collisions;
+  }
+  get rules() {
+    if (this._realizedRules.length === 0 && this.world.rules && _.isArray(this.world.rules)) {
+      this._realizedRules = this.world.rules.map(rule);
+    }
+    return this._realizedRules;
+  }
+  scoreChanged(score) {
+    if (_.isFunction(this.world.scoreChanged)) this.world.scoreChanged(score);
   }
   get explorerName() {
     return this.world.explorerName;
@@ -217,6 +240,7 @@ ccgccccccccccccgcc`);
     this.cancelTimeouts();
     this.q.inputs.up = this.q.inputs.down = this.q.inputs.left = this.q.inputs.right = false;
     this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives });
+    this._realizedRules = [];
   }
   pause() {
     this.q.pauseGame();
@@ -232,6 +256,11 @@ ccgccccccccccccgcc`);
   soundPlay(soundName) {
     if (this.q.options.audioSupported.length > 0) {
       this.q.audio.play(soundName);
+    }
+  }
+  evaluateRules() {
+    for (let rule of this.rules) {
+      rule.evaluate(this);
     }
   }
   onCoinCollision() {
@@ -257,7 +286,9 @@ ccgccccccccccccgcc`);
   }
   onScan() {
   }
-
+  onScoreChanged(score) {
+    this.scoreChanged(score);
+  }
 }
 
 this.Enemy = class {
@@ -284,6 +315,9 @@ this.Enemy = class {
   }
   start() {
     this.qobj.p.speed = this.qobj.p.speedDefault;
+  }
+  die() {
+    game.enemyKill(this.qobj);
   }
 
   static defineWrappers(obj) {

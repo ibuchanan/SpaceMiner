@@ -35,7 +35,7 @@ Template.build.helpers({
     return gameUpdated;
   },
   level: function() {
-    return level.get(); 
+    return level.get();
   },
   buttons: function() {
     return ['gamePause', 'gamePlay', 'gameReset'];
@@ -81,14 +81,14 @@ Template.build.helpers({
 
 function missionStepViewed(stepIndex){
   var user = userName();
-  
-  MissionStepViews.insert({ 
+
+  MissionStepViews.insert({
     userId : Meteor.user()._id,
     missionId : trainingMission._id,
-    userName : user,    
+    userName : user,
     stepIndex : stepIndex,
     date: new Date()
-  });  
+  });
 }
 
 function codeEditorShow() {
@@ -195,29 +195,28 @@ Template.build.rendered = function() {
             console.log(err);
             controls.alert('There was an error releasing your world. Please check the browser console for details...');
           }
-        });              
+        });
       });
     }
 
     function parseWorldDefinitionFromScript(script) {
-      var defaults = Game.getDefaults();      
-      var obj = window.ParseWorldDefinitionFromScript(script, defaults);    
-      return obj;
+      var defaults = Game.getDefaults();
+      return window.ParseWorldDefinitionFromScript(script, defaults);
     }
 
     var updateRun = false;
     function update(updateLevel) {
       updateLevel = updateLevel || false;
-      var userScript = ace.edit("codeInput").getSession().getValue();      
-      
-      if (updateRun && updateLevel) {  
-        var obj = parseWorldDefinitionFromScript(userScript);        
-        var worldName = obj.worldName;        
+      var userScript = ace.edit("codeInput").getSession().getValue();
+
+      if (updateRun && updateLevel) {
+        var obj = parseWorldDefinitionFromScript(userScript);
+        var worldName = obj.worldName;
         gameUpdated = false;
         gameUpdatedDep.changed();
         var buildStepUpdateCounts = {};
         buildStepUpdateCounts['buildStepUpdateCounts.' + String(step)] = 1;
-        
+
         // Get the updated tile and sprites
         var selections = [
           'player/' + obj.sprites.player,
@@ -226,36 +225,47 @@ Template.build.rendered = function() {
           'coin/' + obj.sprites.coin,
           'shot/' + obj.sprites.shot
         ];
-        
+
         // Specify the exact properties to update
-        var props = { 
-          name: worldName, 
-          script: userScript, 
+        var props = {
+          name: worldName,
+          script: userScript,
           selections: selections,
           tile: 'tile/' + obj.sprites.tile,
-          buildStepCurrent: step, 
-          lastUpdated: new Date(), 
+          buildStepCurrent: step,
+          lastUpdated: new Date(),
           updatedBy: userName()
         };
-        
+
+        console.log("The props are now:");
+        console.log(props);
+
         $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show');
-        
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
           Meteor.setTimeout(function(){
             gameUpdated = true;
             gameUpdatedDep.changed();
             // TODO: this is weird. It's not entirely helping prevent the phantom player and double enemies spawning
             game.reset();
-          }, 250);          
-        });        
+          }, 350);
+        });
       }
-      updateRun = true;    
+      updateRun = true;
     }
 
+    var aceEditorPathSet = false;
+
     function aceConfigure() {
+      if (!aceEditorPathSet) {
+        var paths = ['modePath', 'themePath', 'workerPath', 'basePath'];
+        _.each(paths, function(path) {
+          ace.config.set(path, '/packages/mrt_ace-embed/ace');
+        });
+        aceEditorPathSet = true;
+      }
       var editor = ace.edit("codeInput");
-      editor.setTheme("ace/theme/monokai");
-      editor.getSession().setMode("ace/mode/javascript");    
+      editor.setTheme("ace/theme/chrome");
+      editor.getSession().setMode("ace/mode/javascript");
     }
 
     aceConfigure();
@@ -265,7 +275,7 @@ Template.build.rendered = function() {
     $('#test').click(test);
     $('#release').click(release);
   }
-  
+
   Levels.update({_id: 'starter'}, {$set: {lastViewed: new Date()}}, function(err, count) {
     var levelDoc = Router.current().data();
     if (levelDoc._id === 'starter') {
@@ -282,14 +292,16 @@ Template.build.rendered = function() {
       });
     } else {
       Levels.update({_id: Router.current().params._id}, {$set: {lastViewed: new Date()}}, function(err, count) {
-        var levelDoc = Router.current().data();      
+        var levelDoc = Router.current().data();
         level.set(levelDoc._id);
         gameUpdated = true;
         gameUpdatedDep.changed();
-        finishWork();        
+        finishWork();
         // TODO remove hack
-        ace.edit("codeInput").getSession().setValue(levelDoc.script);        
+        console.log("The script is:");
+        console.log(levelDoc.script);
+        ace.edit("codeInput").getSession().setValue(levelDoc.script);
       });
     }
-  });  
+  });
 };

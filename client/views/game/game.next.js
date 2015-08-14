@@ -254,8 +254,11 @@ function getDefaults() {
 
 function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
-    var funcCode = createOverrideFuncCode(worldScript, defaults);
-    var func = eval('(' + funcCode + ')'); // yep, "eval can be harmful"
+    let funcCode = createOverrideFuncCode(worldScript, defaults);
+    funcCode = funcCode.replace('(function (defaults', 'return (function (defaults');
+    funcCode = funcCode = '(function(defaults) {\n' + funcCode;
+    funcCode = funcCode.replace('return __obj__;\n})', 'return __obj__;\n})(defaults)\n});');
+    let func = eval(funcCode); // yep, "eval can be harmful"
     var obj = {};
     if (_.isFunction(func)) {
       obj = func(defaults);
@@ -263,8 +266,8 @@ function parseWorldDefinitionFromScript(worldScript, defaults) {
     } else {
       throw "parseWorldDefinitionFromScript could not parse function from code: " + funcScript;
     }
-  } catch (ex) {
-    console.log(ex);
+  } catch(err) {
+    console.log(err);
   }
   return {};
 }
@@ -289,9 +292,7 @@ function __merge__(obj1, obj2) {
 }
 
 function createOverrideFuncCode(worldScript, defaults) {
-  var script = 'function(defaults) {\n' +
-      '  var __obj__ = {};\n';
-
+  var script = 'var __obj__ = {};\n';
   script += '\n  /* Begin user code */\n\n  ' + worldScript +'\n\n  /* End user code */\n'; 
 
   _.each(defaults, function(value, key) {
@@ -303,9 +304,14 @@ function createOverrideFuncCode(worldScript, defaults) {
     script += `  catch(e) { __obj__.${key} = defaults.${key}; }\n`;
   });
 
-  script += '\n  return __obj__;\n}';
+  script += '\n  return __obj__;\n';
 
-  return script;
+  let scriptCode =
+`(defaults) => {
+${script}
+};`;
+  let result = babel.transform(scriptCode, {stage:1, ast:false});
+  return result.code;
 }
 
 function worldOverride(overrides, world) {
@@ -507,7 +513,6 @@ function move(...args) {
       }
      }
      else {
-       console.log('We are resolving...');
        resolve();
      }
    }
@@ -548,6 +553,156 @@ var range = max => {
  }
 };
 window.range = range;
+
+let Rule = class {
+  constructor({
+    score = -1,
+    enemyCount = -1,
+    when = game => false,
+    once = true,
+    continuous = false,
+    then = game => {}
+  }) {
+    this.score = score;
+    this.enemyCount = enemyCount;
+    this.when = when;
+    this.once = once;
+    this.executed = false;
+    this.continuous = continuous && once == false;
+    this.then = then;
+  }
+
+  evaluate(game) {
+    if (this.continuous || (this.once && !this.executed)) {
+      let shouldExecute = false;
+
+      if (this.score > -1) {
+        let score = game.q.state.get('score');
+        shouldExecute = score >= this.score;
+      } else if (this.enemyCount > -1) {
+        let enemyCount = game.enemies.length;
+        shouldExecute = enemyCount === this.enemyCount;
+      }
+
+      let execute = () => {
+        if (_.isFunction(this.then)) this.then(game);
+        this.executed = true; // TODO: shoudl we run this even if the then is busted?
+      };
+
+      if (shouldExecute) execute();
+
+      if (this.executed) return;
+
+      if (_.isFunction(this.when)) shouldExecute = this.when(game);
+
+      if (shouldExecute) execute();
+    }
+  }
+};
+window.rule = definition => new Rule(definition);
+
+let wall = ({
+  start = {
+    x : 1,
+    y : 1
+  },
+  size = 18,
+  dir = 'r',
+  sprite = 't'
+  } = {}) => {
+  console.log("the sprite: " + sprite);
+  if (dir === 'r' || dir === 'right') {
+    if (size > 18) size = 18;
+    if (start.x > 1 && (start.x + size > 18)) {
+      size -= start.x;
+    }
+    for(let x = start.x; x < start.x + (size); x++) {
+      game.world.setSprite(sprite, x, start.y);
+    }
+  }
+  if (dir === 'l' || dir === 'left') {
+    if (size > 18) size = 18;
+    if (start.x < 18 && (start.x - size < 0)) {
+      size -= (18 - start.x);
+    }
+    for(let x = start.x; x > start.x - (size); x--) {
+      game.world.setSprite(sprite, x, start.y);
+    }
+  }
+  if (dir === 'd' || dir === 'down') {
+    if (size > 12) size = 12;
+    if (start.y > 1 && (start.y + size > 12)) {
+      size -= start.y;
+    }
+    for(let y = start.y; y < start.y + (size); y++) {
+      game.world.setSprite(sprite, start.x, y);
+    }
+  }
+  if (dir === 'u' || dir === 'up') {
+    if (size > 12) size = 12;
+    if (start.y < 12 && (start.y - size < 0)) {
+      size -= (12 - start.y);
+    }
+    for(let y = start.y; y > start.y - (size); y--) {
+      game.world.setSprite(sprite, start.x, y);
+    }
+  }
+};
+window.wall = wall;
+// Examples:
+//wall();
+//wall({size:16, dir:'l', start:{x:16,y:1}});
+//wall({size:10, dir:'u', start:{x:1,y:10}});
+
+let box = ({
+  start = {
+    x : 1,
+    y : 1
+  },
+  size = 4,
+  sprite = 't'
+  } = {}) => {
+
+  wall({start, size, sprite, dir:'r'});
+  wall({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd'});
+  wall({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l'});
+  wall({start: { x : start.x, y: start.y + size - 1}, size, sprite, dir : 'u'});
+};
+window.box = box;
+
+// Examples:
+//box();
+//box({sprite:'t', size:8});
+//box({start:{x:1,y:1}, size: 4, sprite: 't'});
+//box({start:{x:7,y:7}, size: 4, sprite: 't'});
+//box({start:{x:5,y:5}, size: 5, sprite: 't'});
+
+let block = ({
+  start = {
+    x : 1,
+    y : 1
+  },
+  size = 4,
+  sprite = 't'
+  } = {}) => {
+  for(let y = start.y; y < start.y + size; y++) {
+    wall({start: {x:start.x, y:y}, size, sprite, dir: 'r'});
+  }
+};
+window.block = block;
+// Examples:
+//block({start:{x:1,y:1}, size: 5, sprite:'g'});
+
+let invoke = (list, funcName, ...args) => {
+  let array = Array.from(list);
+  for(let item of array) {
+    if (_.isFunction(item[funcName])) item[funcName](...args);
+  }
+};
+
+Array.prototype.invoke = function(funcName, ...args) {
+  invoke(this, funcName, ...args);
+};
 
 function configureQuintus(callback, options) {
   /*
@@ -597,24 +752,23 @@ function configureQuintus(callback, options) {
   }
 
   Q.loadAssetLevel = function(key,src,callback,errorCallback) {
-    var fileParts = src.split("."), worldName = fileParts[0];
+    let fileParts = src.split("."), worldName = fileParts[0];
     Q.loadAssetOther(key, "/collectionapi/levels/" + worldName, function(key, val) {
-      var obj = JSON.parse(val)[0];
-      var board = obj.board;
+      let obj = JSON.parse(val)[0];
+      let board = obj.board;
       board = boardFromText(board);
 
       /* Now check if this is a level that has a 'script' instead */
 
-      var defaults = getDefaults();
+      let defaults = getDefaults();
       if (_.has(obj, 'script') && _.isString(obj.script)) {
-        var world = parseWorldDefinitionFromScript(obj.script, defaults);
+        let world = parseWorldDefinitionFromScript(obj.script, defaults);
         // TODO remove hack
         world._id = worldName;
         Q.assets[worldName + 'World'] = world;
 
         // First, if a world property was set, layer it over the defaults
         var worldSprites = worldOverride(world.world, defaults.world);
-        console.info(worldSprites);
 
         // Second, if a worldRows property was set, layer that over the world
         if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
@@ -747,13 +901,13 @@ function configureQuintus(callback, options) {
                     currentStartingCol = startingCol = thisCol = 0;
                   }
                   sprites.forEach(function(cells, rowIndex) {
-                   if (cells.length >= (colIndex+1)) {
-                     var cell = cells[colIndex];
-                     if (cell !== '.') {
-                       var thisRow = currentStartingRow + rowIndex;
-                       worldSprites[thisRow][thisCol] = cell;
-                     }
-                   }
+                    if (cells.length >= (colIndex+1)) {
+                      var cell = cells[colIndex];
+                      if (cell !== '.') {
+                        var thisRow = currentStartingRow + rowIndex;
+                        worldSprites[thisRow][thisCol] = cell;
+                      }
+                    }
                   });
                 }
                 startingCol += (width);
@@ -761,23 +915,33 @@ function configureQuintus(callback, options) {
             }
           });
         }
-/*
+        /*
 
-var worldName = "Space Miner";
-''
-var worldBuild = {
-    groups : [
-        {
-        start: '2,2',
-        repeat: '4 y',
-        sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
-        }
-    ]
-};
+  var worldName = "Space Miner";
+  ''
+  var worldBuild = {
+      groups : [
+          {
+          start: '2,2',
+          repeat: '4 y',
+          sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
+          }
+      ]
+  };
 
-*/
+  */
         // TODO: is the second param necessary any more?
         board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
+
+        if (_.has(world, 'scoreChanged')) {
+          try {
+            let fun = eval(world.scoreChanged);
+            if (_.isFunction(fun)) world.scoreChanged = fun;
+          } catch (excp) {
+            console.error("Could not parse world.scoreChanged:");
+            console.error(world.scoreChanged);
+          }
+        }
       } else {
         defaults._id = worldName;
         defaults.worldName = obj.name;
@@ -847,6 +1011,7 @@ var worldBuild = {
         score = ("" + score);
       }
       this.p.label = score;
+      game.onScoreChanged(parseInt(score));
     }
   });
 
@@ -883,6 +1048,8 @@ var worldBuild = {
     },
 
     step: function(dt) {
+      // TODO remove hack
+      game.evaluateRules();
       var p = this.entity.p;
       var doneWithTravel = false;
 
@@ -1217,26 +1384,15 @@ var worldBuild = {
     },
 
     hit: function(col) {
-      function die(self) {
-        self.destroy();
-        if (game.enableEnemyRespawn) {
-          game.setTimeout(game.enemy().respawnDelay, function(){
-            var newEnemy = new Q.Enemy(Q.tilePos(10,7));
-            var speedUp = self.p.speed;
-            newEnemy.p.speed = speedUp + game.enemy().increaseSpeedBy;
-            Q.stage().insert(newEnemy);
-          });
-        }
-      }
       if(col.obj.isA("Player")) {
         if (col.obj.p.cloaked !== true) {
-          die(this);
+          game.enemyKill(this);
           game.onEnemyCollision(col.obj);
         }
       }
       else if(col.obj.isA("Shot")){
         game.player.scoreInc(1000);
-        die(this);
+        game.enemyKill(this);
       }
     }
   });
@@ -1273,7 +1429,6 @@ var worldBuild = {
     /* var levelId = Router.current().params.levelId;
     if (levelId) levelPlay(levelId);
     */
-    console.log("Calling back with Q after loading assets!")
     callback(Q);
   });
 
