@@ -252,63 +252,68 @@ function getDefaults() {
   return Game.getDefaults();
 }
 
-let spriteFuncs = `
-var sprites = {};
+let babelize = code => babel.transform(code, {stage:1, ast:false}).code;
 
-var _sprite = function _sprite(type) {
-  return function (val) {
-    return function() {
-      return sprites[type] = val + '.png';
-    };
-  };
+let spriteFuncs = babelize(`
+let sprites = {};
+
+let _sprite = type => val => () => sprites[type] = val + '.png';
+
+let _e = _sprite('enemy');
+let enemies = {
+  blue : _e('brainBlue'),
+  pink: _e('brainPink'),
+  red: _e('cyclopsRed'),
+  yellow: _e('cyclopsYellow'),
+  green: _e('goonGreen'),
+  purple: _e('goonPurple')
 };
 
-var _e = _sprite('enemy');
-var brainBlue = _e('brainBlue');
-var brainPink = _e('brainPink');
-var cyclopsRed = _e('cyclopsRed');
-var cyclopsYellow = _e('cyclopsYellow');
-var goonGreen = _e('goonGreen');
-var goonPurple = _e('goonPurple');
+let _p = _sprite('player');
+let players = {
+  dark: _p('dark'),
+  light: _p('light')
+};
 
-var _p = _sprite('player');
-var playerDark = _p('dark');
-var playerLight = _p('light');
+let _c = _sprite('coin');
+let coins = {
+  blue: _c('blue'),
+  brown: _c('brown'),
+  gold: _c('gold'),
+  green: _c('green'),
+  light: _c('light'),
+  pink: _c('pink')
+};
 
-var _c = _sprite('coin');
-var coinBlue = _c('blue');
-var coinBrown = _c('brown');
-var coinGold = _c('gold');
-var coinGreen = _c('green');
-var coinLight = _c('light');
-var coinPink = _c('pink');
+let _g = _sprite('gem');
+let gems = {
+  bright: _g('brightGem'),
+  dark: _g('diamondDark'),
+  light: _g('diamongLight'),
+  emerald: _g('emerald'),
+  pink: _g('pinkGem'),
+  ruby: _g('ruby')
+};
 
-var _g = _sprite('gem');
-var gemBright = _g('brightGem');
-var gemDiamondDark = _g('diamondDark');
-var gemDiamondLight = _g('diamongLight');
-var gemEmerald = _g('emerald');
-var gemPink = _g('pinkGem');
-var gemRuby = _g('ruby');
+let _t = _sprite('tile');
+let tiles = {
+  fiery: _t('fiery'),
+  golden: _t('golden'),
+  plasma: _t('plasma'),
+  smooth: _t('rockSmooth'),
+  speckled: _t('rockSpeckled'),
+  swirly: _t('rockSwirly')
+};
 
-var _t = _sprite('tile');
-var tileFiery = _t('fiery');
-var tileGolden = _t('golden');
-var tilePlasma = _t('plasma');
-var tileRockSmooth = _t('rockSmooth');
-var tileRockSpeckled = _t('rockSpeckled');
-var tileRockSwirly = _t('rockSwirly');
-
-var setup = function() {
-  for (var i = 0; i < arguments.length; i++) {
-    var func = arguments[i];
-    if (typeof func === 'function') {
-      var result = func();
+let setup = (...opts) => {
+  for (let opt of opts) {
+    if (typeof opt === 'function') {
+      let result = opt();
       if (typeof result === 'function') result();
     }
   }
 };
-`;
+`);
 
 function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
