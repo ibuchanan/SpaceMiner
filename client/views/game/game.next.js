@@ -252,6 +252,64 @@ function getDefaults() {
   return Game.getDefaults();
 }
 
+let spriteFuncs = `
+var sprites = {};
+
+var _sprite = function _sprite(type) {
+  return function (val) {
+    return function() {
+      return sprites[type] = val + '.png';
+    };
+  };
+};
+
+var _e = _sprite('enemy');
+var brainBlue = _e('brainBlue');
+var brainPink = _e('brainPink');
+var cyclopsRed = _e('cyclopsRed');
+var cyclopsYellow = _e('cyclopsYellow');
+var goonGreen = _e('goonGreen');
+var goonPurple = _e('goonPurple');
+
+var _p = _sprite('player');
+var playerDark = _p('dark');
+var playerLight = _p('light');
+
+var _c = _sprite('coin');
+var coinBlue = _c('blue');
+var coinBrown = _c('brown');
+var coinGold = _c('gold');
+var coinGreen = _c('green');
+var coinLight = _c('light');
+var coinPink = _c('pink');
+
+var _g = _sprite('gem');
+var gemBright = _g('brightGem');
+var gemDiamondDark = _g('diamondDark');
+var gemDiamondLight = _g('diamongLight');
+var gemEmerald = _g('emerald');
+var gemPink = _g('pinkGem');
+var gemRuby = _g('ruby');
+
+var _t = _sprite('tile');
+var tileFiery = _t('fiery');
+var tileGolden = _t('golden');
+var tilePlasma = _t('plasma');
+var tileRockSmooth = _t('rockSmooth');
+var tileRockSpeckled = _t('rockSpeckled');
+var tileRockSwirly = _t('rockSwirly');
+
+var setup = function() {
+  for (var i = 0; i < arguments.length; i++) {
+    var func = arguments[i];
+    if (typeof func === 'function') {
+      var result = func();
+      if (typeof result === 'function') result();
+    }
+  }
+};
+`;
+
 function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
     let funcCode = createOverrideFuncCode(worldScript, defaults);
@@ -264,6 +322,8 @@ var addRules = function() {
   }
 }
 var addrules = addRules;
+
+${spriteFuncs}
 
 ${funcCode}`;
     funcCode = funcCode.replace('return __obj__;\n})', 'return __obj__;\n})(defaults)\n});');
@@ -701,6 +761,16 @@ window.blockn = blockn;
 // Examples:
 //block({start:{x:1,y:1}, size: 5, sprite:'g'});
 
+let filln = ({
+  sprite = 't'
+  } = {}) =>
+{
+  for(let y = 1; y < 13; y++) {
+    walln({start: {x:1, y:y}, size:18, sprite, dir: 'r'});
+  }
+};
+window.filln = filln;
+
 let invoke = (list, funcName, ...args) => {
   let array = Array.from(list);
   for(let item of array) {
@@ -728,6 +798,9 @@ let makeFuncs = (factoryFunc, funcLongNames) => {
 makeFuncs(sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
 makeFuncs(dir, ['left', 'right', 'up', 'down']);
 
+let s, space;
+window.s = window.space = () => sprite('');
+
 window.len = window.size = window.height = window.width = (dimension) => ({size:dimension});
 
 let shapeDefer = shape => (...opts) => {
@@ -740,14 +813,17 @@ let shapeDefer = shape => (...opts) => {
   return () => window[shape + 'n'](props);
 };
 
-['box', 'block', 'wall'].map((shape) => window[shape] = shapeDefer(shape))
+['box', 'block', 'wall', 'fill'].map((shape) => window[shape] = shapeDefer(shape))
 
 let funcCombine = opts => {
   let runAllFuncs = () => {};
   if (opts.length > 0) {
     runAllFuncs = () => {
       for(let fun of opts) {
-        if (typeof fun === 'function') fun();
+        if (typeof fun === 'function') {
+          let result = fun();
+          if (typeof result === 'function') result();
+        }
       }
     };
   }
