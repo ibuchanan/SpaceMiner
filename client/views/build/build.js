@@ -237,9 +237,6 @@ Template.build.rendered = function() {
           updatedBy: userName()
         };
 
-        console.log("The props are now:");
-        console.log(props);
-
         $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show');
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
           Meteor.setTimeout(function(){

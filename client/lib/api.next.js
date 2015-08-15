@@ -183,7 +183,8 @@ ccgccccccccccccgcc`);
         }
       },
       scoreChanged: '(function(score) {})',
-      rules: []
+      startTasks: [],
+      worldRules: []
     };
   }
   get worldName() {
@@ -212,10 +213,14 @@ ccgccccccccccccgcc`);
     return this.world.collisions;
   }
   get rules() {
-    if (this._realizedRules.length === 0 && this.world.rules && _.isArray(this.world.rules)) {
-      this._realizedRules = this.world.rules.map(rule);
+    if (this._realizedRules.length === 0 && this.world.worldRules && _.isArray(this.world.worldRules)) {
+      this._realizedRules = this.world.worldRules.map(rule);
     }
     return this._realizedRules;
+  }
+  get startTasks() {
+    if (_.isArray(this.world.startTasks)) return this.world.startTasks;
+    return [];
   }
   scoreChanged(score) {
     if (_.isFunction(this.world.scoreChanged)) this.world.scoreChanged(score);
@@ -232,9 +237,21 @@ ccgccccccccccccgcc`);
   livesDec() {
     this.q.state.dec('lives', 1);
   }
+  start() {
+    this.q.stageScene(this.levelId);
+    this.onStart();
+  }
+  onStart() {
+    for (let fun of this.startTasks) {
+      if (typeof fun === 'function') {
+        let result = fun();
+        if (typeof result === 'function') result();
+      }
+    }
+  }
   reset() {
     this.resetState();
-    this.q.stageScene(this.levelId);
+    this.start();
   }
   resetState() {
     this.cancelTimeouts();

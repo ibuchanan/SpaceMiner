@@ -72,7 +72,7 @@ Template.game.rendered = function() {
       gamePaused.set(false);
       gameShow();
       signals.gameLoadCompleted.dispatch(args.level);
-      q.stageScene(args.level);
+      game.start();
       gameFocus();
     });
   }, { enableSound: args.enableSound } );
@@ -305,14 +305,18 @@ let tiles = {
   swirly: _t('rockSwirly')
 };
 
-let setup = (...opts) => {
-  for (let opt of opts) {
-    if (typeof opt === 'function') {
-      let result = opt();
+let setup = (...tasks) => {
+  for (let fun of tasks) {
+    if (typeof fun === 'function') {
+      let result = fun();
       if (typeof result === 'function') result();
     }
   }
 };
+
+let startTasks = [];
+
+let start = (...tasks) => startTasks = startTasks.concat(tasks);
 `);
 
 function parseWorldDefinitionFromScript(worldScript, defaults) {
@@ -320,13 +324,12 @@ function parseWorldDefinitionFromScript(worldScript, defaults) {
     let funcCode = createOverrideFuncCode(worldScript, defaults);
     funcCode = funcCode.replace('(function (defaults', 'return (function (defaults');
     funcCode = funcCode = `(function(defaults) {
-var rules = [];
-var addRules = function() {
+var worldRules = [];
+var rules = function() {
   for (var _i = 0; _i < arguments.length; _i++) {
-    rules.push(arguments[_i]);
+    worldRules.push(arguments[_i]);
   }
 }
-var addrules = addRules;
 
 ${spriteFuncs}
 
@@ -544,7 +547,8 @@ function move(...args) {
     moveArgs = [args[0]];
   }
  }
- let execute = (resolve) => {
+
+  let execute = (resolve) => {
    let moves = makeMoves(moveArgs);
    let firstStep = true;
    let runStep = index => {
@@ -675,6 +679,17 @@ let Rule = class {
 };
 window.rule = definition => new Rule(definition);
 
+let spriten = ({
+  sprite = 't',
+  start = {
+    x: 1,
+    y: 1
+  }
+} = {}) => {
+  game.world.setSprite(sprite, start.x, start.y);
+};
+window.spriten = spriten;
+
 let walln = ({
   start = {
     x : 1,
@@ -682,8 +697,16 @@ let walln = ({
   },
   size = 18,
   dir = 'r',
-  sprite = 't'
+  sprite = 't',
+  l = null,
+  r = null,
+  u = null,
+  d = null
   } = {}) => {
+  if (l !== null) dir = 'l';
+  if (r !== null) dir = 'r';
+  if (u !== null) dir = 'u';
+  if (d !== null) dir = 'd';
   if (dir === 'r' || dir === 'right') {
     if (size > 18) size = 18;
     if (start.x > 1 && (start.x + size > 18)) {
@@ -788,10 +811,10 @@ Array.prototype.invoke = function(funcName, ...args) {
 };
 
 let at = (x=1, y=1) => ({start:{x:x, y:y}});
-let sprite = (type='t') => ({sprite:type});
+let _sprite = (type='t') => ({sprite:type});
 let dir = (direction='d') => ({dir:direction});
 window.at = at;
-window.sprite = sprite;
+window._sprite = _sprite;
 window.dir = dir;
 
 let makeFuncs = (factoryFunc, funcLongNames) => {
@@ -800,25 +823,32 @@ let makeFuncs = (factoryFunc, funcLongNames) => {
     window[funcLongName] = window[initial] = () => factoryFunc(initial);
   });
 };
-makeFuncs(sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
-makeFuncs(dir, ['left', 'right', 'up', 'down']);
+makeFuncs(_sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
 
 let s, space;
-window.s = window.space = () => sprite('');
+window.s = window.space = () => _sprite('');
 
 window.len = window.size = window.height = window.width = (dimension) => ({size:dimension});
 
-let shapeDefer = shape => (...opts) => {
+let directionObjectAdjust = val => {
+  ['l', 'r', 'u', 'd'].map(dir => {
+    if (val.hasOwnProperty(dir)) val[dir] = true;
+  });
+}
+
+let invokeDefer = funcName => (...opts) => {
   let props = {};
   for (let opt of opts) {
     let val = opt;
     if (typeof opt === 'function') val = opt();
+    directionObjectAdjust(val);
     Object.assign(props, val);
   }
-  return () => window[shape + 'n'](props);
+  return () => window[funcName + 'n'](props);
 };
 
-['box', 'block', 'wall', 'fill'].map((shape) => window[shape] = shapeDefer(shape))
+['sprite', 'wall', 'fill', 'box', 'block'].map(funcName =>
+ window[funcName] = invokeDefer(funcName));
 
 let funcCombine = opts => {
   let runAllFuncs = () => {};
@@ -854,9 +884,6 @@ let score = (...opts) => {
   return props;
 };
 window.score = score;
-
-let rules = (..._rules) => _rules;
-window.rules = rules;
 
 // Example:
 /*
