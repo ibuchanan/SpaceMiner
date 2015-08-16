@@ -201,7 +201,7 @@ ccgccccccccccccgcc`);
   enemyKill(enemy) {
     enemy.destroy();
     if (this.enableEnemyRespawn) {
-      this.setTimeout(this.enemy().respawnDelay, function(){
+      this.setTimeout(this.enemy().respawnDelay, () => {
         let newEnemy = new this.q.Enemy(this.q.tilePos(10,7));
         let speedUp = enemy.p.speed;
         newEnemy.p.speed = speedUp + this.enemy().increaseSpeedBy;
@@ -444,8 +444,8 @@ You can also use the shortcut form like this:
       obj.q.inputs[direction] = true;
     };
     obj.stop = function() {
-      obj.q.inputs.up = obj.q.inputs.down = obj.q.inputs.left = obj.q.inputs.right = false; 
-    };  
+      obj.q.inputs.up = obj.q.inputs.down = obj.q.inputs.left = obj.q.inputs.right = false;
+    };
     obj.scope = function(...directions) {
       var maxCount = 19;
       var scopes = {};
