@@ -15,7 +15,6 @@ mrt:bootstrap-3
 ian:accounts-ui-bootstrap-3
 mrt:ace-embed
 mquandalle:harmony
-zvictor:mongodb-server-aggregation
 mizzao:bootboxjs
 mrt:bootstrap-slate
 rosh93:slide-panel
