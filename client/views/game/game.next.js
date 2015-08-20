@@ -867,7 +867,6 @@ let funcCombine = opts => {
 
 let wait = (milliseconds, ...opts) => {
   let waiter = () => {
-    console.log('execing waiter');
     game.setTimeout(milliseconds, funcCombine(opts));
   }
   return waiter;
