@@ -19,7 +19,21 @@ function assessmentInsert(missionId, step, stepIndex, sense) {
     MissionStepSelfAssessments.insert(assessment);
 }
 
+var hideInstructions = new ReactiveVar(false);
+
 Template.build.helpers({
+  instructionsClass: function() {
+    return hideInstructions.get() ? 'hidden' : 'show left';
+  },
+  editorSmallAndLargeClasses: function() {
+    return hideInstructions.get() ? 'col-md-12 col-lg-12 codeEditorLarge' : 'right col-md-6 col-lg-6 codeEditorSmall';
+  },
+  instructionsHideClass: function() {
+    return hideInstructions.get() ? 'hidden' : 'show';
+  },
+  instructionsShowClass: function() {
+    return hideInstructions.get() ? 'show' : 'hidden';
+  }, 
   mission: function() {
     return trainingMission;
   },
@@ -97,6 +111,12 @@ function codeEditorShow() {
 }
 
 Template.build.events({
+  'click .instructionsHide': function() {
+    hideInstructions.set(true);
+  },
+  'click .instructionsShow': function() {
+    hideInstructions.set(false);
+  },
   'click .stepNext': function() {
     if (currentStepIndex < trainingMission.steps.length - 1) currentStepIndex++;
     missionStepViewed(currentStepIndex);

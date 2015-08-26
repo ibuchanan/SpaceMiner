@@ -42,28 +42,18 @@ h2{
 
 #codeEditorSection {
   margin-top: 10px;
-  width: 50%;
-  left: 50%;
-  position: fixed;
   background-color: #333;
   border: 2px solid #666;
   border-right: none;
   padding-bottom: 10px;
 }
 
-#codeEditorSection .header {  
-  padding-bottom: 5px;
+.codeEditorLarge {
+  width: 100%;
 }
 
-#codeEditorSection.affix-top {
-  position: static;
-  width: 50%;
-}
-  
-#codeEditorSection.affix {
-  position: fixed;
-  top:20px;
-  width:50%;
+#codeEditorSection .header {  
+  padding-bottom: 5px;
 }
 
 #codeInput {
