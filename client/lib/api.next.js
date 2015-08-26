@@ -1,3 +1,29 @@
+let spritePathFromShortName = (type, shortName) => {
+  let map = {
+    enemy: {
+      blue: 'branBlue',
+      pink: 'brainPink',
+      red: 'cyclopsRed',
+      yellow: 'cyclopsYellow',
+      green: 'goonGreen',
+      purple: 'goonPurple'
+    },
+    gem: {
+      bright: 'brightGem',
+      dark: 'diamondDark',
+      light: 'diamondLight',
+      emerald: 'emerald',
+      pink: 'pinkGem',
+      ruby: 'ruby'
+    }
+  };
+
+  let filePath;
+  if (map[type] && map[type][shortName]) filePath = type + '/' + map[type][shortName] + '.png'
+  else filePath = type + '/' + shortName + '.png';
+  return 'spriteParts/' + filePath;
+};
+
 var boardFromText = function(board) {
   return _.map(board.split('\n'), function(row) {
     return row.split('');
@@ -33,7 +59,7 @@ function GameWorld(defaults, q) {
   defaults.q = q;
 
   // TODO add an "add" method that would allow actual addition, not just replacement
-  defaults.setSprite = function(sprite, x=false, y) {
+  defaults.setSprite = function(sprite, x=false, y, asset) {
     let gridPos;
     if (_.isBoolean(x)) {
       gridPos = getDropSpot(x);
@@ -45,7 +71,7 @@ function GameWorld(defaults, q) {
       if (x > 18) x = 18;
       if (y > 13) y = 13;
     }
-    let spritesMap = {
+    const spritesMap = {
       '-': 'blank',
       '': 'blank',
       ' ': 'blank',
@@ -59,6 +85,28 @@ function GameWorld(defaults, q) {
       'enemy': 'Enemy',
       'p': 'Player',
       'player': 'Player'
+    };
+    const spriteFilePathMap = {
+      Tile: 'tile',
+      Tower: 'gem',
+      Dot: 'coin',
+      Enemy: 'enemy',
+      Player: 'player'
+    };
+    const tilesMap = {
+      'blank': 0,
+      'plasma': 1,
+      'plasma.png': 1,
+      'fiery': 2,
+      'fiery.png': 2,
+      'golden': 3,
+      'golden.png': 3,
+      'rockSmooth': 4,
+      'rockSmooth.png': 4,
+      'rockSpeckled': 5,
+      'rockSpeckled.png': 5,
+      'rockSwirly': 6,
+      'rockSwirly.png': 6
     };
     sprite = sprite || '-';
     sprite = sprite.toLowerCase();
@@ -85,10 +133,29 @@ function GameWorld(defaults, q) {
     }
 
     if (spriteClass === 'Tile' || spriteClass === 'blank') {
-      let spriteNum = spriteClass === 'Tile' ? 1 : 0;
+      let spriteNum;
+      if (spriteClass === 'Tile') {
+        if (asset) {
+          spriteNum = tilesMap[asset];
+        } else {
+          let selectedTile = defaults.sprites.tile;
+          spriteNum = tilesMap[selectedTile];
+          if (!_.isNumber(spriteNum)) spriteNum = 1;
+        }
+      } else {
+        spriteNum = 0;
+      }
       lvl.setTile(x, y, spriteNum);
     } else {
-      this.q.stage().insert(new this.q[spriteClass](this.q.tilePos(x, y)));
+      let spr;
+      if (asset) {
+        let assetKey = spritePathFromShortName(spriteFilePathMap[spriteClass], asset);
+        spr = new this.q[spriteClass](this.q.tilePos(x, y), assetKey);
+      }
+      else {
+        spr = new this.q[spriteClass](this.q.tilePos(x, y));
+      }
+      this.q.stage().insert(spr);
     }
   };
 

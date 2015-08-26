@@ -1,3 +1,113 @@
+// Code generation and level customization helpers
+let _spr = type => val => () => ({sprite:type, asset: val});
+
+let _e = _spr('enemy');
+let enemies = {
+  blue : _e('brainBlue'),
+  pink: _e('brainPink'),
+  red: _e('cyclopsRed'),
+  yellow: _e('cyclopsYellow'),
+  green: _e('goonGreen'),
+  purple: _e('goonPurple')
+};
+window.enemie = enemies;
+
+let _p = _spr('player');
+let players = {
+  dark: _p('dark'),
+  light: _p('light')
+};
+window.players = players;
+
+let _c = _spr('coin');
+let coins = {
+  blue: _c('blue'),
+  brown: _c('brown'),
+  gold: _c('gold'),
+  green: _c('green'),
+  light: _c('light'),
+  pink: _c('pink')
+};
+window.coins = coins;
+
+let _g = _spr('gem');
+let gems = {
+  bright: _g('brightGem'),
+  dark: _g('diamondDark'),
+  light: _g('diamondLight'),
+  emerald: _g('emerald'),
+  pink: _g('pinkGem'),
+  ruby: _g('ruby')
+};
+window.gems = gems;
+
+let _t = _spr('tile');
+let tiles = {
+  fiery: _t('fiery'),
+  golden: _t('golden'),
+  plasma: _t('plasma'),
+  smooth: _t('rockSmooth'),
+  speckled: _t('rockSpeckled'),
+  swirly: _t('rockSwirly'),
+  space: _t('-')
+};
+window.tiles = tiles;
+
+let spritesAll = [];
+for (let group of [enemies, players, coins, gems, tiles]) {
+  for (let name in group) {
+    let data = group[name]();
+    spritesAll.push('spriteParts/' + data.sprite + '/' + data.asset + '.png');
+  }
+}
+window.spritesAll = spritesAll;
+
+let babelize = code => babel.transform(code, {stage:1, ast:false}).code;
+window.babelize = babelize;
+
+let babelRun = code => babel.run(code, {stage:1});
+window.babelRun = babelRun;
+
+let spriteFuncs = babelize(`
+let sprites = {};
+
+let setup = (...tasks) => {
+  for (let fun of tasks) {
+    let data;
+    if (typeof fun === 'function') {
+      let result = fun();
+      if (typeof result === 'function') {
+        data = result();
+      } else {
+        data = result;
+      }
+      sprites[data.sprite] = data.asset + '.png';
+    }
+  }
+};
+
+let startTasks = [];
+
+let start = (...tasks) => startTasks = startTasks.concat(tasks);
+`);
+
+let windowFuncsFromES = babelize(`
+let invokeDeferSimpleAsync = func => (...opts) => async () => { return await func(...opts) };
+window.invokeDeferSimpleAsync = invokeDeferSimpleAsync;
+
+let repeatAsyncn = async (times, func) => {
+  for (let i of range(times)) {
+    await func(i);
+  }
+  return;
+};
+window.repeatAsyncn = repeatAsyncn;
+
+let repeatAsync = invokeDeferSimpleAsync(repeatAsyncn);
+window.repeatAsync = repeatAsync;
+`);
+eval(windowFuncsFromES);
+
 // Default handlers for game events
 this.OnWon = function() {
 }
@@ -178,6 +288,7 @@ Template.game.events({
 
 });
 
+
 var SPRITE_PLAYER = 1;
 var SPRITE_TILES = 2;
 var SPRITE_ENEMY = 4;
@@ -186,41 +297,60 @@ var SPRITE_SHOT = 16;
 
 function levelPlay(q, levelId, callback) {
   levelMapCreate(q, levelId);
-  q.load(levelId + ".spr, " + levelId + ".lvl, " + levelId + ".til", function() {
-    q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
-    q.compileSheets(levelId + ".spr","sprites.json");
-    q.compileSheets("basicShot.png","shot.json");
-    // TODO remove hack
-    var world = q.assets[levelId + 'World'];
-    callback(q, world);
-  }, {reload:true});
+  // Lets load all the sprites now. We can adapt this later, but for now this is fine:
+  let allSprites = window.spritesAll.join(',');
+  q.load(allSprites, () => {
+    q.load(`${levelId}.spr, ${levelId}.lvl, ${levelId}.til`, () => {
+      q.sheet("tiles", levelId + ".til", { tileW: 32, tileH: 32});
+      q.sheet('tilesAll', 'tiles.png', {tileW: 32, tileH: 32});
+      q.compileSheets(levelId + ".spr","sprites.json");
+      q.compileSheets("basicShot.png","shot.json");
+      // TODO remove hack
+      var world = q.assets[levelId + 'World'];
+      callback(q, world);
+    }, {reload:true});
+  });
 }
 
-function levelMapCreate(q, levelMapId) {
-  q.TileLayer.extend("Level" + levelMapId,{
+function levelMapCreate(q, leveld) {
+  q.TileLayer.extend("Level" + levelId,{
     init: function() {
       this._super({
         type: SPRITE_TILES,
-        dataAsset: levelMapId + ".lvl",
-        sheet: 'tiles'
+        dataAsset: levelId + ".lvl",
+        sheet: 'tilesAll'
       });
     },
     setup: function() {
       // Clone the top level array
-      var tiles = this.p.tiles = this.p.tiles.concat();
-      var size = this.p.tileW;
+      let tiles = this.p.tiles = this.p.tiles.concat();
+      let size = this.p.tileW;
 
-      var map = {
+      const map = {
         '-': 'Dot',
         'G': 'Tower',
         'E': 'Enemy',
         'P': 'Player'
       };
-      for(var y=0;y<tiles.length;y++) {
-        var row = tiles[y] = tiles[y].concat();
-        for(var x =0;x<row.length;x++) {
+
+      let world = q.assets[levelId + 'World'];
+
+      const tilesMap = {
+        'plasma.png': 1,
+        'fiery.png': 2,
+        'golden.png': 3,
+        'rockSmooth.png': 4,
+        'rockSpeckled.png': 5,
+        'rockSwirly.png': 6
+      };
+
+      const tileNum = tilesMap[world.sprites.tile];
+
+      for(let y=0;y<tiles.length;y++) {
+        let row = tiles[y] = tiles[y].concat();
+        for(let x =0;x<row.length;x++) {
           var tile = row[x];
-          if (tile === 't') row[x] = 1;
+          if (tile === 't') row[x] = tileNum;
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             var sprite = new q[className](q.tilePos(x,y));
@@ -235,8 +365,8 @@ function levelMapCreate(q, levelMapId) {
     }
   });
 
-  q.scene(levelMapId, function(stage) {
-    var map = stage.collisionLayer(new q["Level" + levelMapId]());
+  q.scene(levelId, function(stage) {
+    var map = stage.collisionLayer(new q["Level" + levelId]());
     map.setup();
     var score = new q.Score();
     var box = stage.insert(new q.UI.Container({
@@ -251,73 +381,6 @@ function levelMapCreate(q, levelMapId) {
 function getDefaults() {
   return Game.getDefaults();
 }
-
-let babelize = code => babel.transform(code, {stage:1, ast:false}).code;
-
-let spriteFuncs = babelize(`
-let sprites = {};
-
-let _sprite = type => val => () => sprites[type] = val + '.png';
-
-let _e = _sprite('enemy');
-let enemies = {
-  blue : _e('brainBlue'),
-  pink: _e('brainPink'),
-  red: _e('cyclopsRed'),
-  yellow: _e('cyclopsYellow'),
-  green: _e('goonGreen'),
-  purple: _e('goonPurple')
-};
-
-let _p = _sprite('player');
-let players = {
-  dark: _p('dark'),
-  light: _p('light')
-};
-
-let _c = _sprite('coin');
-let coins = {
-  blue: _c('blue'),
-  brown: _c('brown'),
-  gold: _c('gold'),
-  green: _c('green'),
-  light: _c('light'),
-  pink: _c('pink')
-};
-
-let _g = _sprite('gem');
-let gems = {
-  bright: _g('brightGem'),
-  dark: _g('diamondDark'),
-  light: _g('diamongLight'),
-  emerald: _g('emerald'),
-  pink: _g('pinkGem'),
-  ruby: _g('ruby')
-};
-
-let _t = _sprite('tile');
-let tiles = {
-  fiery: _t('fiery'),
-  golden: _t('golden'),
-  plasma: _t('plasma'),
-  smooth: _t('rockSmooth'),
-  speckled: _t('rockSpeckled'),
-  swirly: _t('rockSwirly')
-};
-
-let setup = (...tasks) => {
-  for (let fun of tasks) {
-    if (typeof fun === 'function') {
-      let result = fun();
-      if (typeof result === 'function') result();
-    }
-  }
-};
-
-let startTasks = [];
-
-let start = (...tasks) => startTasks = startTasks.concat(tasks);
-`);
 
 function parseWorldDefinitionFromScript(worldScript, defaults) {
   try {
@@ -684,9 +747,10 @@ let spriten = ({
   start = {
     x: 1,
     y: 1
-  }
+  },
+  asset
 } = {}) => {
-  game.world.setSprite(sprite, start.x, start.y);
+  game.world.setSprite(sprite, start.x, start.y, asset);
 };
 window.spriten = spriten;
 
@@ -701,7 +765,8 @@ let walln = ({
   l = null,
   r = null,
   u = null,
-  d = null
+  d = null,
+  asset
   } = {}) => {
   if (l !== null) dir = 'l';
   if (r !== null) dir = 'r';
@@ -713,7 +778,7 @@ let walln = ({
       size -= start.x;
     }
     for(let x = start.x; x < start.x + (size); x++) {
-      game.world.setSprite(sprite, x, start.y);
+      game.world.setSprite(sprite, x, start.y, asset);
     }
   }
   if (dir === 'l' || dir === 'left') {
@@ -722,7 +787,7 @@ let walln = ({
       size -= (18 - start.x);
     }
     for(let x = start.x; x > start.x - (size); x--) {
-      game.world.setSprite(sprite, x, start.y);
+      game.world.setSprite(sprite, x, start.y, asset);
     }
   }
   if (dir === 'd' || dir === 'down') {
@@ -731,7 +796,7 @@ let walln = ({
       size -= start.y;
     }
     for(let y = start.y; y < start.y + (size); y++) {
-      game.world.setSprite(sprite, start.x, y);
+      game.world.setSprite(sprite, start.x, y, asset);
     }
   }
   if (dir === 'u' || dir === 'up') {
@@ -740,7 +805,7 @@ let walln = ({
       size -= (12 - start.y);
     }
     for(let y = start.y; y > start.y - (size); y--) {
-      game.world.setSprite(sprite, start.x, y);
+      game.world.setSprite(sprite, start.x, y, asset);
     }
   }
 };
@@ -756,13 +821,14 @@ let boxn = ({
     y : 1
   },
   size = 4,
-  sprite = 't'
+  sprite = 't',
+  asset
   } = {}) => {
 
-  walln({start, size, sprite, dir:'r'});
-  walln({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd'});
-  walln({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l'});
-  walln({start: { x : start.x, y: start.y + size - 1}, size, sprite, dir : 'u'});
+  walln({start, size, sprite, dir:'r', asset});
+  walln({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd', asset});
+  walln({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l', asset});
+  walln({start: { x : start.x, y: start.y + size - 1}, size, sprite, dir : 'u', asset});
 };
 window.boxn = boxn;
 
@@ -779,10 +845,11 @@ let blockn = ({
     y : 1
   },
   size = 4,
-  sprite = 't'
+  sprite = 't',
+  asset
   } = {}) => {
   for(let y = start.y; y < start.y + size; y++) {
-    walln({start: {x:start.x, y:y}, size, sprite, dir: 'r'});
+    walln({start: {x:start.x, y:y}, size, sprite, dir: 'r', asset});
   }
 };
 window.blockn = blockn;
@@ -790,11 +857,12 @@ window.blockn = blockn;
 //block({start:{x:1,y:1}, size: 5, sprite:'g'});
 
 let filln = ({
-  sprite = 't'
+  sprite = 't',
+  asset
   } = {}) =>
 {
   for(let y = 1; y < 13; y++) {
-    walln({start: {x:1, y:y}, size:18, sprite, dir: 'r'});
+    walln({start: {x:1, y:y}, size:18, sprite, dir: 'r', asset});
   }
 };
 window.filln = filln;
@@ -825,9 +893,6 @@ let makeFuncs = (factoryFunc, funcLongNames) => {
 };
 makeFuncs(_sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
 
-let s, space;
-window.s = window.space = () => _sprite('');
-
 window.len = window.size = window.height = window.width = (dimension) => ({size:dimension});
 
 let directionObjectAdjust = val => {
@@ -846,6 +911,18 @@ let invokeDefer = funcName => (...opts) => {
   }
   return () => window[funcName + 'n'](props);
 };
+window.invokeDefer = invokeDefer;
+
+let invokeDeferSimple = func => (...opts) => () => func(...opts);
+window.invokeDeferSimple = invokeDeferSimple;
+
+let repeatn = (times, func) => {
+  for (let i of range(times)) func(i);
+};
+window.repeatn = repeatn;
+
+let repeat = invokeDeferSimple(repeatn);
+window.repeat = repeat;
 
 ['sprite', 'wall', 'fill', 'box', 'block'].map(funcName =>
  window[funcName] = invokeDefer(funcName));
@@ -1231,7 +1308,7 @@ function configureQuintus(callback, options) {
       var p = this.entity.p;
 
       if (col.tile) {
-        if (col.collided && col.obj.p.sheet === 'tiles') {
+        if (col.collided && (col.obj.p.sheet === 'tiles' || col.obj.p.sheet === 'tilesAll')) {
           p.stepping = false; // TODO no idea why not working right...
           p.x = p.origX;
           p.y = p.origY;
@@ -1338,13 +1415,22 @@ function configureQuintus(callback, options) {
     }
   });
 
+  let applySpriteProps = (target, asset, sheetName) => {
+    if (asset) {
+      target.asset = asset;
+    } else {
+      target.sheet = sheetName;
+    }
+  };
+
   Q.Sprite.extend("Player", {
-    init: function(p) {
-      this._super(p,{
-        sheet:"player",
+    init: function(p, asset) {
+      let props = {
         type: SPRITE_PLAYER,
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
-      });
+      };
+      applySpriteProps(props, asset, 'player');
+      this._super(p,props);
       this.add("2d, playerControls, laser");
     }
   });
@@ -1381,6 +1467,7 @@ function configureQuintus(callback, options) {
       this.destroy();
     },
     erase: function(collision) {
+      this.debind();
       this.destroy();
     }
   });
@@ -1442,59 +1529,60 @@ function configureQuintus(callback, options) {
 
   // Create the Dot sprite
   Q.Sprite.extend("Dot", {
-    init: function(p) {
-      this._super(p,{
-        sheet: 'dot',
+    init: function(p, asset, sheetName='dot') {
+      let props = {
         type: SPRITE_DOT,
         // Set sensor to true so that it gets notified when it's
         // hit, but doesn't trigger collisions itself that cause
         // the player to stop or change direction
         sensor: true
-      });
-
+      };
+      applySpriteProps(props, asset, sheetName);
+      this.count = 1;
+      this._super(p,props);
       this.on("sensor");
       this.on("inserted");
+      this.on("destroyed");
     },
 
     // When a dot is hit..
     sensor: function() {
       var col = centersWithinRange(this, arguments[0], COL_RANGE);
       if (col) {
-        this.destroy();
-        this.stage.dotCount--;
         game.onCoinCollision();
-        // If there are no more dots left, just restart the game
-        // TODO move to next level from page
-        if(this.stage.dotCount === 0) {
-          onLevelComplete();
-        }
+        this.destroy();
       }
     },
+
     // When a dot is inserted, use it's parent (the stage)
     // to keep track of the total number of dots on the stage
     inserted: function() {
-      this.stage.dotCount = this.stage.dotCount || 0
+      this.stage.dotCount = this.stage.dotCount || 0;
       this.stage.dotCount++;
+    },
+
+    destroyed: function() {
+      let count = this.count;
+      this.count--;
+      this.stage.dotCount -= count;
+      // If there are no more dots left, just restart the game
+      // TODO move to next level from page
+      if(this.stage.dotCount === 0) onLevelComplete();
+      this.debind();
     }
   });
 
   // Tower is just a dot with a different sheet - use the same
   // sensor and counting functionality
   Q.Dot.extend("Tower", {
-    init: function(p) {
-      this._super(Q._defaults(p,{
-        sheet: 'tower'
-      }));
+    init: function(p, asset) {
+      this._super(Q._defaults(p,{}), asset, 'tower');
     },
     sensor: function() {
       var col = centersWithinRange(this, arguments[0], COL_RANGE);
       if (col) {
-        this.destroy();
-        this.stage.dotCount--;
         game.onGemCollision();
-        if(this.stage.dotCount === 0) {
-          onLevelComplete();
-        }
+        this.destroy();
       }
     }
   });
@@ -1563,16 +1651,17 @@ function configureQuintus(callback, options) {
   });
 
   Q.Sprite.extend("Enemy", {
-    init: function(p) {
-      this._super(p,{
-        sheet:"enemy",
+    init: function(p, asset) {
+      let props = {
         speed: 150,
         type: SPRITE_ENEMY,
         collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_SHOT
-      });
-
+      };
+      applySpriteProps(props, asset, 'enemy');
+      this._super(p, props);
       this.add("2d,enemyControls");
       this.on("hit.sprite",this,"hit");
+      this.on("destroyed");
     },
 
     hit: function(col) {
@@ -1586,6 +1675,10 @@ function configureQuintus(callback, options) {
         game.player.scoreInc(1000);
         game.enemyKill(this);
       }
+    },
+
+    destroyed: function() {
+      this.debind();
     }
   });
    window.pickUpGems = function(startX, startY, boxWidth, boxHeight, boxTotal, boxesOnX, xSpace, ySpace){
@@ -1617,7 +1710,7 @@ function configureQuintus(callback, options) {
      }
         getGems();
   }
-  Q.load("sprites.json, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png",  function() {
+  Q.load('sprites.json, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png, tiles.png',  function() {
     /* var levelId = Router.current().params.levelId;
     if (levelId) levelPlay(levelId);
     */
