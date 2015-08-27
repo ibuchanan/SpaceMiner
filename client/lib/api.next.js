@@ -251,7 +251,8 @@ ccgccccccccccccgcc`);
       },
       scoreChanged: '(function(score) {})',
       startTasks: [],
-      worldRules: []
+      worldRules: [],
+      worldRepeat: 1
     };
   }
   get worldName() {

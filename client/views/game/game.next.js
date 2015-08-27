@@ -313,6 +313,7 @@ function levelPlay(q, levelId, callback) {
 }
 
 function levelMapCreate(q, leveld) {
+  let world = {worldRepeat : 1};
   q.TileLayer.extend("Level" + levelId,{
     init: function() {
       this._super({
@@ -333,7 +334,7 @@ function levelMapCreate(q, leveld) {
         'P': 'Player'
       };
 
-      let world = q.assets[levelId + 'World'];
+      world = q.assets[levelId + 'World'];
 
       const tilesMap = {
         'plasma.png': 1,
@@ -371,10 +372,11 @@ function levelMapCreate(q, leveld) {
     var score = new q.Score();
     var box = stage.insert(new q.UI.Container({
       //x: score.p.w/2 + 5, y: score.p.h/2 + 5, fill: 'rgba(0,0,0,0.5)'
-      x: 25, y: 5, fill: 'rgba(0,0,0,0.5)'
+      x: 25, y: 15, fill: 'rgba(0,0,0,0.5)'
     }));
     box.insert(score);
     box.fit();
+    if (world.worldRepeat > 1) stage.add("viewport").follow(q('Player').first());
   });
 }
 
@@ -985,7 +987,9 @@ function configureQuintus(callback, options) {
 
   function configureCanvas(q) {
     var setup = q.setup('game', {
-      width: 640, height: 448, scaleToFit: true
+      width: 640, height: 448, 
+      scaleToFit: true,
+      maximize: 'touch'
     });
     if (options.enableSound) setup.enableSound();
     setup.controls(true);
@@ -1030,8 +1034,10 @@ function configureQuintus(callback, options) {
       /* Now check if this is a level that has a 'script' instead */
 
       let defaults = getDefaults();
+      let worldRepeat = defaults.worldRepeat;      
       if (_.has(obj, 'script') && _.isString(obj.script)) {
         let world = parseWorldDefinitionFromScript(obj.script, defaults);
+        worldRepeat = world.worldRepeat;
         // TODO remove hack
         world._id = worldName;
         Q.assets[worldName + 'World'] = world;
@@ -1217,7 +1223,38 @@ function configureQuintus(callback, options) {
         Q.assets[worldName + 'World'] = defaults;
       }
 
-      Q.assets[key] = board;
+      let newBoard = board;
+      if (worldRepeat > 1) {
+        let tilesToDuplicate = board.slice(1, board.length-1);
+        let clonedTiles = JSON.parse(JSON.stringify(tilesToDuplicate));
+        let lastRow = board.pop();
+        newBoard = Array.concat(board, clonedTiles);
+        newBoard.push(lastRow);
+
+        if (worldRepeat > 2) {
+          let newNewBoard = [];
+          for(let row of newBoard) {
+            let last = row.pop();
+            let slice = row.slice(1, row.length-1);
+            row = row.concat(slice);
+            row.push(last);
+            newNewBoard.push(row);
+          }
+          newBoard = newNewBoard;
+        }
+      }
+
+      let seenPlayer = false;
+      newBoard = newBoard.map(row => row.map(sprite => {
+        let val = sprite;
+        if ((sprite === 'P' || sprite === 'p')) {
+          if (seenPlayer) val = '-';
+          seenPlayer = true;
+        }
+        return val;
+      }));
+
+      Q.assets[key] = newBoard;
 
       // TODO fix hack
       try {
