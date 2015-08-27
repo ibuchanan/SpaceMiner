@@ -126,7 +126,7 @@ code {
   <h1 style='text-align: center'><span class='label label-warning'><span class='fa fa-globe'></span> {{mission.project}}</span></h1>
   <div class="container-fluid">  
     <div class='row stepNew'>      
-      <section class='col-xs-12 col-sm-12 col-md-6 col-lg-6 {{instructionsClass}}' id='steps'>
+      <section class='col-xs-12 col-sm-12 col-md-6 col-lg-6 {{hideIfEditorFullScreen}}' id='steps'>
         <div class='header'>          
           <h2><span class='label label-info'>Step {{currentStepIndex}}: {{currentStep.title}}</span></h2>
           <nav>
@@ -217,8 +217,8 @@ code {
         {{/if}}
       </section>
       <section class='col-xs-12 col-sm-12 {{editorSmallAndLargeClasses}}' id='codeEditorSection'>
-        <button class='instructionsHide btn btn-xs btn-primary {{instructionsHideClass}}'><span class='fa fa-chevron-left'></span> Hide Instructions</button>
-        <button class='instructionsShow btn btn-xs btn-primary {{instructionsShowClass}}'>Show Instructions <span class='fa fa-chevron-right'></span></button>
+        <button class='instructionsHide btn btn-xs btn-primary {{hideIfEditorFullScreen}}'><span class='fa fa-chevron-left'></span> Hide Instructions</button>
+        <button class='instructionsShow btn btn-xs btn-primary {{showIfEditorFullScreen}}'>Show Instructions <span class='fa fa-chevron-right'></span></button>
         <div role="tabpanel">
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist" id='gameTabsNav'>

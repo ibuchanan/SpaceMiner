@@ -22,18 +22,11 @@ function assessmentInsert(missionId, step, stepIndex, sense) {
 var hideInstructions = new ReactiveVar(false);
 
 Template.build.helpers({
-  instructionsClass: function() {
-    return hideInstructions.get() ? 'hidden' : 'show left';
-  },
+  hideIfEditorFullScreen: hideIfTrue(hideInstructions),
+  showIfEditorFullScreen: showForceIfTrue(hideInstructions),
   editorSmallAndLargeClasses: function() {
     return hideInstructions.get() ? 'col-md-12 col-lg-12 codeEditorLarge' : 'right col-md-6 col-lg-6 codeEditorSmall';
   },
-  instructionsHideClass: function() {
-    return hideInstructions.get() ? 'hidden' : 'show';
-  },
-  instructionsShowClass: function() {
-    return hideInstructions.get() ? 'show' : 'hidden';
-  }, 
   mission: function() {
     return trainingMission;
   },
