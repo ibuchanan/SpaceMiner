@@ -35,4 +35,3 @@ gwendall:auth-client-callbacks
 spacebars-compiler
 npm-container
 babel-compiler
-dcsan:sly

@@ -63,7 +63,6 @@ Template.lesson.rendered = function() {
     currentPartIndex.set(partIndex);
     lessonDep.changed();
     updateLessonProgressPartLastViewed(lessonProgress, secIndex, partIndex, true);
-    new Sly('#sections-menu').init();
   });
 }
 
