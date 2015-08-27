@@ -31,6 +31,14 @@ code {
   text-align: center;
 }
 
+.header {
+  padding-top: 4px;
+}
+
+#codeEditorTab {
+  text-align: center;
+}
+
 #codeInput { 
   border: 2px solid darkgray;
   position: relative;
@@ -39,6 +47,7 @@ code {
   bottom: 0;
   left: 0;
   height: 600px;
+  text-align: left;
 }
 
 .instructionsHide, .instructionsShow {
@@ -222,16 +231,16 @@ code {
         <div role="tabpanel">
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist" id='gameTabsNav'>
-            <li role="presentation" class="active"><a href="#codeEditorTab" aria-controls="home" role="tab" data-toggle="tab">Code editor</a></li>
-            <li role="presentation"><a href="#gamePreviewTab" aria-controls="profile" role="tab" data-toggle="tab">Game preview</a></li>
+            <li role="presentation" class="active"><a href="#codeEditorTab" aria-controls="home" role="tab" data-toggle="tab"><span class='fa fa-code'></span> Code Editor</a></li>
+            <li role="presentation"><a href="#gamePreviewTab" aria-controls="profile" role="tab" data-toggle="tab"><span class='fa fa-gamepad'></span> Game Preview</a></li>
           </ul>            
           <!-- Tab panes -->
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="codeEditorTab">
               <div class='header'>              
-                <button class="btn btn-success" id="update"><span class='fa fa-refresh'></span> Update world</button>
-                <button class="btn btn-danger" id="test"><span class='fa-bug fa'></span> Send world to test</button>
-                <button class="btn btn-info" id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
+                <button class='btn btn-success btn-sm' id="update"><span class='fa fa-refresh'></span> Update world</button>
+                <button class='btn btn-danger btn-sm' id="test"><span class='fa-bug fa'></span> Send world to test</button>
+                <button class='btn btn-info btn-sm' id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
               <div id="codeInput"></div>            
             </div>

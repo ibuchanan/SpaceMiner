@@ -598,7 +598,7 @@ let moveNeedsPlayerProps = arg => {
 };
 
 let makeMoves = moves => moves.map(move => {
-  if (_.isObject(move)) return moveString(move);
+  if (_.isObject(move) && !_.isFunction(move)) return moveString(move);
   return move;
 });
 
@@ -615,6 +615,7 @@ function move(...args) {
 
   let execute = (resolve) => {
    let moves = makeMoves(moveArgs);
+   console.log(moves);
    let firstStep = true;
    let runStep = index => {
      var nextIndex = index+1;
@@ -631,6 +632,8 @@ function move(...args) {
          }
          runStep(nextIndex);
        } else  if (_.isFunction(moves[index])) {
+        console.log("It's fun:");
+        console.log(moves[index].toString());
          moves[index]();
          runStep(nextIndex);
        } else {
@@ -988,7 +991,7 @@ function configureQuintus(callback, options) {
   function configureCanvas(q) {
     var setup = q.setup('game', {
       width: 640, height: 448, 
-      scaleToFit: true,
+      //scaleToFit: true,
       maximize: 'touch'
     });
     if (options.enableSound) setup.enableSound();
@@ -1759,7 +1762,7 @@ function configureQuintus(callback, options) {
 
 this.gameFocus = function() {
   Meteor.setTimeout(function() {
-    $("#game").focus();
+    $('#game').focus();
   }, 125);
 }
 
