@@ -615,7 +615,6 @@ function move(...args) {
 
   let execute = (resolve) => {
    let moves = makeMoves(moveArgs);
-   console.log(moves);
    let firstStep = true;
    let runStep = index => {
      var nextIndex = index+1;
@@ -632,8 +631,6 @@ function move(...args) {
          }
          runStep(nextIndex);
        } else  if (_.isFunction(moves[index])) {
-        console.log("It's fun:");
-        console.log(moves[index].toString());
          moves[index]();
          runStep(nextIndex);
        } else {

@@ -30,13 +30,15 @@ function getEditor(template) {
 }
 
 Template.editorProgram.rendered = function() {
+  let defaultCode = this.data.program.code;
   var userProgram = getUserProgramForCurrentUser(this.data.program);
   this.data.program = userProgram;
   let editor = getEditor(this);
-  editor.setTheme("ace/theme/chrome");
+  editor.setTheme('ace/theme/chrome');
   var session = editor.getSession();
-  session.setMode("ace/mode/javascript");
+  session.setMode('ace/mode/javascript');
   var code = this.data.program.code;
+  if (!code || code.trim() === '') code = defaultCode;
   editor.setOptions({
     maxLines: 18,
     minLines: 18,
@@ -88,7 +90,7 @@ Template.editorProgram.events({
     var console = {
       log : function(val) {
         printed = true;
-        output.append(val + "\n");
+        output.append(val + '\n');
       }
     };
     var print = console.log;
@@ -115,14 +117,14 @@ Template.editorProgram.events({
     Meteor.call('es6compile', [code], (err, talkBabelToMe) => {
       var result;
       if (err) {
-        result = "*Error executing program*";
+        result = '*Error executing program*';
         window.console.error(err);
       } else {
         try {
           window.BABEL_CODE = talkBabelToMe;
           result = eval(talkBabelToMe);
         } catch(ex) {
-          result = "*Error executing program*";
+          result = '*Error executing program*';
           window.console.error(ex);
         }
       }
