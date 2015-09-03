@@ -987,9 +987,9 @@ function configureQuintus(callback, options) {
 
   function configureCanvas(q) {
     var setup = q.setup('game', {
-      width: 640, height: 448, 
+      width: 640, height: 448
       //scaleToFit: true,
-      maximize: 'touch'
+      //maximize: 'touch'
     });
     if (options.enableSound) setup.enableSound();
     setup.controls(true);
