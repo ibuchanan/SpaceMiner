@@ -11,7 +11,7 @@ meteorhacks:npm
 jquery
 underscore
 accounts-password
-mrt:bootstrap-3
+twbs:bootstrap
 ian:accounts-ui-bootstrap-3
 mrt:ace-embed
 mquandalle:harmony
@@ -35,3 +35,4 @@ gwendall:auth-client-callbacks
 spacebars-compiler
 npm-container
 babel-compiler
+http
