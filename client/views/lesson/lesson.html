@@ -130,8 +130,9 @@
 </template>
 
 <template name='question'>
+  {{#if current}}
   <section class='question'>
-    <h4>{{title}}</h4>
+    <h4>#{{questionNumber}} of {{questionCount}}: {{{title}}}</h4>
     <div class="btn-group" data-toggle="buttons">
       {{#each addIndex choices}}
       <label class="btn btn-default choice">
@@ -141,5 +142,11 @@
     </div>
     &nbsp;<button class='btn btn-success check'>Check answer <span class='fa fa-check'></span></button>
     <div class='feedback'></div>
+    {{#if nextVisible}}
+      <p style='text-align:center; padding-top: 8px;'>
+        <button class='btn btn-primary btn-sm next'>Next <span class='fa fa-step-forward'></span></button>
+      </p>
+    {{/if}}      
   </section>
+  {{/if}}
 </template>

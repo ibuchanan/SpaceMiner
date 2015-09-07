@@ -118,6 +118,14 @@ Template.popquiz.helpers({
   lesson: getLesson
 });
 
+var popquiz = {};
+var popquizDep = new Deps.Dependency();
+
+Template.popquiz.rendered = function(evt, template) {
+  popquiz = this.data;
+  popquizDep.changed();
+};
+
 Template.section.helpers({
   current: function() {
     var index = currentSecIndex.get();    
@@ -271,15 +279,36 @@ Template.paragraph.rendered = function(evt, template) {
     UI.insert(UI.renderWithData(Template[name], data), this.parentNode, this);
     el.remove();
   }); 
-}
+};
 
 Template.question.rendered = function() {
   $('.choice').button();
-}
+};
+
+var currentQuestionDep = new Deps.Dependency();
+
+Template.question.helpers({
+  current: function() {
+    currentQuestionDep.depend();
+    return this.current;
+  },
+  questionNumber: function() {
+    return this.index + 1;
+  },
+  questionCount: function() {
+    popquizDep.depend();
+    if (popquiz.questions) return popquiz.questions.length;
+    return 1;
+  },
+  nextVisible: function() {
+    answeredDep.depend();
+    return this.nextVisible;
+  }
+});
 
 Template.question.events({
   'click .check': function(evt, template) {
-    var val = $(template.find('.question .btn-group .btn[class*="active"] input')).val();    
+    var val = $(template.find('.question .btn-group .btn[class*="active"] input')).val();
     if (val) {
       var index = parseInt(val);
       var correct = this.correctIndex == parseInt(index);
@@ -288,9 +317,15 @@ Template.question.events({
       $(template.find('.feedback')).html(`<div style='padding: 4px; color: white; background-color: ${bg}'><span class='${icon}'></span>&nbsp;` + this.choices[index].feedback + '</div>');
       $(template.find('.feedback')).hide();
       $(template.find('.feedback')).fadeIn('slow');
-  
       this.correct = correct;
+      if (correct) this.nextVisible = true;
       answeredDep.changed();
     }
+  },
+  'click .next': function(evt, template) {
+    this.current = false;
+    let next = popquiz.questions[this.index + 1];
+    if (next) next.current = true;
+    currentQuestionDep.changed();
   }
 });
