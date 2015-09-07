@@ -36,3 +36,4 @@ spacebars-compiler
 npm-container
 babel-compiler
 http
+aldeed:clock

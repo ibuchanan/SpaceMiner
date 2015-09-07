@@ -1,6 +1,6 @@
 var lesson = null;
 var lessonProgress;
-var lessonDep = new Deps.Dependency;
+var lessonDep = new Tracker.Dependency;
 
 var currentSecIndex = new ReactiveVar(0);
 var currentPartIndex = new ReactiveVar(0);
@@ -21,7 +21,6 @@ function updateLessonProgressPartLastViewed(lessonProgress, secIndex, partIndex,
   lessonProgress.sections.items[secIndex].parts.items[partIndex].lastViewed = new Date();
   lessonProgress.sections.items[secIndex].parts.lastIndex = partIndex;
   updateLessonProgress(lessonProgress);
-  console.log(lessonProgress);
 }
 
 function setupWindowGlobals() {
@@ -50,14 +49,12 @@ Template.lesson.rendered = function() {
       secIndex = parseInt(secIndex) - 1;
     } else {
       secIndex = lessonProgress.sections.lastIndex;
-      console.log(secIndex);
     }
     if (partIndex)  {
       // nothing special, just parse it
       partIndex = parseInt(partIndex) - 1;
     } else {
       partIndex = lessonProgress.sections.items[secIndex].parts.lastIndex;
-      console.log(partIndex);
     }
     currentSecIndex.set(secIndex);
     currentPartIndex.set(partIndex);
@@ -71,7 +68,7 @@ function getLesson() {
   return lesson;
 }
 
-var answeredDep = new Deps.Dependency;
+var answeredDep = new Tracker.Dependency;
 
 Template.lesson.helpers({
   gameData: function() {
@@ -119,7 +116,7 @@ Template.popquiz.helpers({
 });
 
 var popquiz = {};
-var popquizDep = new Deps.Dependency();
+var popquizDep = new Tracker.Dependency();
 
 Template.popquiz.rendered = function(evt, template) {
   popquiz = this.data;
@@ -195,9 +192,6 @@ Template.lesson.events({
     if (partIndex < parts.length - 1) {
       var nextIndex = partIndex + 1;
       currentPartIndex.set(nextIndex);
-      console.log('changing:');
-      console.log(partIndex);
-      console.log(nextIndex);
       updateLessonProgressPartLastViewed(lessonProgress, index, nextIndex);
     }
     if (partIndex === parts.length -1) {
@@ -281,11 +275,25 @@ Template.paragraph.rendered = function(evt, template) {
   }); 
 };
 
-Template.question.rendered = function() {
-  $('.choice').button();
+
+let questionClock = new ReactiveClock('questionClock');
+
+let questionClockReset = () => {
+  questionClock.setElapsedSeconds(0);
+  questionClock.start();
 };
 
-var currentQuestionDep = new Deps.Dependency();
+let currentQuestionDep = new Tracker.Dependency();
+
+Tracker.autorun(() => {
+  currentQuestionDep.depend();
+  questionClockReset();
+});
+
+Template.question.rendered = function() {
+  $('.choice').button();
+  questionClockReset();
+};
 
 Template.question.helpers({
   current: function() {
@@ -306,9 +314,17 @@ Template.question.helpers({
   }
 });
 
+let attemptLog = (index, attemptTime, correct) => ({
+  index,
+  attemptTime,
+  correct
+});
+
 Template.question.events({
   'click .check': function(evt, template) {
     var val = $(template.find('.question .btn-group .btn[class*="active"] input')).val();
+    let attemptTime = questionClock.elapsedTime();
+    questionClockReset();
     if (val) {
       var index = parseInt(val);
       var correct = this.correctIndex == parseInt(index);
@@ -318,6 +334,7 @@ Template.question.events({
       $(template.find('.feedback')).hide();
       $(template.find('.feedback')).fadeIn('slow');
       this.correct = correct;
+      this.attempts.push(attemptLog(index, attemptTime, correct));
       if (correct) this.nextVisible = true;
       answeredDep.changed();
     }
