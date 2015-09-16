@@ -37,3 +37,5 @@ npm-container
 babel-compiler
 http
 aldeed:clock
+tomi:upload-server
+tomi:upload-jquery

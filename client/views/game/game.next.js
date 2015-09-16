@@ -579,7 +579,7 @@ r = right = r => { return {r} };
 l = left = l => { return {l} };
 d = down = d => { return {d} };
 u = up = u => { return {u} };
-pt = point = (x, y) => x + ' ' + y;
+pt = point = (x, y) => `${x} ${y}`;
 
 window.r = window.right = r;
 window.u = window.up = u;
@@ -1460,6 +1460,22 @@ function configureQuintus(callback, options) {
     }
   };
 
+  let defineSpriteProps = () => {
+    ['Dot', 'Enemy', 'Player'].forEach(className => {
+      Object.defineProperty(Q[className].prototype, 'pos', {
+        get: function() {
+          let pos = Q.gridPos(this.p.x, this.p.y);
+          pos.x--;
+          pos.y--;
+          return point(pos.x, pos.y);
+        }
+      });
+    });
+  };
+
+  Q.component('treasure', {});
+  Q.component('foreign', {});  
+
   Q.Sprite.extend("Player", {
     init: function(p, asset) {
       let props = {
@@ -1580,6 +1596,7 @@ function configureQuintus(callback, options) {
       this.on("sensor");
       this.on("inserted");
       this.on("destroyed");
+      this.add('foreign,treasure');
     },
 
     // When a dot is hit..
@@ -1620,6 +1637,7 @@ function configureQuintus(callback, options) {
       if (col) {
         game.onGemCollision();
         this.destroy();
+        game.setTimeout(25, () => game.afterGemCollision());
       }
     }
   });
@@ -1696,7 +1714,7 @@ function configureQuintus(callback, options) {
       };
       applySpriteProps(props, asset, 'enemy');
       this._super(p, props);
-      this.add("2d,enemyControls");
+      this.add("2d,enemyControls,foreign");
       this.on("hit.sprite",this,"hit");
       this.on("destroyed");
     },
@@ -1718,35 +1736,9 @@ function configureQuintus(callback, options) {
       this.debind();
     }
   });
-   window.pickUpGems = function(startX, startY, boxWidth, boxHeight, boxTotal, boxesOnX, xSpace, ySpace){
-     var row = 0;
-     var col = 0;
-     var maxH = boxesOnX;
-     var maxV = boxTotal/boxesOnX;
-     function getGems(){
-       if(row < maxV){
-            if(col < maxH){
-              game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
-              col++;
-              game.player.move(
-                boxWidth - 1 +' '+'right',
-                boxHeight - 1 + ' ' + 'down',
-                boxWidth -1 + ' ' + 'left',
-                boxHeight -1 + ' ' + 'up',
-                getGems);
-            }
-            else if(row < maxV-1){
-               row++;
-               col = 0;
-               game.player.move(col*(boxWidth+xSpace) + startX+' '+ (startY + row*(boxHeight+ySpace)));
-               col++;
-               game.player.move(boxWidth - 1 +' '+'right', boxHeight - 1 + ' ' + 'down', boxWidth -1 + ' ' +
-               'left',  boxHeight -1 + ' ' + 'up',getGems);
-           }
-       }
-     }
-        getGems();
-  }
+
+  defineSpriteProps();
+
   Q.load('sprites.json, gem1.wav, coin1.wav, victory1.wav, shot.json, basicShot.png, tiles.png',  function() {
     /* var levelId = Router.current().params.levelId;
     if (levelId) levelPlay(levelId);

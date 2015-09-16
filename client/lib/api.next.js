@@ -43,7 +43,7 @@ function defineProperties(target, source, props) {
   });
 }
 
-var getDropSpot = (forward) => {
+let getDropSpot = (forward) => {
   var direction = game.player.direction;
   var pos = { x: game.player.x, y: game.player.y };
   var offset = forward ? 32 : -32;
@@ -180,20 +180,42 @@ this.Game = class {
     this._realizedRules = [];
   }
   get player() {
-    var qPlayer = this.q('Player').items[0];
-    var player = new Player(this.q, qPlayer);
+    const qPlayer = this.q('Player').items[0];
+    const player = new Player(this.q, qPlayer);
     defineProperties(player, qPlayer.p, ['x', 'y', 'speed', 'direction']);
     return player;
   }
   get enemies() {
-    var qEnemies = this.q('Enemy');
-    var that = this;
-    var enemies = _.map(qEnemies.items, (qEnemy) => {
-      var enemy = new Enemy(that.q, qEnemy);
+    const qEnemies = this.q('Enemy');
+    const that = this;
+    const enemies = qEnemies.items.map(qEnemy => {
+      let enemy = new Enemy(that.q, qEnemy);
       defineProperties(enemy, qEnemy.p, ['x', 'y', 'speed', 'direction']);
       return enemy;
     });
     return enemies;
+  }
+  _select(selector) {
+    return Array.from(this.q(selector).items);
+  }
+  get gems() {
+    return this._select('Tower');
+  }
+  get coins() {
+    return this._select('Dot');
+  }
+  /*
+  let count = 1;
+  for (let t of game.treasures) { 
+    console.write(`Moving to #${count++} at ${t.pos}! `);
+    await move(t.pos);
+  }
+  */
+  get treasures() {
+    return this._select('.treasure');
+  }
+  get foreigns() {
+    return this._select('.foreign');
   }
   setTimeout(delay, func) {
     this.timeOuts.push(Meteor.setTimeout(func, delay));
@@ -353,10 +375,16 @@ ccgccccccccccccgcc`);
     this.player.scoreInc(this.collisions().coin.scoreInc);
     this.soundPlay(this.collisions().coin.soundPlay);
   }
+  onGemPickup() {
+
+  }
   onGemCollision() {
     this.player.scoreInc(this.collisions().gem.scoreInc);
     this.player.ammoInc(this.collisions().gem.ammoInc);
     this.soundPlay(this.collisions().gem.soundPlay);
+  }
+  afterGemCollision() {
+    this.onGemPickup();
   }
   onEnemyCollision(hitPlayer) {
     this.livesDec();
@@ -445,7 +473,7 @@ this.Player = class {
     var move = this.move;
     var moveHelp =
 `
-<h2>player.move('count direction', ...)</h2>
+<h2>move('count direction', ...)</h2>
 
 <p>Call this function to move the player <b>count</b> number of cells for the given <b>direction</b>. The <b>direction</b> may be <b>left, up, right, or down</b>. You can also use <b>l, u, r, or d</b> as shortcuts. This function will take any number of arguments and will keep moving the player until it has evaluated each argument.</p>
 
@@ -454,13 +482,13 @@ this.Player = class {
 <div>
 <p>To move the player 4 spaces to the left, followed by 2 up, 7 to the right and then 5 down, type this code:</p>
 <p>
-<code>game.player.move('4 left', '2 up', '7 right', '5 down');</code>
+<code>move('4 left', '2 up', '7 right', '5 down');</code>
 </p>
 <p>
 You can also use the shortcut form like this:
 <p>
 <p>
-<code>game.player.move('4 l', '2 u', '7 r', '5 d');</code>
+<code>move('4 l', '2 u', '7 r', '5 d');</code>
 </p>
 </div>
 `;

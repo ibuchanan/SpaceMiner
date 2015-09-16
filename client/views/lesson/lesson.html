@@ -29,9 +29,11 @@
       </article>
     </section>
     {{#if rendered}}
-    <div class='row lesson-continue'>
-      <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
-    </div>
+      {{#unless isQuiz}}
+      <div class='row lesson-continue'>
+        <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
+      </div>
+      {{/unless}}
     {{/if}}
   </div>
 </template>
@@ -121,6 +123,9 @@
               {{#each questions}}
                 {{> question}}
               {{/each}}
+              {{#if finished}}
+                {{> popquizReview}}
+              {{/if}}
             </div>
           </div>
         </div>
@@ -140,13 +145,39 @@
       </label>
       {{/each}}
     </div>
-    &nbsp;<button class='btn btn-success check'>Check answer <span class='fa fa-check'></span></button>
+    &nbsp;<button class='btn btn-info check'>Check Answer <span class='fa fa-check'></span></button>
     <div class='feedback'></div>
-    {{#if nextVisible}}
-      <p style='text-align:center; padding-top: 8px;'>
-        <button class='btn btn-primary btn-sm next'>Next <span class='fa fa-step-forward'></span></button>
-      </p>
-    {{/if}}      
+    <p style='text-align:center; padding-top: 8px;'>
+      <button class='btn btn-primary btn-sm prevQuestion' style='float:left;' {{prevDisabled}}><span class='fa fa-step-backward'> Previous</span></button>
+      <button class='btn btn-primary btn-sm nextQuestion' style='float:right;' {{nextDisabled}}>Next <span class='fa fa-step-forward'></span></button>
+    </p>
   </section>
   {{/if}}
+</template>
+
+<template name='popquizReview'>
+  <style>
+  .greenChecked {
+    background-color: darkgreen !important;
+  }
+  </style>
+  {{#each questions}}
+    <h4>{{{title}}}</h4>
+    <div class='btn-group' data-toggle='buttons'>
+      {{#each addIndex choices}}
+        {{> popquizChoiceReview question=../index choice=this}}
+      {{/each}}
+    </div>    
+    {{> popquizQuestionReview question=index popquiz=this}}
+  {{/each}}
+</template>
+
+<template name='popquizChoiceReview'>
+  <label class='btn btn-default choice {{active}} {{correct}}'>
+    <input type='radio' name='choices' id='choice{{choice.index}}' value='{{choice.index}}' /> {{{choice.value.text}}} {{{attempt}}}
+  </label>
+</template>
+
+<template name='popquizQuestionReview'>
+  <div class='feedback-{{question}}'></div>
 </template>

@@ -29,7 +29,7 @@ Template.program.rendered = function() {
   var script = this.data.script;
   editor.setOptions({
     maxLines: 50,
-    fontSize: 20,
+    fontSize: 28,
     showPrintMargin: false,
     readOnly: !this.data.contentEditable,
     highlightActiveLine: this.data.contentEditable,

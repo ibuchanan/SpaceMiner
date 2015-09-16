@@ -128,6 +128,32 @@ code {
   padding: 5px;
   color: white;
 } 
+
+.jqDropZone {
+    background: lightgrey;
+    width: 150px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-weight: bold;
+}
+.jqDropZone.in {
+    width: 600px;
+    height: 200px;
+    line-height: 200px;
+    font-size: larger;
+}
+.jqDropZone.hover {
+    background: lawngreen;
+}
+.jqDropZone.fade {
+    -webkit-transition: all 0.3s ease-out;
+    -moz-transition: all 0.3s ease-out;
+    -ms-transition: all 0.3s ease-out;
+    -o-transition: all 0.3s ease-out;
+    transition: all 0.3s ease-out;
+    opacity: 1;
+}
   </style>
 </head>
 
@@ -242,7 +268,11 @@ code {
                 <button class='btn btn-danger btn-sm' id="test"><span class='fa-bug fa'></span> Send world to test</button>
                 <button class='btn btn-info btn-sm' id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
-              <div id="codeInput"></div>            
+              <div id="codeInput"></div>
+              <!--
+              <h3>Enemy Sprite Upload</h3>
+              dropzone
+              -->
             </div>
             <div role="tabpanel" class="tab-pane" id="gamePreviewTab">
               {{#with gameUpdated}}

@@ -68,7 +68,8 @@ function getLesson() {
   return lesson;
 }
 
-var answeredDep = new Tracker.Dependency;
+let answeredDep = new Tracker.Dependency;
+let isQuiz = new ReactiveVar(false);
 
 Template.lesson.helpers({
   gameData: function() {
@@ -108,20 +109,30 @@ Template.lesson.helpers({
   rendered: function() {
     var lesson = getLesson();
     return lesson !== null;
+  },
+  isQuiz: function() {
+    let wellIsIt = isQuiz.get();
+    return wellIsIt;
   }
 });
 
-Template.popquiz.helpers({
-  lesson: getLesson
-});
-
-var popquiz = {};
+var popquiz = {finished:false};
 var popquizDep = new Tracker.Dependency();
 
-Template.popquiz.rendered = function(evt, template) {
+Template.popquiz.rendered = function() {
   popquiz = this.data;
+  popquiz.finished = false;
   popquizDep.changed();
+  isQuiz.set(true);
 };
+
+Template.popquiz.helpers({
+  lesson: getLesson,
+  finished: function() {
+    popquizDep.depend();
+    return popquiz.finished;
+  }
+});
 
 Template.section.helpers({
   current: function() {
@@ -259,7 +270,7 @@ _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
   Template[item].events(sharedEvents);
 });
 
-Template.paragraph.rendered = function(evt, template) {  
+Template.paragraph.rendered = function() {  
   $('script[type="text/spaceminer+dynamic"]').each(function() {
     var el = $(this);
     var name = el.attr('data-name');
@@ -275,7 +286,6 @@ Template.paragraph.rendered = function(evt, template) {
   }); 
 };
 
-
 let questionClock = new ReactiveClock('questionClock');
 
 let questionClockReset = () => {
@@ -288,6 +298,11 @@ let currentQuestionDep = new Tracker.Dependency();
 Tracker.autorun(() => {
   currentQuestionDep.depend();
   questionClockReset();
+});
+
+Tracker.autorun(() => {
+  let currentPart = currentPartIndex.get();
+  isQuiz.set(false);
 });
 
 Template.question.rendered = function() {
@@ -308,9 +323,13 @@ Template.question.helpers({
     if (popquiz.questions) return popquiz.questions.length;
     return 1;
   },
-  nextVisible: function() {
+  prevDisabled: function() {
     answeredDep.depend();
-    return this.nextVisible;
+    return this.index === 0 ? 'disabled' : '';
+  },
+  nextDisabled: function() {
+    answeredDep.depend();
+    return this.nextEnabled ? '' : 'disabled';
   }
 });
 
@@ -335,14 +354,80 @@ Template.question.events({
       $(template.find('.feedback')).fadeIn('slow');
       this.correct = correct;
       this.attempts.push(attemptLog(index, attemptTime, correct));
-      if (correct) this.nextVisible = true;
+      if (correct) this.nextEnabled = true;
       answeredDep.changed();
     }
   },
-  'click .next': function(evt, template) {
-    this.current = false;
+  'click .prevQuestion': function(evt, template) {
+    let prev = popquiz.questions[this.index - 1];
+    if (prev) {
+      this.current = false;
+      prev.current = true;
+      currentQuestionDep.changed();
+    }
+  },
+  'click .nextQuestion': function(evt, template) {
     let next = popquiz.questions[this.index + 1];
-    if (next) next.current = true;
+    if (next) {
+      this.current = false;
+      next.current = true;
+    } else {
+      popquiz.finished = true;
+      this.current = false;
+      popquizDep.changed();
+    }
     currentQuestionDep.changed();
+  }
+});
+
+Template.popquizChoiceReview.helpers({
+  active: function() {
+    return this.choice.value.correct ? 'active' : ''
+  },
+  correct: function() {
+    return this.choice.value.correct ? 'greenChecked' : '';
+  },
+  attempt: function() {
+    let attempts = popquiz.questions[this.question].attempts;
+    let attemptIndex = 0;
+    let theAttempt;
+    let attemptNumber = 0;
+    for(let attempt of attempts) {
+      attemptIndex++;
+      if (attempt.index === this.choice.index) {
+        attemptNumber = attemptIndex;
+        theAttempt = attempt;
+        break;
+      }
+    }
+    if (attemptNumber > 0) {
+      let star = theAttempt.correct ? " <span class='fa fa-star'></span>" : '';
+      return `<span class='badge' title='${theAttempt.attemptTime}'>${attemptNumber}${star}</span>`;
+    }
+    else return '';
+  }
+});
+
+let popquizQuestionReviewTemplate = {};
+
+Template.popquizQuestionReview.rendered = function() {
+  let correctChoice;
+  for(let choice of this.data.popquiz.choices) {
+    if (choice.correct) correctChoice = choice;
+  }
+  const icon = 'fa fa-check';
+  const bg = 'seagreen';
+  $(this.view.templateInstance().find('.feedback-' + this.data.question)).html(`<div style='padding: 4px; color: white; background-color: ${bg}'><span class='${icon}'></span>&nbsp;` + correctChoice.feedback + '</div>');
+  $(this.view.templateInstance().find('.feedback-' + this.data.question)).show();
+};
+
+Template.popquizChoiceReview.events({
+  'click .choice': function() {
+    const correct = this.choice.value.correct;
+    const icon = correct ? 'fa fa-check' : 'fa fa-ban';
+    const bg = correct ? 'seagreen' : 'indianred';
+    $('.feedback-' + this.question).html(`<div style='padding: 4px; color: white; background-color: ${bg}'><span class='${icon}'></span>&nbsp;` + this.choice.value.feedback + '</div>');
+    $('.feedback-' + this.question).hide();
+    $('.feedback-' + this.question).fadeIn('slow');
   }
 });

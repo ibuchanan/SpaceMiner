@@ -102,6 +102,7 @@ Template.editorProgram.events({
     var printArray = function(array) {
       array.forEach(print);
     }
+    console.write = val => output.append(val);
 
     var printbArray = function(array) {
       array.forEach(printb);
@@ -133,7 +134,7 @@ Template.editorProgram.events({
         if (useStringify === 'true') {
           result = JSON.stringify(result, ' ', 2);
         }
-        output.text(result).fadeIn();
+        output.append(result).fadeIn();
       } else {
         output.fadeIn();
       }
