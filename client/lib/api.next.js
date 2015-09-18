@@ -402,6 +402,108 @@ ccgccccccccccccgcc`);
   onScoreChanged(score) {
     this.scoreChanged(score);
   }
+  _componentsDestroy(selector) {
+    Array.from(this.q(selector).items).forEach(i => i.destroy());
+  }
+  gridShow(opacity=.75) {
+    this.gridHide();
+    const q = this.q,
+      width = q.width,
+      height = q.height,
+      lineW = width - 64,
+      lineH = height - 64,
+      centerW = width / 2,
+      centerH = height / 2,
+      items = this._stageItems(),
+      rows = items.rows,
+      cols = items.cols,
+      radius = 0,
+      border = 1,
+      stroke = 'white',
+      drawLine = (x, y, w, h) => {
+        let line = q.stage().insert(new q.UI.Container({
+          x, y, w, h,
+          radius, border, stroke, opacity
+        }));
+        line.add('gridShow');
+        return line;
+      };
+    for (let row of range(rows + 1)) drawLine(centerW, row * 32 + 32, lineW, 1);
+    for (let col of range(cols + 1)) drawLine(col * 32 + 32, centerH, 1, lineH);
+  }
+  gridHide() {
+    this._componentsDestroy('.gridShow');
+  }
+  posShow() {
+    let all = this._stageItems();
+    for(let item of all.items) {
+      let x, y;
+      x = (item.p.x - 16) / 32 - 1;
+      y = (item.p.y - 16) / 32 - 1;
+      let button = this.q.stage().insert(new this.q.UI.Button(
+        {
+          y: item.p.y,
+          x: item.p.x,
+          fill: 'black',
+          label: ' ',
+          border: 1,
+          opacity:.75
+        })
+      );
+      this.q.stage().insert(new this.q.UI.Text({
+        label:`${x}, ${y}`,
+        color:'white',
+        align:'center',
+        x:0,
+        y:0,
+        size:8}
+      ), button);
+      button.fit(3,3);
+      button.add('posShow');
+    }
+  }
+  posHide() {
+    this._componentsDestroy('.posShow');
+  }
+  _stageItems() {
+    if (!this._stageItems.cached) {
+      let all = Array.from(this.q.stage().items);
+      const root = all.shift();
+      this._stageItems.cached = {
+        rows: root.p.rows - 2,
+        cols: root.p.cols - 2,
+        items: all
+      }
+    }
+    return this._stageItems.cached;
+  }
+  row(rowNum=0) {
+    const items = this._stageItems();
+    if (rowNum < 0) rowNum = 0;
+    if (rowNum > items.rows - 1) rowNum = items.rows - 1;
+    const startAt = rowNum * items.cols;
+    const finishAt = startAt + items.cols;
+    return Array.from(items.items.slice(startAt, finishAt));
+  }
+  col(colNum=0) {
+    const items = this._stageItems();
+    if (colNum < 0) colNum = 0;
+    if (colNum > items.cols - 1) colNum = items.cols - 1;
+    let colItems = [];
+    for(let i = 0; i < items.rows; i++) {
+      let row = this.row(i);
+      colItems.push(row[colNum]);
+    }
+    return colItems;
+  }
+  infoShow() {
+    this.gridShow();
+    this.posShow();
+  }
+  infoHide() {
+    this.gridHide();
+    this.posHide();
+  }
 }
 
 this.Enemy = class {

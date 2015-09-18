@@ -1474,7 +1474,9 @@ function configureQuintus(callback, options) {
   };
 
   Q.component('treasure', {});
-  Q.component('foreign', {});  
+  Q.component('foreign', {});
+  Q.component('posShow', {});
+  Q.component('gridShow', {});
 
   Q.Sprite.extend("Player", {
     init: function(p, asset) {
