@@ -165,6 +165,8 @@ function GameWorld(defaults, q) {
 this.Game = class {
   constructor(q, world) {
     this.timeOuts = [];
+    this.intervals = [];
+    this._intervalIterations = {};
     this.q = q;
     this.levelId = "";
     this.world = world;
@@ -178,6 +180,13 @@ this.Game = class {
     }
     this.paused = false;
     this._realizedRules = [];
+  }
+  iterationForInterval(interval) {
+    if (interval === null) return 0;
+    if (!_.has(this._intervalIterations, interval)) {
+      this._intervalIterations[interval] = 1;
+    }
+    return this._intervalIterations[interval]++;
   }
   get player() {
     const qPlayer = this.q('Player').items[0];
@@ -218,12 +227,23 @@ this.Game = class {
     return this._select('.foreign');
   }
   setTimeout(delay, func) {
-    this.timeOuts.push(Meteor.setTimeout(func, delay));
+    let timeout = Meteor.setTimeout(func, delay);
+    this.timeOuts.push(timeout);
+    return timeout;
   }
   cancelTimeouts() {
-    for(var i = 0; i < this.timeOuts.length; i++) {
-      Meteor.clearTimeout(this.timeOuts[i]);
-    }
+    for(let timeout of this.timeOuts) Meteor.clearTimeout(timeout);
+    this.timeOuts = [];
+  }
+  setInterval(delay, func) {
+    let interval = Meteor.setInterval(func, delay);
+    this.intervals.push(interval);
+    return interval;
+  }
+  cancelIntervals() {
+    for(let interval of this.intervals) Meteor.clearInterval(interval);
+    this.intervals = [];
+    this._intervalIterations = {};
   }
   static getDefaults() {
     var worldSprites = boardFromText(
@@ -345,6 +365,7 @@ ccgccccccccccccgcc`);
   }
   resetState() {
     this.cancelTimeouts();
+    this.cancelIntervals();
     this.q.inputs.up = this.q.inputs.down = this.q.inputs.left = this.q.inputs.right = false;
     this.q.state.reset({ score: 0, ammo: 0, lives: this.numberOfLives });
     this._realizedRules = [];
@@ -438,8 +459,10 @@ ccgccccccccccccgcc`);
     let all = this._stageItems();
     for(let item of all.items) {
       let x, y;
-      x = (item.p.x - 16) / 32 - 1;
-      y = (item.p.y - 16) / 32 - 1;
+      x = (item.p.x - 16) / 32;
+      y = (item.p.y - 16) / 32;
+      // TODO: remove this shameful hack:      
+      if (x % 1 > 0 || y % 1 > 0) continue;
       let button = this.q.stage().insert(new this.q.UI.Button(
         {
           y: item.p.y,

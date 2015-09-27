@@ -10,7 +10,7 @@ let enemies = {
   green: _e('goonGreen'),
   purple: _e('goonPurple')
 };
-window.enemie = enemies;
+window.enemies = enemies;
 
 let _p = _spr('player');
 let players = {
@@ -778,6 +778,7 @@ let walln = ({
     if (size > 18) size = 18;
     if (start.x > 1 && (start.x + size > 18)) {
       size -= start.x;
+      size++;
     }
     for(let x = start.x; x < start.x + (size); x++) {
       game.world.setSprite(sprite, x, start.y, asset);
@@ -951,6 +952,18 @@ let wait = (milliseconds, ...opts) => {
   return waiter;
 };
 window.wait = wait;
+
+let recur = (milliseconds, state, func) => {
+  let intervalId = null;
+  let wrappedFunc = () => {
+    func(game.iterationForInterval(intervalId), state);
+  };
+  let interval = () => {
+    intervalId = game.setInterval(milliseconds, wrappedFunc);
+  }
+  return interval;
+};
+window.recur = recur;
 
 let score = (...opts) => {
   let props = {};
