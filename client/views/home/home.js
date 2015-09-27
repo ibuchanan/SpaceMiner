@@ -154,9 +154,6 @@ Template.level.helpers({
     return '';
   },
   edit: function() {
-    if (this.userId && this.userId === Meteor.userId())  {
-      return "<div><button class='levelEdit btn btn-xs btn-danger'>Edit</button></div>";
-    }
-    return "";
+    return this.userId && this.userId === Meteor.userId();
   }
 });

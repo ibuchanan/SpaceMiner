@@ -101,5 +101,12 @@
 </template>
 
 <template name="level">
-  <button class="col-md-5 btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}<br/>{{{preview}}}<div class='explorer'>{{explorer}}</div>{{{edit}}}</button>
+  <div class='col-md-5'>
+    <button class="btn btn-lg levelPlay btn-{{randomBackgroundColor}}">{{name}}{{{version}}}<br/>{{{preview}}}<div class='explorer'>{{explorer}}</div></button>
+    {{#if edit}}
+    <div>
+      <button class='levelEdit btn btn-xs btn-danger'>Edit</button>
+    </div>
+    {{/if}}
+  </div>
 </template>
