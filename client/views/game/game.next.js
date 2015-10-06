@@ -1,3 +1,18 @@
+// General helpers
+let range = (min, max=null) => {
+ let cur = 0;
+ if (max === null) max = min;
+ else {
+  cur = min;
+ }
+ return {
+   [Symbol.iterator]: function*() {
+     while (cur < max) yield cur++;
+   }
+ }
+};
+window.range = range;
+
 // Code generation and level customization helpers
 let _spr = type => val => () => ({sprite:type, asset: val});
 
@@ -687,16 +702,6 @@ function run(name, ...args) {
 }
 window.run = run;
 
-var range = max => {
- let cur = 0;
- return {
-   [Symbol.iterator]: function*() {
-     while (cur < max) yield cur++;
-   }
- }
-};
-window.range = range;
-
 let Rule = class {
   constructor({
     score = -1,
@@ -870,6 +875,28 @@ let filln = ({
 };
 window.filln = filln;
 
+let duplicaten = (count, 
+  start = {
+    start: {
+      x : 1,
+      y : 1
+    }
+  },
+  ...assets) => {
+  let x = start.start.x;
+  let y = start.start.y;
+  for(let i of range(count)) {
+    // TODO: handle moe than just hard-coded right direction
+    for (let asset of assets) {
+      if (typeof asset === 'function') asset = asset();
+      console.log(start, count, asset);
+      spriten({start:{x:x, y:y}, sprite:asset.sprite, asset:asset.asset});
+      x++;
+    }
+  }
+};
+window.duplicaten = window.dupn = duplicaten;
+
 let invoke = (list, funcName, ...args) => {
   let array = Array.from(list);
   for(let item of array) {
@@ -896,13 +923,13 @@ let makeFuncs = (factoryFunc, funcLongNames) => {
 };
 makeFuncs(_sprite, ['gem', 'enemy', 'coin', 'tile', 'player']);
 
-window.len = window.size = window.height = window.width = (dimension) => ({size:dimension});
+window.len = window.size = window.height = window.width = dimension => ({size:dimension});
 
 let directionObjectAdjust = val => {
   ['l', 'r', 'u', 'd'].map(dir => {
     if (val.hasOwnProperty(dir)) val[dir] = true;
   });
-}
+};
 
 let invokeDefer = funcName => (...opts) => {
   let props = {};
@@ -915,6 +942,11 @@ let invokeDefer = funcName => (...opts) => {
   return () => window[funcName + 'n'](props);
 };
 window.invokeDefer = invokeDefer;
+
+let invokeDeferOnWindow = funcName => (...args) => {
+  return () => window[funcName + 'n'](...args);
+};
+window.invokeDeferOnWindow = invokeDeferOnWindow;
 
 let invokeDeferSimple = func => (...opts) => () => func(...opts);
 window.invokeDeferSimple = invokeDeferSimple;
@@ -929,6 +961,9 @@ window.repeat = repeat;
 
 ['sprite', 'wall', 'fill', 'box', 'block'].map(funcName =>
  window[funcName] = invokeDefer(funcName));
+
+['duplicate', 'dup'].map(funcName => 
+  window[funcName] = invokeDeferOnWindow(funcName));
 
 let funcCombine = opts => {
   let runAllFuncs = () => {};
