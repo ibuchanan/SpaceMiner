@@ -25,7 +25,7 @@ Template.lessons.helpers({
         //['Arrays', 'Group multiple values in a specific numeric order inside a single variable', 'arrays'],
         //['Objects', 'Group multiple values by name (like a dictionary for your stuff) inside a single variable', 'objects'],
         ['Training', 'Go on a training mission to use your new skills', 'training'],
-        ['ES2015', 'Learn ES2015 and beyond in SpaceMiner!', 'es2015'],
+        ['ES2015', 'Advanced: Learn ES2015 and beyond in SpaceMiner!', 'ES2015'],
         //['Games', 'Make more games with what you\'ve leanred so far!', 'games']
     ];
   }
