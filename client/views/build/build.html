@@ -130,12 +130,15 @@ code {
 } 
 
 .jqDropZone {
-    background: lightgrey;
-    width: 150px;
+    color: white;
+    background: darkgray;
     height: 50px;
+    padding-left: 8px;
+    padding-right: 8px;
     line-height: 50px;
     text-align: center;
     font-weight: bold;
+    display: inline-block;
 }
 .jqDropZone.in {
     width: 600px;
@@ -154,6 +157,12 @@ code {
     transition: all 0.3s ease-out;
     opacity: 1;
 }
+
+.spriteImage {
+  width: 32px;
+  height: 32px;
+}
+
   </style>
 </head>
 
@@ -259,7 +268,7 @@ code {
           <ul class="nav nav-tabs" role="tablist" id='gameTabsNav'>
             <li role="presentation" class="active"><a href="#codeEditorTab" aria-controls="home" role="tab" data-toggle="tab"><span class='fa fa-code'></span> Code Editor</a></li>
             <li role="presentation"><a href="#gamePreviewTab" aria-controls="profile" role="tab" data-toggle="tab"><span class='fa fa-gamepad'></span> Game Preview</a></li>
-          </ul>            
+          </ul>
           <!-- Tab panes -->
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="codeEditorTab">
@@ -269,10 +278,40 @@ code {
                 <button class='btn btn-info btn-sm' id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
               <div id="codeInput"></div>
-              <!--
-              <h3>Enemy Sprite Upload</h3>
-              dropzone
-              -->
+              <h3>Custom Sprite Upload</h3>
+              <div class='btn-group' data-toggle='buttons'>
+                {{#with gameUpdated}}
+                  <h4>First, select the sprite type to change:</h4>
+                  <label class='btn btn-default customTile'>
+                    <input type='radio' name='customSprite' value='tile' /> Tile <img src='{{spriteFor "tile"}}'
+                      class='spriteImage' />
+                  </label>
+                  <label class='btn btn-danger customEnemy'>
+                    <input type='radio' name='customSprite' value='enemy' /> Enemy <img src='{{spriteFor "enemy"}}'
+                      class='spriteImage' />
+                  </label>
+                  <label class='btn btn-success customGem'>
+                    <input type='radio' name='customSprite' value='gem' /> Gem <img src='{{spriteFor "gem"}}'
+                      class='spriteImage' />
+                  </label>
+                  <label class='btn btn-warning customCoin'>
+                    <input type='radio' name='customSprite' value='coin' /> Coin <img src='{{spriteFor "coin"}}'
+                      class='spriteImage' />
+                  </label>
+                  <label class='btn btn-primary customPlayer'>
+                    <input type='radio' name='customSprite' value='player' /> Player <img src='{{spriteFor "player"}}'
+                      class='spriteImage' />
+                  </label>
+                {{/with}}
+              </div>
+              <center style='padding: 10px'>
+                <h4>Then, do one of the following:</h4>
+                {{> dropzone callbacks=uploadCallbacks}}
+                <h5>OR</h5>
+                <br/>
+                <button class='btn btn-danger customSpriteDefault'>Reset to Default</button>
+                <br/>
+              </center>
             </div>
             <div role="tabpanel" class="tab-pane" id="gamePreviewTab">
               {{#with gameUpdated}}

@@ -343,6 +343,7 @@ function levelMapCreate(q, leveld) {
       let size = this.p.tileW;
 
       const map = {
+        'S': 'S',
         '-': 'Dot',
         'G': 'Tower',
         'E': 'Enemy',
@@ -366,6 +367,9 @@ function levelMapCreate(q, leveld) {
         let row = tiles[y] = tiles[y].concat();
         for(let x =0;x<row.length;x++) {
           var tile = row[x];
+          if (tile === 'S') {
+            continue;
+          }
           if (tile === 't') row[x] = tileNum;
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
@@ -889,7 +893,6 @@ let duplicaten = (count,
     // TODO: handle moe than just hard-coded right direction
     for (let asset of assets) {
       if (typeof asset === 'function') asset = asset();
-      console.log(start, count, asset);
       spriten({start:{x:x, y:y}, sprite:asset.sprite, asset:asset.asset});
       x++;
     }
@@ -1045,7 +1048,7 @@ function configureQuintus(callback, options) {
     q.input.joypadControls();
   }
 
-  var modules = ["Sprites", "Scenes", "Input", "2D", "UI"];
+  var modules = ["Sprites", "Scenes", "Input", "2D", "UI", "Anim"];
   var audioSupported = [];
   if (options.enableSound) {
     modules.push("Audio");
@@ -1072,6 +1075,22 @@ function configureQuintus(callback, options) {
     return rows;
   }
 
+  /*
+    // Sample with groups:
+
+    var worldName = "Space Miner";
+    ''
+    var worldBuild = {
+        groups : [
+            {
+            start: '2,2',
+            repeat: '4 y',
+            sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
+            }
+        ]
+    };
+  */
+
   Q.loadAssetLevel = function(key,src,callback,errorCallback) {
     let fileParts = src.split("."), worldName = fileParts[0];
     Q.loadAssetOther(key, "/collectionapi/levels/" + worldName, function(key, val) {
@@ -1079,242 +1098,251 @@ function configureQuintus(callback, options) {
       let board = obj.board;
       board = boardFromText(board);
 
-      /* Now check if this is a level that has a 'script' instead */
-
-      let defaults = getDefaults();
-      let worldRepeat = defaults.worldRepeat;      
-      if (_.has(obj, 'script') && _.isString(obj.script)) {
-        let world = parseWorldDefinitionFromScript(obj.script, defaults);
-        worldRepeat = world.worldRepeat;
-        // TODO remove hack
-        world._id = worldName;
-        Q.assets[worldName + 'World'] = world;
-
-        // First, if a world property was set, layer it over the defaults
-        var worldSprites = worldOverride(world.world, defaults.world);
-
-        // Second, if a worldRows property was set, layer that over the world
-        if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
-          var overrides = getRows(world.worldRows);
-          worldSprites = worldOverride(overrides, worldSprites);
+      let customSprites = obj.customSprites;
+      if (customSprites && _.isObject(customSprites)) {
+        let customSpritesPaths = [];
+        for(let key in customSprites) {
+          customSpritesPaths.push(customSprites[key]);
         }
-
-        // Third, if worldCoords was set, layer that on top of the world
-        if (_.isObject(world.worldCoords) && _.keys(world.worldCoords).length > 0) {
-          _.each(world.worldCoords, function(value, key) {
-            var coords = key.split(',');
-            if (coords.length < 2) {
-              console.log('The key: ' + key + ', must be in the format of r,c where r specifies a row number and c specifies a column within that row. For example: 0,0 is the first row and first column, and 3,4 would be the fourth row andd fifth column.');
+        Q.load(customSpritesPaths, function() {
+          for(let key in customSprites) {
+            var customSprite =  customSprites[key];
+            if (customSprite !== '') {
+              Q.sheet(`custom-${key}Sheet`, customSprite, {tileW:32, tileH: 32});
+              let frames = Array.from(range(Q.sheets[`custom-${key}Sheet`].w/32));
+              Q.animations(key, { move: { frames, rate: 1, loop: true } });
             }
-            var row = parseInt(coords[0]);
-            var col = parseInt(coords[1]);
-            worldSprites[row][col] = value;
-          });
-        }
-
-        // Fourth, process the worldBuild directions
-        if(_.isObject(world.worldBuild) && _.keys(world.worldBuild).length > 0) {
-          var group = function(g) {
-            var start = g.start || null;
-            var sprites = g.sprites || [];
-            var repeat = g.repeat || 'x 1'; // '[full|[count[ x|y]]
-
-            sprites = getRows(sprites);
-
-            return {
-              start,
-              repeat,
-              sprites
-            };
-          };
-
-          var groups = function(gs) {
-            if (!_.isArray(gs)) return [];
-            else {
-              return _.map(gs, group);
-            }
-          };
-
-          var worldBuild = world.worldBuild;
-
-          var gs = [];
-          if (_.isObject(worldBuild) && _.isArray(worldBuild.groups)) {
-            gs = groups(worldBuild.groups); 
-          } else if (_.isObject(worldBuild)) {
-            gs = [ group(worldBuild) ];
           }
-
-          var startingRow = 0,
-              startingCol = 0;
-
-          // Now let's iterate...
-          _.each(gs, function(g) {
-            var start = g.start;
-            var sprites = g.sprites;
-            var repeat = g.repeat;
-            if (start) {
-              var coords = start.split(',');
-              if (coords.length < 2) coords = [0,0];
-              startingRow = parseInt(coords[0]);
-              startingCol = parseInt(coords[1]);
-            }
-
-            var worldWidth = worldSprites[0].length;
-            var worldHeight = worldSprites.length;
-
-            var iterations = 1;
-            var repeatDirection = 'x';
-            var repeatParts = repeat.split(' ');
-            if (repeatParts[0] === 'full') {
-              // TODO calculate iterations or something...
-            } else {
-              iterations = parseInt(repeatParts[0]);
-            }
-            if (repeatParts.length > 1) {
-              repeatDirection = repeatParts[1];
-            }
-
-            // Find max length of the spriteparts
-            var width = sprites[0].length;
-            _.each(sprites, function(row) {
-              if (row.length > width) width = row.length;
-            });
-            var height = sprites.length;
-
-            // Adapt to bounds
-            if (startingRow > worldHeight) startingRow = worldHeight - height;
-            if (startingCol > worldWidth) startingCol = worldWidth - width;
-            if (startingRow + height > worldHeight) startingRow = worldHeight - height;
-            if (startingCol + width > worldWidth) startingCol = worldWidth - width;
-
-            var wrappedAtRow = 0;
-            var wrappedAtCol = 0;
-
-            for(var i = 0; i < iterations; i++) {
-              var currentStartingRow = startingRow;
-              var currentStartingCol = startingCol;
-
-              if (repeatDirection === 'y') {
-                sprites.forEach(function(cells, rowIndex) {
-                  var thisRow = currentStartingRow + rowIndex - wrappedAtRow;
-                  if (thisRow >= worldHeight) {
-                    wrappedAtRow = rowIndex;
-                    currentStartingCol = startingCol + width;
-                    startingCol += width;
-                    currentStartingRow = startingRow = thisRow = 0;
-                  }
-                  cells.forEach(function(cell, colIndex) {
-                    if (cell !== '.') {
-                      var thisCol = currentStartingCol + colIndex;
-                      if (thisCol < worldWidth) {
-                        worldSprites[thisRow][thisCol] = cell;
-                      }
-                    }
-                  });
-                });
-                startingRow += height;
-              }
-              else if (repeatDirection === 'x') {
-                for(var colIndex = 0; colIndex < width; colIndex++) {
-                  var thisCol = currentStartingCol + colIndex - wrappedAtCol;
-                  if (thisCol >= worldWidth) {
-                    wrappedAtCol = colIndex;
-                    currentStartingRow = startingRow + height;
-                    startingRow += height;
-                    currentStartingCol = startingCol = thisCol = 0;
-                  }
-                  sprites.forEach(function(cells, rowIndex) {
-                    if (cells.length >= (colIndex+1)) {
-                      var cell = cells[colIndex];
-                      if (cell !== '.') {
-                        var thisRow = currentStartingRow + rowIndex;
-                        worldSprites[thisRow][thisCol] = cell;
-                      }
-                    }
-                  });
-                }
-                startingCol += (width);
-              }
-            }
-          });
-        }
-        /*
-
-  var worldName = "Space Miner";
-  ''
-  var worldBuild = {
-      groups : [
-          {
-          start: '2,2',
-          repeat: '4 y',
-          sprites: [ 'gg', 'ggg', 'gggg', 'ggggg']
-          }
-      ]
-  };
-
-  */
-        // TODO: is the second param necessary any more?
-        board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
-
-        if (_.has(world, 'scoreChanged')) {
-          try {
-            let fun = eval(world.scoreChanged);
-            if (_.isFunction(fun)) world.scoreChanged = fun;
-          } catch (excp) {
-            console.error("Could not parse world.scoreChanged:");
-            console.error(world.scoreChanged);
-          }
-        }
+          finishLoadingLevel();
+        });
       } else {
-        defaults._id = worldName;
-        defaults.worldName = obj.name;
-        Q.assets[worldName + 'World'] = defaults;
+        finishLoadingLevel();
       }
 
-      let newBoard = board;
-      if (worldRepeat > 1) {
-        let tilesToDuplicate = board.slice(1, board.length-1);
-        let clonedTiles = JSON.parse(JSON.stringify(tilesToDuplicate));
-        let lastRow = board.pop();
-        newBoard = Array.concat(board, clonedTiles);
-        newBoard.push(lastRow);
+      function finishLoadingLevel() {
+        /* Now check if this is a level that has a 'script' instead */
+        let defaults = getDefaults();
+        let worldRepeat = defaults.worldRepeat;
+        if (_.has(obj, 'script') && _.isString(obj.script)) {
+          let world = parseWorldDefinitionFromScript(obj.script, defaults);
+          if (customSprites) world.customSprites = customSprites;
+          worldRepeat = world.worldRepeat;
+          // TODO remove hack
+          world._id = worldName;
+          Q.assets[worldName + 'World'] = world;
 
-        if (worldRepeat > 2) {
-          let newNewBoard = [];
-          for(let row of newBoard) {
-            let last = row.pop();
-            let slice = row.slice(1, row.length-1);
-            row = row.concat(slice);
-            row.push(last);
-            newNewBoard.push(row);
+          // First, if a world property was set, layer it over the defaults
+          var worldSprites = worldOverride(world.world, defaults.world);
+
+          // Second, if a worldRows property was set, layer that over the world
+          if (_.isArray(world.worldRows) && world.worldRows.length > 0 && _.isString(world.worldRows[0])) {
+            var overrides = getRows(world.worldRows);
+            worldSprites = worldOverride(overrides, worldSprites);
           }
-          newBoard = newNewBoard;
-        }
-      }
 
-      let seenPlayer = false;
-      newBoard = newBoard.map(row => row.map(sprite => {
-        let val = sprite;
-        if ((sprite === 'P' || sprite === 'p')) {
-          if (seenPlayer) val = '-';
-          seenPlayer = true;
-        }
-        return val;
-      }));
+          // Third, if worldCoords was set, layer that on top of the world
+          if (_.isObject(world.worldCoords) && _.keys(world.worldCoords).length > 0) {
+            _.each(world.worldCoords, function(value, key) {
+              var coords = key.split(',');
+              if (coords.length < 2) {
+                console.log('The key: ' + key + ', must be in the format of r,c where r specifies a row number and c specifies a column within that row. For example: 0,0 is the first row and first column, and 3,4 would be the fourth row andd fifth column.');
+              }
+              var row = parseInt(coords[0]);
+              var col = parseInt(coords[1]);
+              worldSprites[row][col] = value;
+            });
+          }
 
-      Q.assets[key] = newBoard;
+          // Fourth, process the worldBuild directions
+          if(_.isObject(world.worldBuild) && _.keys(world.worldBuild).length > 0) {
+            var group = function(g) {
+              var start = g.start || null;
+              var sprites = g.sprites || [];
+              var repeat = g.repeat || 'x 1'; // '[full|[count[ x|y]]
 
-      // TODO fix hack
-      try {
-        var func4 = makeFunc(obj.onWon);
-        if (func4) {
-          OnWon = func4;
+              sprites = getRows(sprites);
+
+              return {
+                start,
+                repeat,
+                sprites
+              };
+            };
+
+            var groups = function(gs) {
+              if (!_.isArray(gs)) return [];
+              else {
+                return _.map(gs, group);
+              }
+            };
+
+            var worldBuild = world.worldBuild;
+
+            var gs = [];
+            if (_.isObject(worldBuild) && _.isArray(worldBuild.groups)) {
+              gs = groups(worldBuild.groups);
+            } else if (_.isObject(worldBuild)) {
+              gs = [ group(worldBuild) ];
+            }
+
+            var startingRow = 0,
+                startingCol = 0;
+
+            // Now let's iterate...
+            _.each(gs, function(g) {
+              var start = g.start;
+              var sprites = g.sprites;
+              var repeat = g.repeat;
+              if (start) {
+                var coords = start.split(',');
+                if (coords.length < 2) coords = [0,0];
+                startingRow = parseInt(coords[0]);
+                startingCol = parseInt(coords[1]);
+              }
+
+              var worldWidth = worldSprites[0].length;
+              var worldHeight = worldSprites.length;
+
+              var iterations = 1;
+              var repeatDirection = 'x';
+              var repeatParts = repeat.split(' ');
+              if (repeatParts[0] === 'full') {
+                // TODO calculate iterations or something...
+              } else {
+                iterations = parseInt(repeatParts[0]);
+              }
+              if (repeatParts.length > 1) {
+                repeatDirection = repeatParts[1];
+              }
+
+              // Find max length of the spriteparts
+              var width = sprites[0].length;
+              _.each(sprites, function(row) {
+                if (row.length > width) width = row.length;
+              });
+              var height = sprites.length;
+
+              // Adapt to bounds
+              if (startingRow > worldHeight) startingRow = worldHeight - height;
+              if (startingCol > worldWidth) startingCol = worldWidth - width;
+              if (startingRow + height > worldHeight) startingRow = worldHeight - height;
+              if (startingCol + width > worldWidth) startingCol = worldWidth - width;
+
+              var wrappedAtRow = 0;
+              var wrappedAtCol = 0;
+
+              for(var i = 0; i < iterations; i++) {
+                var currentStartingRow = startingRow;
+                var currentStartingCol = startingCol;
+
+                if (repeatDirection === 'y') {
+                  sprites.forEach(function(cells, rowIndex) {
+                    var thisRow = currentStartingRow + rowIndex - wrappedAtRow;
+                    if (thisRow >= worldHeight) {
+                      wrappedAtRow = rowIndex;
+                      currentStartingCol = startingCol + width;
+                      startingCol += width;
+                      currentStartingRow = startingRow = thisRow = 0;
+                    }
+                    cells.forEach(function(cell, colIndex) {
+                      if (cell !== '.') {
+                        var thisCol = currentStartingCol + colIndex;
+                        if (thisCol < worldWidth) {
+                          worldSprites[thisRow][thisCol] = cell;
+                        }
+                      }
+                    });
+                  });
+                  startingRow += height;
+                }
+                else if (repeatDirection === 'x') {
+                  for(var colIndex = 0; colIndex < width; colIndex++) {
+                    var thisCol = currentStartingCol + colIndex - wrappedAtCol;
+                    if (thisCol >= worldWidth) {
+                      wrappedAtCol = colIndex;
+                      currentStartingRow = startingRow + height;
+                      startingRow += height;
+                      currentStartingCol = startingCol = thisCol = 0;
+                    }
+                    sprites.forEach(function(cells, rowIndex) {
+                      if (cells.length >= (colIndex+1)) {
+                        var cell = cells[colIndex];
+                        if (cell !== '.') {
+                          var thisRow = currentStartingRow + rowIndex;
+                          worldSprites[thisRow][thisCol] = cell;
+                        }
+                      }
+                    });
+                  }
+                  startingCol += (width);
+                }
+              }
+            });
+          }
+
+          // TODO: is the second param necessary any more?
+          board = boardFromNewToOld(createBoardFromWorld(worldSprites, defaults.world));
+
+          if (_.has(world, 'scoreChanged')) {
+            try {
+              let fun = eval(world.scoreChanged);
+              if (_.isFunction(fun)) world.scoreChanged = fun;
+            } catch (excp) {
+              console.error("Could not parse world.scoreChanged:");
+              console.error(world.scoreChanged);
+            }
+          }
+        } else {
+          defaults._id = worldName;
+          defaults.worldName = obj.name;
+          Q.assets[worldName + 'World'] = defaults;
         }
-      } catch (ex) {
-        console.log("Error getting level functions:");
-        console.log(ex);
-      }
-      callback(key, Q.assets[key]);
+
+        let newBoard = board;
+        if (worldRepeat > 1) {
+          let tilesToDuplicate = board.slice(1, board.length-1);
+          let clonedTiles = JSON.parse(JSON.stringify(tilesToDuplicate));
+          let lastRow = board.pop();
+          newBoard = Array.concat(board, clonedTiles);
+          newBoard.push(lastRow);
+
+          if (worldRepeat > 2) {
+            let newNewBoard = [];
+            for(let row of newBoard) {
+              let last = row.pop();
+              let slice = row.slice(1, row.length-1);
+              row = row.concat(slice);
+              row.push(last);
+              newNewBoard.push(row);
+            }
+            newBoard = newNewBoard;
+          }
+        }
+
+        let seenPlayer = false;
+        newBoard = newBoard.map(row => row.map(sprite => {
+          let val = sprite;
+          if ((sprite === 'P' || sprite === 'p')) {
+            if (seenPlayer) val = '-';
+            seenPlayer = true;
+          }
+          return val;
+        }));
+
+        Q.assets[key] = newBoard;
+
+        // TODO fix hack
+        try {
+          var func4 = makeFunc(obj.onWon);
+          if (func4) {
+            OnWon = func4;
+          }
+        } catch (ex) {
+          console.log("Error getting level functions:");
+          console.log(ex);
+        }
+        callback(key, Q.assets[key]);
+      } // /finishLoadingLevel
     }, errorCallback);
   };
   Q.assetTypes.lvl = 'Level';
@@ -1326,6 +1354,16 @@ function configureQuintus(callback, options) {
     img.src = Q.assetUrl("levelSprites/", src);
   };
   Q.assetTypes.spr = 'Sprite';
+
+  Q.loadAssetCustomSprite = (key,src,callback,errorCallback) => {
+    let img = new Image();
+    img.onload = () => { callback(key, img); } ;
+    img.onerror = errorCallback;
+    src = src.replace('.cspr', '.jpg');
+    src = Q.assetUrl('upload/', src);
+    img.src = src;
+  }
+  Q.assetTypes.cspr = 'CustomSprite';
 
   Q.loadAssetTile = function(key,src,callback,errorCallback) {
     var img = new Image();
@@ -1533,8 +1571,14 @@ function configureQuintus(callback, options) {
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
       };
       applySpriteProps(props, asset, 'player');
+      if(game.customSprite('player') !== '') {
+        props.sheet = 'custom-playerSheet';
+      }
       this._super(p,props);
-      this.add("2d, playerControls, laser");
+      this.add("2d,playerControls,laser,animation");
+      if(game.customSprite('player') !== '') {
+        this.play('move');
+      }
     }
   });
 
@@ -1641,12 +1685,20 @@ function configureQuintus(callback, options) {
         sensor: true
       };
       applySpriteProps(props, asset, sheetName);
+      var sheetCustomName = sheetName === 'dot' ? 'coin' : 'gem';
+      if(game.customSprite(sheetCustomName) !== '') {
+        props.sheet = `custom-${sheetCustomName}Sheet`;
+      }
       this.count = 1;
       this._super(p,props);
       this.on("sensor");
       this.on("inserted");
       this.on("destroyed");
       this.add('foreign,treasure');
+      var sheetCustomName = sheetName === 'dot' ? 'coin' : 'gem';
+      if(game.customSprite(sheetCustomName) !== '') {
+        //this.play('move');
+      }
     },
 
     // When a dot is hit..
@@ -1760,13 +1812,20 @@ function configureQuintus(callback, options) {
       let props = {
         speed: 150,
         type: SPRITE_ENEMY,
+        sprite: 'enemy',
         collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_SHOT
       };
       applySpriteProps(props, asset, 'enemy');
+      if(game.customSprite('enemy') !== '') {
+        props.sheet = 'custom-enemySheet';
+      }
       this._super(p, props);
-      this.add("2d,enemyControls,foreign");
+      this.add("2d,enemyControls,foreign,animation");
       this.on("hit.sprite",this,"hit");
       this.on("destroyed");
+      if(game.customSprite('enemy') !== '') {
+        this.play('move');
+      }
     },
 
     hit: function(col) {

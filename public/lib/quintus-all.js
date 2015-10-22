@@ -125,7 +125,11 @@ var Quintus = function Quintus(opts) {
   */
   Q._normalizeArg = function(arg) {
     if(Q._isString(arg)) {
-      arg = arg.replace(/\s+/g,'').split(",");
+      // TODO SpaceMiner change
+      if (arg.indexOf(',')) {
+        if (arg.indexOf(', ') > -1 || arg.indexOf(' ,') > -1) arg = arg.replace(/\s+/g,'');
+        arg = arg.split(',');
+      }
     }
     if(!Q._isArray(arg)) {
       arg = [ arg ];
@@ -1849,6 +1853,7 @@ var Quintus = function Quintus(opts) {
         /* Call the appropriate loader function */
         /* passing in our per-asset callback */
         /* Dropping our asset by name into Q.assets */
+        console.log("Quinuts.load: ", key, itm);
         Q["loadAsset" + assetType](key,itm,
                                    loadedCallback,
                                    function() { errorCallback(itm); });
@@ -2790,44 +2795,47 @@ Quintus.Anim = function(Q) {
       var entity = this.entity,
           p = entity.p;
       if(p.animation) {
-        var anim = Q.animation(p.sprite,p.animation),
+        var anim = Q.animation(p.sprite,p.animation);
+        var rate, stepped;
+        if (anim) {
             rate = anim.rate || p.rate,
             stepped = 0;
-        p.animationTime += dt;
-        if(p.animationChanged) {
-          p.animationChanged = false;
-        } else { 
           p.animationTime += dt;
-          if(p.animationTime > rate) {
-            stepped = Math.floor(p.animationTime / rate);
-            p.animationTime -= stepped * rate;
-            p.animationFrame += stepped;
-          }
-        }
-        if(stepped > 0) {
-          if(p.animationFrame >= anim.frames.length) {
-            if(anim.loop === false || anim.next) {
-              p.animationFrame = anim.frames.length - 1;
-              entity.trigger('animEnd');
-              entity.trigger('animEnd.' + p.animation);
-              p.animation = null;
-              p.animationPriority = -1;
-              if(anim.trigger) {  
-                entity.trigger(anim.trigger,anim.triggerData);
-              }
-              if(anim.next) { this.play(anim.next,anim.nextPriority); }
-              return;
-            } else {
-              entity.trigger('animLoop');
-              entity.trigger('animLoop.' + p.animation);
-              p.animationFrame = p.animationFrame % anim.frames.length;
+          if(p.animationChanged) {
+            p.animationChanged = false;
+          } else { 
+            p.animationTime += dt;
+            if(p.animationTime > rate) {
+              stepped = Math.floor(p.animationTime / rate);
+              p.animationTime -= stepped * rate;
+              p.animationFrame += stepped;
             }
           }
-          entity.trigger("animFrame");
+          if(stepped > 0) {
+            if(p.animationFrame >= anim.frames.length) {
+              if(anim.loop === false || anim.next) {
+                p.animationFrame = anim.frames.length - 1;
+                entity.trigger('animEnd');
+                entity.trigger('animEnd.' + p.animation);
+                p.animation = null;
+                p.animationPriority = -1;
+                if(anim.trigger) {  
+                  entity.trigger(anim.trigger,anim.triggerData);
+                }
+                if(anim.next) { this.play(anim.next,anim.nextPriority); }
+                return;
+              } else {
+                entity.trigger('animLoop');
+                entity.trigger('animLoop.' + p.animation);
+                p.animationFrame = p.animationFrame % anim.frames.length;
+              }
+            }
+            entity.trigger("animFrame");
+          }
+          p.sheet = anim.sheet || p.sheet;
+          p.frame = anim.frames[p.animationFrame];
+          if(anim.hasOwnProperty("flip")) { p.flip  = anim.flip; }
         }
-        p.sheet = anim.sheet || p.sheet;
-        p.frame = anim.frames[p.animationFrame];
-        if(anim.hasOwnProperty("flip")) { p.flip  = anim.flip; }
       }
     },
 

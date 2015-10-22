@@ -1,15 +1,18 @@
+let path = Npm.require('path');
+let root = path.resolve('.');
+let glob = Meteor.npmRequire("glob");     
+
 var IMAGES_BASE = '';
 if (process.env.IMAGES_BASE) {
   IMAGES_BASE = process.env.IMAGES_BASE;
   console.log("IMAGES_BASE manually set to:");
   console.log(IMAGES_BASE);
 } else {
-  var path = Npm.require('path');
-  var root = path.resolve('.');
   IMAGES_BASE = path.resolve('../web.browser/app/images/') + '/';
   console.log("IMAGES_BASE auto-resolved to:");
   console.log(IMAGES_BASE);
 }
+console.log("Root: ", root);
 
 var gm = Meteor.npmRequire('gm');
 var babel = Meteor.npmRequire('babel-core');
@@ -34,18 +37,18 @@ function createLevelRecord(levelDto, callback) {
 function createLevelDefault() {
   var board = 
 `tttttttttttttttttttt
-t-EG------------G--t
-t-ttttt------ttttt-t
-t-tG------------Gt-t
-t-ttttt------ttttt-t
-t-----t--tt--t-----t
-t--t--t--tt--t--t--t
-t-----t------t-----t
-t-t--------------t-t
-t-t-tt-tttttt-tt-t-t
-t--G------P-----G--t
-t-t-tt-t-tt-t-tt-t-t
-t--G------------G--t
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
+tttttttttttttttttttt
 tttttttttttttttttttt`;
   var level = {
     _id: 'starter',
@@ -57,7 +60,7 @@ tttttttttttttttttttt`;
     onEnemyHit: 'game.reset();',
     onGemHit: "player.scoreInc(player.scoreGet());\ngame.soundPlay('gem1.wav');\nplayer.ammoInc(1);",
     onCoinHit: "player.scoreInc(100);\ngame.soundPlay('coin1.wav');",
-    onWon: "controls.alert('You won!');",
+    onWon: "game.onWon();",
     published: true,
     selections: [
       'player/dark.png',
@@ -66,7 +69,7 @@ tttttttttttttttttttt`;
       'coin/blue.png',
       'shot/basicShot.png'
     ],
-    tile: 'tile/plasma.png',
+    tile: 'tile/rockSmooth.png',
     phase: 'inception',
     buildStepCurrent: 0,
     buildStepUpdateCounts: {
@@ -480,7 +483,6 @@ function cleanDbAndCreateDefaultRecords() {
       tile: 5,
       shot: 6
     };
-    var glob = Meteor.npmRequire("glob");     
     var imageGlobPath = IMAGES_BASE + "spriteParts/**/*.png";
     
     glob(imageGlobPath, Meteor.bindEnvironment((er, files)=> {
@@ -521,7 +523,58 @@ function configureCollectionAPI() {
   API.start();
 }
 
+let setupJobs = () => {
+  let myJobs = JobCollection('myJobQueue');
+  myJobs.allow({
+    admin: (userId, method, params) => userId ? true : false
+  });
+
+  Meteor.startup(() => {
+    Meteor.publish('allJobs', () => myJobs.find({}));
+    return myJobs.startJobServer();
+  });
+
+  let job = new Job(myJobs, 'spriteUploadAssociateWithUser',
+    {
+      baseDir: '/.uploads/',
+    }
+  );
+    
+  job.priority('normal')
+    .retry().repeat({
+      repeats: myJobs.forever,
+      wait: 10000
+    })
+    .save();
+
+  let workers = Job.processJobs('myJobQueue', 'spriteUploadAssociateWithUser',
+    (job, cb)  => {
+      const data = job.data;
+
+      glob('c:/.uploads/*', Meteor.bindEnvironment((er, files) => {
+        console.log("Unprocessed images found:");
+        console.log(files);
+        job.done();
+        cb();
+      }));
+    }
+  );
+
+};
+
 Meteor.startup(function() {
+    //setupJobs();
+    UploadServer.init({
+      tmpDir: root + '/.uploads/tmp',
+      uploadDir: root + '/.uploads/',
+      checkCreateDirectories: true, //create the directories for you
+      /*validateFile: function(req, res) {
+        console.log(req.path);
+        return true;
+      }
+      */
+    });
+
     Router.map(function() {
       this.route('levelSprites/:id', {
         where: 'server',

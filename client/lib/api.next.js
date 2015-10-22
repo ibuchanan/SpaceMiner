@@ -187,7 +187,7 @@ this.Game = class {
       this._intervalIterations[interval] = 1;
     }
     return this._intervalIterations[interval]++;
-  }
+  }  
   get player() {
     const qPlayer = this.q('Player').items[0];
     const player = new Player(this.q, qPlayer);
@@ -203,6 +203,10 @@ this.Game = class {
       return enemy;
     });
     return enemies;
+  }
+  customSprite(spriteType) {
+    return this.world.customSprites && this.world.customSprites[spriteType] ?
+      this.world.customSprites[spriteType] : '';
   }
   _select(selector) {
     return Array.from(this.q(selector).items);
@@ -247,25 +251,25 @@ this.Game = class {
   }
   static getDefaults() {
     var worldSprites = boardFromText(
-`cegccccccccccccgcc
-ctttttcccccctttttc
-ctgccccccccccccgtc
-ctttttcccccctttttc
-ccccctccttcctccccc
-cctcctccttcctcctcc
-ccccctcccccctccccc
-ctcccccccccccccctc
-ctcttcttttttcttctc
-ccgccccccpcccccgcc
-ctcttctcttctcttctc
-ccgccccccccccccgcc`);
+`tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt
+tttttttttttttttttt`);
     return {
       worldName : "Space Miner",
       explorerName : "Ninja Coder",
       numberOfLives : 1,
       enableEnemyRespawn : true,
       sprites: {
-        tile: "plasma.png",
+        tile: "rockSwirly.png",
         enemy: "brainBlue.png",
         coin: "blue.png",
         gem: "pinkGem.png",
@@ -357,6 +361,12 @@ ccgccccccccccccgcc`);
         let result = fun();
         if (typeof result === 'function') result();
       }
+    }
+  }
+  onWon() {
+    // Only execute if the world is not an empty world:
+    if (this.startTasks.length > 0) {
+      controls.alert("You won!");
     }
   }
   reset() {

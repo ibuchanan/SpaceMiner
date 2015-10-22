@@ -22,7 +22,6 @@ codeadventure:js-signals
 reactive-var
 xorax:multiple-callbacks
 #accounts-meetup
-joshowens:accounts-entry
 iron:router
 parhelium:epic-editor
 service-configuration
@@ -33,9 +32,14 @@ dsyko:jquery-ui-touch-punch
 iamkevingreen:mixitup
 gwendall:auth-client-callbacks
 spacebars-compiler
-npm-container
 babel-compiler
 http
 aldeed:clock
 tomi:upload-server
-tomi:upload-jquery
+#standard-minifiers
+
+
+npm-container
+joshowens:accounts-entry@=1.0.4
+gly:upload-jquery
+vsivsi:job-collection

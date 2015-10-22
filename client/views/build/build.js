@@ -1,10 +1,12 @@
 var level = new ReactiveVar('starter');
 
 var gameUpdated = false;
-var gameUpdatedDep = new Deps.Dependency;
+var gameUpdatedDep = new Tracker.Dependency;
 
 var currentStepIndex = 0;
 var currentStep = new ReactiveVar(trainingMission.steps[currentStepIndex]);
+
+var customSpriteType = 'tile';
 
 function assessmentInsert(missionId, step, stepIndex, sense) {
     var assessment = {
@@ -18,6 +20,49 @@ function assessmentInsert(missionId, step, stepIndex, sense) {
     };
     MissionStepSelfAssessments.insert(assessment);
 }
+
+function updateCustomSprite(customSpriteFilename) {
+  var props = {
+    lastUpdated: new Date(),
+    updatedBy: userName()
+  };
+  // Note customSpriteType is set globally.
+  props['customSprites.' + customSpriteType] = customSpriteFilename;
+
+  Levels.update({_id:level.get()}, {
+    $set: props
+  }, (err, count) => {
+    if (!err) {
+      controls.alert('Your world will now use the custom ' + customSpriteType + ' sprite!');
+      gameUpdated = true;
+      gameUpdatedDep.changed();
+    } else {
+      console.log(err);
+      controls.alert('There was an error when attempting to update your world to use the custom sprite. Please try again...');
+    }
+  });
+};
+
+function updateDefaultSprite() {
+  var props = {
+    lastUpdated: new Date(),
+    updatedBy: userName()
+  };
+  // Note customSpriteType is set globally.
+  props['customSprites.' + customSpriteType] = '';
+
+  Levels.update({_id:level.get()}, {
+    $set: props
+  }, (err, count) => {
+    if (!err) {
+      controls.alert('Your world will now use the default ' + customSpriteType + ' sprite!');
+    } else {
+      console.log(err);
+      controls.alert('There was an error when attempting to update your world to use the default sprite. Please try again...');
+    }
+  });
+};
+
 
 var hideInstructions = new ReactiveVar(false);
 
@@ -83,8 +128,51 @@ Template.build.helpers({
         console.log(ex);
       }
     }
+  },
+  uploadCallbacks: function() {
+    return {
+      finished: function(index, fileInfo, context) {       
+        var name = fileInfo.name.replace('.jpg', '.cspr');
+        updateCustomSprite(name);
+      }
+    };
+  },
+  spriteFor: function(spriteType) {
+    var name = spriteType[0].toUpperCase() + spriteType.substring(1);
+    var levelDoc = Router.current().data();
+    var customSprites = levelDoc.customSprites;
+    if (customSprites && customSprites[spriteType] && customSprites[spriteType] !== '') {
+      return '/upload/' + customSprites[spriteType].replace('.cspr', '.jpg');
+    } else if (levelDoc.sprites && levelDoc.sprites[spriteType]) {
+      var imgName = levelDoc.sprites[spriteType];
+      var imgPath = '/images/spriteParts/' + spriteType + '/' + imgName;
+      return imgPath;
+    } else {
+      var sels = levelDoc.selections;
+      sels.push(levelDoc.tile);
+      var sprites = {};
+      for(var i = 0; i < sels.length; i++) {
+        var items = sels[i].split('/');
+        sprites[items[0]] = items[1];
+      }
+      var imgName = sprites[spriteType];
+      var imgPath = '/images/spriteParts/' + spriteType + '/' + imgName;
+      return imgPath;
+    }
   }
 });
+
+function customSprites() {
+  var levelDoc = Router.current().data();
+  var sprites = [];
+  for(var key in levelDoc.customSprites) {
+    sprites.push({
+      spriteName: key,
+      src: levelDoc.customSprites[key].replace('.cspr', '.jpg')
+    });
+  }
+  return sprites;
+}
 
 function missionStepViewed(stepIndex){
   var user = userName();
@@ -143,7 +231,20 @@ Template.build.events({
   },
   'click .yes': function() {
     assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'yes');
-  }  
+  },
+  'click .customEnemy': function() {
+    customSpriteType = 'enemy';
+  },
+  'click .customGem': function() {
+    customSpriteType = 'gem';
+  },
+  'click .customCoin': function() {
+    customSpriteType = 'coin';
+  },
+  'click .customPlayer': function() {
+    customSpriteType = 'player';
+  },
+  'click .customSpriteDefault': updateDefaultSprite
 });
 
 Template.build.rendered = function() { 
@@ -307,9 +408,6 @@ Template.build.rendered = function() {
         gameUpdated = true;
         gameUpdatedDep.changed();
         finishWork();
-        // TODO remove hack
-        console.log("The script is:");
-        console.log(levelDoc.script);
         ace.edit("codeInput").getSession().setValue(levelDoc.script);
       });
     }
