@@ -40,6 +40,5 @@ tomi:upload-server
 
 
 npm-container
-joshowens:accounts-entry@=1.0.4
-gly:upload-jquery
-vsivsi:job-collection
+tomi:upload-jquery
+joshowens:accounts-entry
