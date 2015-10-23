@@ -41,4 +41,4 @@ tomi:upload-server
 
 npm-container
 tomi:upload-jquery
-joshowens:accounts-entry
+joshowens:accounts-entry@=1.0.4

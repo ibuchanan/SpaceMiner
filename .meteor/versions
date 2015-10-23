@@ -16,6 +16,7 @@ caching-html-compiler@1.0.2
 callback-hook@1.0.4
 check@1.0.6
 codeadventure:js-signals@0.1.1
+coffeescript@1.0.10
 ddp@1.2.2
 ddp-client@1.2.1
 ddp-common@1.2.1
@@ -31,6 +32,7 @@ email@1.0.7
 fastclick@1.0.7
 geojson-utils@1.0.4
 gwendall:auth-client-callbacks@0.1.0
+handlebars@1.0.4
 html-tools@1.0.5
 htmljs@1.0.5
 http@1.1.1
@@ -46,9 +48,11 @@ iron:location@1.0.11
 iron:middleware-stack@1.0.11
 iron:router@1.0.12
 iron:url@1.0.11
-joshowens:accounts-entry@0.7.3
+joshowens:accounts-entry@1.0.4
+joshowens:simple-form@0.2.1
 jquery@1.11.4
 launch-screen@1.0.4
+less@2.5.0_3
 livedata@1.0.15
 localstorage@1.0.5
 logging@1.0.8
@@ -70,6 +74,7 @@ mrt:ace-embed@0.0.4
 mrt:bootstrap-slate@0.0.1
 mrt:collection-api@0.1.15
 mrt:exports@1.0.0
+mrt:underscore-string-latest@2.3.3
 npm-bcrypt@0.7.8_2
 npm-container@1.2.0
 npm-mongo@1.4.39_1
@@ -86,9 +91,11 @@ reload@1.1.4
 retry@1.0.4
 rosh93:slide-panel@0.1.6
 routepolicy@1.0.6
+sacha:spin@2.0.4
 service-configuration@1.0.5
 session@1.1.1
 sha@1.0.4
+softwarerero:accounts-t9n@1.0.9
 spacebars@1.0.7
 spacebars-compiler@1.0.7
 srp@1.0.4
