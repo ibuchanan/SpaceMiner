@@ -112,7 +112,33 @@ this.QuintusOverrides = class {
          throw "file type not supported";
        }
        this.p.tiles = data;
-     };
+    };
 
+    Q.TileLayer.prototype.drawableTile = function(tileNum) {
+      if (typeof tileNum === 'number') return tileNum > 0;
+      else return tileNum !== '' && tileNum !== null && tileNum !== undefined;
+    };
+
+    Q.TileLayer.prototype.collidableTile = function(tileNum) {
+      if (typeof tileNum === 'number') return tileNum > 0;
+      else return tileNum !== '' && tileNum !== null && tileNum !== undefined;
+    };
+
+    Q.SpriteSheet.prototype.draw = function(ctx, x, y, frame) {
+      if(!ctx) { ctx = Q.ctx; }
+      if (typeof frame !== 'number') {
+        ctx.drawImage(Q.asset(frame), 0, 0,
+                    this.tileW, this.tileH,
+                    Math.floor(x), Math.floor(y),
+                    this.tileW, this.tileH);
+      }
+      else {
+        ctx.drawImage(Q.asset(this.asset),
+                      this.fx(frame),this.fy(frame),
+                      this.tileW, this.tileH,
+                      Math.floor(x),Math.floor(y),
+                      this.tileW, this.tileH);
+      }
+    };
   }
 }

@@ -362,6 +362,7 @@ function levelMapCreate(q, leveld) {
       };
 
       const tileNum = tilesMap[world.sprites.tile];
+      const customTile = game.customSprite('tile');
 
       for(let y=0;y<tiles.length;y++) {
         let row = tiles[y] = tiles[y].concat();
@@ -370,7 +371,10 @@ function levelMapCreate(q, leveld) {
           if (tile === 'S') {
             continue;
           }
-          if (tile === 't') row[x] = tileNum;
+          if (tile === 't') {
+            if (customTile !== '') row[x] = customTile;
+            else row[x] = tileNum;
+          }
           if (tile !== 't' && tile !== 1) {
             var className = map[String(tile)];
             var sprite = new q[className](q.tilePos(x,y));
@@ -1359,7 +1363,8 @@ function configureQuintus(callback, options) {
     let img = new Image();
     img.onload = () => { callback(key, img); } ;
     img.onerror = errorCallback;
-    src = src.replace('.cspr', '.jpg');
+    src = src.replace('.cspr', '.png');
+    src = src.replace('|', '/');
     src = Q.assetUrl('upload/', src);
     img.src = src;
   }
@@ -1538,11 +1543,17 @@ function configureQuintus(callback, options) {
     }
   });
 
-  let applySpriteProps = (target, asset, sheetName) => {
+  let applySpriteProps = (target, asset, sheetName, specialSheetName) => {
     if (asset) {
       target.asset = asset;
     } else {
-      target.sheet = sheetName;
+      let sheetNameCompare = sheetName;
+      if (specialSheetName) sheetNameCompare = specialSheetName;
+      if(game.customSprite(sheetNameCompare) !== '') {
+        target.sheet = `custom-${sheetNameCompare}Sheet`;
+      } else {
+        target.sheet = sheetName;
+      }
     }
   };
 
@@ -1571,9 +1582,6 @@ function configureQuintus(callback, options) {
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
       };
       applySpriteProps(props, asset, 'player');
-      if(game.customSprite('player') !== '') {
-        props.sheet = 'custom-playerSheet';
-      }
       this._super(p,props);
       this.add("2d,playerControls,laser,animation");
       if(game.customSprite('player') !== '') {
@@ -1684,19 +1692,16 @@ function configureQuintus(callback, options) {
         // the player to stop or change direction
         sensor: true
       };
-      applySpriteProps(props, asset, sheetName);
-      var sheetCustomName = sheetName === 'dot' ? 'coin' : 'gem';
-      if(game.customSprite(sheetCustomName) !== '') {
-        props.sheet = `custom-${sheetCustomName}Sheet`;
-      }
+      // TODO: wtf?
+      const sheetNameSpecial = sheetName === 'dot' ? 'coin' : 'gem';
+      applySpriteProps(props, asset, sheetName, sheetNameSpecial);
       this.count = 1;
       this._super(p,props);
       this.on("sensor");
       this.on("inserted");
       this.on("destroyed");
       this.add('foreign,treasure');
-      var sheetCustomName = sheetName === 'dot' ? 'coin' : 'gem';
-      if(game.customSprite(sheetCustomName) !== '') {
+      if(game.customSprite(sheetNameSpecial) !== '') {
         //this.play('move');
       }
     },
@@ -1816,9 +1821,6 @@ function configureQuintus(callback, options) {
         collisionMask: SPRITE_PLAYER | SPRITE_TILES | SPRITE_SHOT
       };
       applySpriteProps(props, asset, 'enemy');
-      if(game.customSprite('enemy') !== '') {
-        props.sheet = 'custom-enemySheet';
-      }
       this._super(p, props);
       this.add("2d,enemyControls,foreign,animation");
       this.on("hit.sprite",this,"hit");

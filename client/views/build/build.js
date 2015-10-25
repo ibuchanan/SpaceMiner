@@ -131,8 +131,15 @@ Template.build.helpers({
   },
   uploadCallbacks: function() {
     return {
-      finished: function(index, fileInfo, context) {       
-        var name = fileInfo.name.replace('.jpg', '.cspr');
+      formData: function() {
+        var data = {
+          customSpriteType: customSpriteType
+        };
+        return data;
+      },
+      finished: function(index, fileInfo, context) {
+        var name = fileInfo.name.replace('.png', '.cspr');
+        name = customSpriteType + '|' + name;
         updateCustomSprite(name);
       }
     };
@@ -142,7 +149,9 @@ Template.build.helpers({
     var levelDoc = Router.current().data();
     var customSprites = levelDoc.customSprites;
     if (customSprites && customSprites[spriteType] && customSprites[spriteType] !== '') {
-      return '/upload/' + customSprites[spriteType].replace('.cspr', '.jpg');
+      var spriteSrc = customSprites[spriteType].replace('.cspr', '.png');
+      spriteSrc = spriteSrc.replace('|', '/');
+      return '/upload/' + spriteSrc;
     } else if (levelDoc.sprites && levelDoc.sprites[spriteType]) {
       var imgName = levelDoc.sprites[spriteType];
       var imgPath = '/images/spriteParts/' + spriteType + '/' + imgName;
@@ -166,9 +175,11 @@ function customSprites() {
   var levelDoc = Router.current().data();
   var sprites = [];
   for(var key in levelDoc.customSprites) {
+    var src = levelDoc.customSprites[key].replace('.cspr', '.png');
+    src = src.replace('|', '/');
     sprites.push({
       spriteName: key,
-      src: levelDoc.customSprites[key].replace('.cspr', '.jpg')
+      src: src
     });
   }
   return sprites;
@@ -231,6 +242,9 @@ Template.build.events({
   },
   'click .yes': function() {
     assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'yes');
+  },
+  'click .customTile': function() {
+    customSpriteType = 'tile';
   },
   'click .customEnemy': function() {
     customSpriteType = 'enemy';

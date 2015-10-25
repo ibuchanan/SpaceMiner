@@ -1853,7 +1853,6 @@ var Quintus = function Quintus(opts) {
         /* Call the appropriate loader function */
         /* passing in our per-asset callback */
         /* Dropping our asset by name into Q.assets */
-        console.log("Quinuts.load: ", key, itm);
         Q["loadAsset" + assetType](key,itm,
                                    loadedCallback,
                                    function() { errorCallback(itm); });

@@ -568,11 +568,9 @@ Meteor.startup(function() {
       tmpDir: root + '/.uploads/tmp',
       uploadDir: root + '/.uploads/',
       checkCreateDirectories: true, //create the directories for you
-      /*validateFile: function(req, res) {
-        console.log(req.path);
-        return true;
+      getDirectory: (fileInfo, formData) => {
+        return `/${formData.customSpriteType}`;
       }
-      */
     });
 
     Router.map(function() {
