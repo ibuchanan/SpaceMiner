@@ -25,6 +25,15 @@ let enemies = {
   green: _e('goonGreen'),
   purple: _e('goonPurple')
 };
+/*
+let enemies = customSpriteName => () => ({sprite:'enemy', asset:`enemy|${customSpriteName}.cspr`});
+enemies.blue = _e('brainBlue');
+enemies.pink = _e('brainPink');
+enemies.red = _e('cyclopsRed');
+enemies.yellow = _e('cyclopsYellow');
+enemies.green = _e('goonGreen');
+enemies.purple = _e('goonPurple');
+*/
 window.enemies = enemies;
 
 let _p = _spr('player');
@@ -1363,10 +1372,8 @@ function configureQuintus(callback, options) {
     let img = new Image();
     img.onload = () => { callback(key, img); } ;
     img.onerror = errorCallback;
-    src = src.replace('.cspr', '.png');
-    src = src.replace('|', '/');
-    src = Q.assetUrl('upload/', src);
-    img.src = src;
+    let spriteUrl = getSpriteUrlFromName(src);
+    img.src = spriteUrl;
   }
   Q.assetTypes.cspr = 'CustomSprite';
 
@@ -1680,7 +1687,7 @@ function configureQuintus(callback, options) {
     var distY = Math.abs(obj1Y - obj2Y);
     return distX < range && distY < range;
   }
-  var COL_RANGE = 32;
+  const COL_RANGE = 32;
 
   // Create the Dot sprite
   Q.Sprite.extend("Dot", {
@@ -1692,8 +1699,7 @@ function configureQuintus(callback, options) {
         // the player to stop or change direction
         sensor: true
       };
-      // TODO: wtf?
-      const sheetNameSpecial = sheetName === 'dot' ? 'coin' : 'gem';
+      const sheetNameSpecial = sheetName === 'dot' ? 'coin' : 'gem';
       applySpriteProps(props, asset, sheetName, sheetNameSpecial);
       this.count = 1;
       this._super(p,props);
@@ -1811,6 +1817,29 @@ function configureQuintus(callback, options) {
       }
     }
   });
+
+    /*
+      let customSprites = obj.customSprites;
+      if (customSprites && _.isObject(customSprites)) {
+        let customSpritesPaths = [];
+        for(let key in customSprites) {
+          customSpritesPaths.push(customSprites[key]);
+        }
+        Q.load(customSpritesPaths, function() {
+          for(let key in customSprites) {
+            var customSprite =  customSprites[key];
+            if (customSprite !== '') {
+              Q.sheet(`custom-${key}Sheet`, customSprite, {tileW:32, tileH: 32});
+              let frames = Array.from(range(Q.sheets[`custom-${key}Sheet`].w/32));
+              Q.animations(key, { move: { frames, rate: 1, loop: true } });
+            }
+          }
+          finishLoadingLevel();
+        });
+      } else {
+        finishLoadingLevel();
+      }
+    */
 
   Q.Sprite.extend("Enemy", {
     init: function(p, asset) {

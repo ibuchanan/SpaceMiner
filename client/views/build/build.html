@@ -158,11 +158,54 @@ code {
     opacity: 1;
 }
 
-.spriteImage {
-  width: 32px;
-  height: 32px;
+.customSprites {
+  text-align: center;
 }
 
+.customSprite {
+  background: black;
+  color: white;
+  border: 1px solid #333;
+  text-align: center;
+  padding-bottom: 10px;
+}
+
+.customSprites .active {
+  border: 2px ridge silver;
+}
+
+.customSprite .file-selected {
+  background: midnightblue;
+  padding: 4px;
+  color: silver;
+  font-weight: bold;
+  font-style: italic;
+  display: inline-block;
+}
+
+.customSprites .active:hover {
+  border: 2px ridge silver;
+}
+
+.spriteImage {
+  position: relative;
+  overflow: hidden;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 4px;
+  background: #666;
+  display: inline-block;
+}
+
+#sprite-file {
+  display: inline-block;
+}
+
+.upload-hidden {
+  opacity:0;
+  height:0px;
+  width:0px;
+}
   </style>
 </head>
 
@@ -279,39 +322,23 @@ code {
               </div>
               <div id="codeInput"></div>
               <h3>Custom Sprite Upload</h3>
-              <div class='btn-group' data-toggle='buttons'>
-                {{#with gameUpdated}}
-                  <h4>First, select the sprite type to change:</h4>
-                  <label class='btn btn-default customTile'>
-                    <input type='radio' name='customSprite' value='tile' /> Tile <img src='{{spriteFor "tile"}}'
-                      class='spriteImage' />
-                  </label>
-                  <label class='btn btn-danger customEnemy'>
-                    <input type='radio' name='customSprite' value='enemy' /> Enemy <img src='{{spriteFor "enemy"}}'
-                      class='spriteImage' />
-                  </label>
-                  <label class='btn btn-success customGem'>
-                    <input type='radio' name='customSprite' value='gem' /> Gem <img src='{{spriteFor "gem"}}'
-                      class='spriteImage' />
-                  </label>
-                  <label class='btn btn-warning customCoin'>
-                    <input type='radio' name='customSprite' value='coin' /> Coin <img src='{{spriteFor "coin"}}'
-                      class='spriteImage' />
-                  </label>
-                  <label class='btn btn-primary customPlayer'>
-                    <input type='radio' name='customSprite' value='player' /> Player <img src='{{spriteFor "player"}}'
-                      class='spriteImage' />
-                  </label>
-                {{/with}}
+              {{#each customSpriteTypes}}
+                <input id='file-input-{{this}}' type='file' class='upload-hidden' />              
+              {{/each}}
+              <div class='customSprites'>
+              {{#with gameUpdated}}
+                {{#each customSpriteTypes}}
+                <div class='customSprite custom-{{this}}'>
+                  <h4>{{this}}</h4>
+                  <div class='spriteImage'><img src='{{spriteFor this}}' /></div>
+                  <div>
+                    <button class='btn btn-xs btn-primary' {{fileSelect}}>Choose new file <span class='fa fa-file-image-o'></span></button>&nbsp;<span id='file-selected-{{this}}' class='file-selected'></span>&nbsp;<button class='btn btn-xs btn-success upload-sprite' {{fileUpload}} disabled>Upload <span class='fa fa-upload'></span></button>&nbsp;or
+                    <button class='btn btn-xs btn-warning' {{fileDefault}}>Reset Default <span class='fa fa-archive'></span></button>
+                  </div>
+                </div>
+                {{/each}}
+              {{/with}}
               </div>
-              <center style='padding: 10px'>
-                <h4>Then, do one of the following:</h4>
-                {{> dropzone callbacks=uploadCallbacks}}
-                <h5>OR</h5>
-                <br/>
-                <button class='btn btn-danger customSpriteDefault'>Reset to Default</button>
-                <br/>
-              </center>
             </div>
             <div role="tabpanel" class="tab-pane" id="gamePreviewTab">
               {{#with gameUpdated}}

@@ -1,3 +1,6 @@
+var metaContext = { customSpriteType: '' };
+var uploader = new Slingshot.Upload('spriteUpload', metaContext);
+
 var level = new ReactiveVar('starter');
 
 var gameUpdated = false;
@@ -5,8 +8,6 @@ var gameUpdatedDep = new Tracker.Dependency;
 
 var currentStepIndex = 0;
 var currentStep = new ReactiveVar(trainingMission.steps[currentStepIndex]);
-
-var customSpriteType = 'tile';
 
 function assessmentInsert(missionId, step, stepIndex, sense) {
     var assessment = {
@@ -21,12 +22,11 @@ function assessmentInsert(missionId, step, stepIndex, sense) {
     MissionStepSelfAssessments.insert(assessment);
 }
 
-function updateCustomSprite(customSpriteFilename) {
+function updateCustomSprite(customSpriteType, customSpriteFilename) {
   var props = {
     lastUpdated: new Date(),
     updatedBy: userName()
   };
-  // Note customSpriteType is set globally.
   props['customSprites.' + customSpriteType] = customSpriteFilename;
 
   Levels.update({_id:level.get()}, {
@@ -43,12 +43,11 @@ function updateCustomSprite(customSpriteFilename) {
   });
 };
 
-function updateDefaultSprite() {
+function updateDefaultSprite(customSpriteType) {
   var props = {
     lastUpdated: new Date(),
     updatedBy: userName()
   };
-  // Note customSpriteType is set globally.
   props['customSprites.' + customSpriteType] = '';
 
   Levels.update({_id:level.get()}, {
@@ -66,7 +65,13 @@ function updateDefaultSprite() {
 
 var hideInstructions = new ReactiveVar(false);
 
+var customSpriteTypes = ['tile', 'enemy', 'coin', 'gem', 'player'];
+
 Template.build.helpers({
+  customSpriteTypes: function() { return customSpriteTypes; },
+  fileSelect: function() { return 'data-file-select-' + this; },
+  fileUpload: function() { return 'data-file-upload-' + this; },
+  fileDefault: function() { return 'data-file-default-' + this; },
   hideIfEditorFullScreen: hideIfTrue(hideInstructions),
   showIfEditorFullScreen: showForceIfTrue(hideInstructions),
   editorSmallAndLargeClasses: function() {
@@ -129,29 +134,13 @@ Template.build.helpers({
       }
     }
   },
-  uploadCallbacks: function() {
-    return {
-      formData: function() {
-        var data = {
-          customSpriteType: customSpriteType
-        };
-        return data;
-      },
-      finished: function(index, fileInfo, context) {
-        var name = fileInfo.name.replace('.png', '.cspr');
-        name = customSpriteType + '|' + name;
-        updateCustomSprite(name);
-      }
-    };
-  },
   spriteFor: function(spriteType) {
     var name = spriteType[0].toUpperCase() + spriteType.substring(1);
     var levelDoc = Router.current().data();
     var customSprites = levelDoc.customSprites;
     if (customSprites && customSprites[spriteType] && customSprites[spriteType] !== '') {
-      var spriteSrc = customSprites[spriteType].replace('.cspr', '.png');
-      spriteSrc = spriteSrc.replace('|', '/');
-      return '/upload/' + spriteSrc;
+        var spriteUrl = getSpriteUrlFromName(customSprites[spriteType]);
+        return spriteUrl + '?_t=' + new Date().valueOf();
     } else if (levelDoc.sprites && levelDoc.sprites[spriteType]) {
       var imgName = levelDoc.sprites[spriteType];
       var imgPath = '/images/spriteParts/' + spriteType + '/' + imgName;
@@ -175,11 +164,10 @@ function customSprites() {
   var levelDoc = Router.current().data();
   var sprites = [];
   for(var key in levelDoc.customSprites) {
-    var src = levelDoc.customSprites[key].replace('.cspr', '.png');
-    src = src.replace('|', '/');
+    var spriteUrl = getSpritePathFromName(levelDoc.customSprites[key]);
     sprites.push({
       spriteName: key,
-      src: src
+      src: spriteUrl
     });
   }
   return sprites;
@@ -242,24 +230,46 @@ Template.build.events({
   },
   'click .yes': function() {
     assessmentInsert(trainingMission._id, currentStep.get(), currentStepIndex, 'yes');
-  },
-  'click .customTile': function() {
-    customSpriteType = 'tile';
-  },
-  'click .customEnemy': function() {
-    customSpriteType = 'enemy';
-  },
-  'click .customGem': function() {
-    customSpriteType = 'gem';
-  },
-  'click .customCoin': function() {
-    customSpriteType = 'coin';
-  },
-  'click .customPlayer': function() {
-    customSpriteType = 'player';
-  },
-  'click .customSpriteDefault': updateDefaultSprite
+  }
 });
+
+customSpriteTypes.forEach(function(customSpriteType) {
+  var events = {};
+
+  events['click [data-file-select-' + customSpriteType + ']'] = function() {
+    $('#file-input-' + customSpriteType).click();
+    $('#file-input-' + customSpriteType).change(function(){
+      if ($(this).val()) {
+          $('#file-selected-' + customSpriteType).text($(this).val());
+          $('button[data-file-upload-' + customSpriteType + ']').attr('disabled', false);
+      } else {
+          $('button[data-file-upload-' + customSpriteType + ']').attr('disabled', 'disabled');
+      }
+    });
+  };
+
+  events['click [data-file-upload-' + customSpriteType + ']'] = function() {
+    metaContext.customSpriteType = customSpriteType;
+    uploader.send(document.getElementById('file-input-' + customSpriteType).files[0], function (error, downloadUrl) {
+      if (error) {
+        console.error('Error uploading', uploader.xhr.response);
+        alert (error);
+      }
+      else {
+        var spriteName = getSpriteNameFromUrl(downloadUrl);
+        updateCustomSprite(metaContext.customSpriteType, spriteName);
+      }
+    });
+  };
+
+  events['click [data-file-default-' + customSpriteType + ']'] = function() {
+    updateDefaultSprite(customSpriteType);
+  };
+
+  Template.build.events(events);
+});
+
+
 
 Template.build.rendered = function() { 
   

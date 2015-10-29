@@ -14,6 +14,23 @@ if (process.env.IMAGES_BASE) {
 }
 console.log("Root: ", root);
 
+Slingshot.createDirective("spriteUpload", Slingshot.S3Storage, {
+  bucket: "openagile-testing",
+  acl: "public-read",
+  authorize: function () {
+    //Deny uploads if user is not logged in.
+    if (!this.userId) {
+      var message = "Please login before posting files";
+      throw new Meteor.Error("Login Required", message);
+    }
+    return true;
+  },
+
+  key: function (file, metaContext) {
+    return this.userId + '/' + metaContext.customSpriteType + '/' + file.name;
+  }
+});
+
 var gm = Meteor.npmRequire('gm');
 var babel = Meteor.npmRequire('babel-core');
 
