@@ -1022,7 +1022,7 @@ window.recur = recur;
 
 let score = (...opts) => {
   let props = {};
-  if (opts.length < 2) throw "Must pass at least two arguments to score(...) function";
+  if (opts.length < 2) throw 'Must pass at least two arguments to score(...) function';
   // Assume number here:
   let scoreMin = parseInt(opts.shift());
   props.score = scoreMin;
@@ -1030,6 +1030,21 @@ let score = (...opts) => {
   return props;
 };
 window.score = score;
+
+let collision = (at, func) => {
+    let targetPos = Q.tilePos(at.start.x, at.start.y);
+    let targetSprite = Q.stage().locate(targetPos.x, targetPos.y);
+    if (targetSprite && targetSprite.sensor) {
+        targetSprite.on('sensor', func);
+    }
+};
+window.collision = collision;
+
+let warpn = (id = 'starter') => {
+    game.pause();
+    window.location = `/play?id=${id}`;
+};
+window.warpn = warpn;
 
 // Example:
 /*
