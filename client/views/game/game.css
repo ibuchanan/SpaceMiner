@@ -1,0 +1,12 @@
+.play-link-href {
+	background: #333;
+	width: 425px;
+	padding: 5px;
+	font-weight: bold;
+	text-align: center;
+}
+
+.play-link-copy-message {
+	font-weight: bold;
+	font-size: 80%;
+}

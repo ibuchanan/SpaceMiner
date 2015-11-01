@@ -109,12 +109,7 @@ Template.levelsConquer.helpers({
 Template.level.events({
   'click button.levelPlay': function(evt, template) {
     Session.set('levelId', null);
-    var id = this._id;
-    Meteor.setTimeout(function() {
-      Session.set('levelId', id);
-      signals.gameOpened.dispatch();
-      //Session.set('gameVisible', true);      
-    }, 1000);
+    window.location = '/play?id=' + this._id;
   },
   'click button.levelEdit': function(evt, template) {
     Session.set('levelId', null);

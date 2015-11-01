@@ -145,6 +145,8 @@ var gameOpen = new ReactiveVar(false);
 
 var chatEnabled = new ReactiveVar(false);
 
+let linkEnabled = new ReactiveVar(false);
+
 var signals = AutoSignal.register('game', {
   gameOpened: function() {
     gameOpen.set(true);
@@ -162,7 +164,7 @@ var signals = AutoSignal.register('game', {
   }
 });
 
-var buttons = ['levelsShow', 'gamePause', 'gamePlay', 'gameReset', 'customize', 'fork'];
+var buttons = ['gamePause', 'gamePlay', 'gameReset']; //, 'customize', 'fork'];
 
 function argify(args) {
   if (_.isString(args)) args = { level : args };
@@ -188,6 +190,9 @@ Template.game.created = function() {
   if (args.chatEnabled) {
     chatEnabled.set(true);
   }
+  if (args.linkEnabled) {
+    linkEnabled.set(true);
+  }
 };
 
 Template.game.rendered = function() {
@@ -205,6 +210,9 @@ Template.game.rendered = function() {
       gameFocus();
     });
   }, { enableSound: args.enableSound } );
+  $('.play-link-href').val(window.location.href).click(function() {
+    this.select();
+  })
 };
 
 Template.game.helpers({
@@ -226,7 +234,8 @@ Template.game.helpers({
   },
   userOwnsCurrentLevel: function() {
     var level = Levels.findOne({_id: levelId});
-    return Meteor.userId() !== null && level.userId === Meteor.userId();
+    if (level) return Meteor.userId() !== null && level.userId === Meteor.userId();
+    return false;
   },
   showIfGameOpen: showIfTrue(gameOpen),
   hideIfGameComplete: function() {
@@ -260,13 +269,13 @@ Template.game.helpers({
       worldRows.push(row);
     }
     return worldRows;
+  },
+  linkEnabled: function() {
+    return linkEnabled.get();
   }
 });
 
 Template.game.events({
-  'click .levelsShow': function() {
-    signals.gameHidden.dispatch();
-  },
   'click .gamePause': function() {
     game.pause();
     gamePaused.set(true);

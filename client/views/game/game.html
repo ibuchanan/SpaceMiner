@@ -1,11 +1,10 @@
 <template name='game'>
   <div id='gamePanel' class='{{showIfGameOpen}}'>
-    <h1 class='currentGameName'>{{name}}</h1>
+    <h1 class='currentGameName'><span class='label label-warning'>{{name}} <span class='fa fa-flag-checkered'></span></span></h1>
     <h4>Explored by: {{explorerName}}</h4>
     <h5>Enemies respawn: {{enemiesRespawn}}</h5>
     <div class='{{hideIfGameLoading}}'>
       <div class='btn-group btn-group-sm'>
-        <button class='btn btn-primary levelsShow {{allowed "levelsShow"}}'><span class='fa fa-chevron-left'></span> All levels</button>    
         <button class='btn btn-warning gamePause {{allowed "gamePause"}} {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>
         <button class='btn btn-success gamePlay {{allowed "gamePlay"}} {{hideIfPlaying}} {{hideIfGameComplete}}'><span class='fa fa-play'></span> Play</button> 
         <button class='btn btn-danger gameReset {{allowed "gameReset"}} {{hideIfGameComplete}}'><span class='fa fa-refresh'></span> Reset</button>
@@ -26,9 +25,16 @@
             {{/each}}
           </div>
           {{/each}}
-        </div>        
+        </div>
         <canvas id='game' class='game' width='640' height='448'></canvas>
       </div>
+      {{#if linkEnabled}}
+      <section class='play-link'>
+          <h3><span class='label label-info'>Share Link <span class='fa fa-link'></span></span></h3>
+          <input type='text' class='play-link-href' />
+          <div class='play-link-copy-message'><small>Ctrl+C or Cmd+C to copy</small></div>
+      </section>
+      {{/if}}
       <div id='chat' class='chat {{showIfChatEnabled}}'>
         <textarea id='chatEditor'></textarea>
         <br />
