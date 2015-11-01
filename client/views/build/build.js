@@ -2,6 +2,7 @@ var metaContext = { customSpriteType: '' };
 var uploader = new Slingshot.Upload('spriteUpload', metaContext);
 
 var level = new ReactiveVar('starter');
+var gallerySelected = new ReactiveVar(null);
 
 var gameUpdated = false;
 var gameUpdatedDep = new Tracker.Dependency;
@@ -72,6 +73,7 @@ Template.build.helpers({
   fileSelect: function() { return 'data-file-select-' + this; },
   fileUpload: function() { return 'data-file-upload-' + this; },
   fileDefault: function() { return 'data-file-default-' + this; },
+  galleryShow: function() { return 'data-gallery-show-' + this; },
   hideIfEditorFullScreen: hideIfTrue(hideInstructions),
   showIfEditorFullScreen: showForceIfTrue(hideInstructions),
   editorSmallAndLargeClasses: function() {
@@ -157,6 +159,20 @@ Template.build.helpers({
       var imgPath = '/images/spriteParts/' + spriteType + '/' + imgName;
       return imgPath;
     }
+  },
+  spriteSelect: function() {
+    var customSpriteType = this;
+    return function(spriteInfo) {
+      var parts = spriteInfo.assetKey.split('/');
+      var spriteName = parts[0] + '/' + customSpriteType + '/' + parts[1] + '.cspr';
+      updateCustomSprite(customSpriteType, spriteName);
+    }
+  },
+  galleryEnabled: function() {
+    var customSpriteType = this;
+    var currentSelected = gallerySelected.get();
+    var enabled = String(currentSelected) === String(customSpriteType);
+    return enabled;
   }
 });
 
@@ -241,6 +257,7 @@ customSpriteTypes.forEach(function(customSpriteType) {
     $('#file-input-' + customSpriteType).change(function(){
       if ($(this).val()) {
           $('#file-selected-' + customSpriteType).text($(this).val());
+          $('#file-selected-' + customSpriteType).removeClass('hide');
           $('button[data-file-upload-' + customSpriteType + ']').attr('disabled', false);
       } else {
           $('button[data-file-upload-' + customSpriteType + ']').attr('disabled', 'disabled');
@@ -264,6 +281,10 @@ customSpriteTypes.forEach(function(customSpriteType) {
 
   events['click [data-file-default-' + customSpriteType + ']'] = function() {
     updateDefaultSprite(customSpriteType);
+  };
+
+  events['click [data-gallery-show-' + customSpriteType + ']'] = function() {
+    gallerySelected.set(customSpriteType);
   };
 
   Template.build.events(events);
@@ -293,15 +314,6 @@ Template.build.rendered = function() {
       //ace.edit('codeInput').getSession().setValue(userScript);      
       update(false);
       missionStepViewed(currentStepIndex);
-      
-      /*
-      var scriptText = $('#script-' + step).text();
-      var stepHtml = $('#step-' + step).html();
-      var userScript = ace.edit("codeInput").getSession().getValue();
-      userScript += scriptText;
-      ace.edit("codeInput").getSession().setValue(userScript);
-      $#step').html(stepHtml);
-      */
     }
 
     function test() {

@@ -35,11 +35,10 @@ spacebars-compiler
 babel-compiler
 http
 aldeed:clock
-tomi:upload-server
 #standard-minifiers
 
 
 npm-container
-tomi:upload-jquery
 joshowens:accounts-entry@=1.0.4
 edgee:slingshot
+peerlibrary:aws-sdk

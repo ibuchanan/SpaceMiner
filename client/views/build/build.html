@@ -6,207 +6,6 @@
   <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" />
   <script data-require="handlebars.js@1.3.0" data-semver="1.3.0" src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.js"></script>
   <!-- <script src='//cdn.jsdelivr.net/quintus/0.2.0/quintus.min.js'></script> -->
-  <style type="text/css" media="screen">
-code {
-  font-weight: bold;
-  margin-top: 2px;
-  margin-bottom: 2px;
-}  
-    
-.gameHeader h2 {
-  color: gold;
-}
-
-.gameHeader h4 {
-  color: silver;
-}
-
-.gameHeader div {
-  color: skyblue;
-}
-
-#worldSection {
-  /*background-image: url(http://a1star.com/images/shimmering-multistars.gif);*/
-  background-image: url(http://a1star.com/images/starsglow1.gif);
-  text-align: center;
-}
-
-.header {
-  padding-top: 4px;
-}
-
-#codeEditorTab {
-  text-align: center;
-}
-
-#codeInput { 
-  border: 2px solid darkgray;
-  position: relative;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 600px;
-  text-align: left;
-}
-
-.instructionsHide, .instructionsShow {
-  margin-top: 4px;
-}
-
-#update, #next {
-  margin-top: 3px;
-}
-
-.worldContainer {
-  text-align: center;
-}
-
-.worldMap {
-  display: table;
-  border-collapse: collapse;
-  border: none;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 5px;
-}
-
-.worldRow {
-  display: table-row;
-  border: none;
-}
-
-.worldCell {
-  position: relative;
-  background-color: black;
-  height: 30px;
-  min-height: 30px;
-  width: 30px;
-  min-width: 30px;
-  text-align: center;
-  display: table-cell;  
-  border-collapse: collapse;
-}
-
-.worldCellBorder {
-  border: 1px solid lightgray;
-}
-
-.worldCellCoords:after {
-  position: relative;
-  top: 10px;
-  content: attr(data-coords);
-  padding: 1px;
-  font-size: 70%;
-  font-weight: bold;
-  color: black;
-  background-color: white;
-  opacity: .8;
-}
-    
-.stepNew {
-  margin-bottom: 5px;
-}
-    
-.tips {
-  font-size: 75%;
-  font-weight: bold;  
-}    
- 
-.observations {
-  margin-top: 5px;
-  margin-bottom: 5px;
-  background: #111;
-  color: white;  
-}
-        
-.observation .explanation {
-  background: #111;
-}
-    
-.observation .explanationText {
-  padding: 5px;
-  color: white;
-} 
-
-.jqDropZone {
-    color: white;
-    background: darkgray;
-    height: 50px;
-    padding-left: 8px;
-    padding-right: 8px;
-    line-height: 50px;
-    text-align: center;
-    font-weight: bold;
-    display: inline-block;
-}
-.jqDropZone.in {
-    width: 600px;
-    height: 200px;
-    line-height: 200px;
-    font-size: larger;
-}
-.jqDropZone.hover {
-    background: lawngreen;
-}
-.jqDropZone.fade {
-    -webkit-transition: all 0.3s ease-out;
-    -moz-transition: all 0.3s ease-out;
-    -ms-transition: all 0.3s ease-out;
-    -o-transition: all 0.3s ease-out;
-    transition: all 0.3s ease-out;
-    opacity: 1;
-}
-
-.customSprites {
-  text-align: center;
-}
-
-.customSprite {
-  background: black;
-  color: white;
-  border: 1px solid #333;
-  text-align: center;
-  padding-bottom: 10px;
-}
-
-.customSprites .active {
-  border: 2px ridge silver;
-}
-
-.customSprite .file-selected {
-  background: midnightblue;
-  padding: 4px;
-  color: silver;
-  font-weight: bold;
-  font-style: italic;
-  display: inline-block;
-}
-
-.customSprites .active:hover {
-  border: 2px ridge silver;
-}
-
-.spriteImage {
-  position: relative;
-  overflow: hidden;
-  width: 32px;
-  height: 32px;
-  margin-bottom: 4px;
-  background: #666;
-  display: inline-block;
-}
-
-#sprite-file {
-  display: inline-block;
-}
-
-.upload-hidden {
-  opacity:0;
-  height:0px;
-  width:0px;
-}
-  </style>
 </head>
 
 <template name='build'>
@@ -320,20 +119,29 @@ code {
                 <button class='btn btn-danger btn-sm' id="test"><span class='fa-bug fa'></span> Send world to test</button>
                 <button class='btn btn-info btn-sm' id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
-              <div id="codeInput"></div>
-              <h3>Custom Sprite Upload</h3>
+              <div id="codeInput"></div>
+              <h2><span class='label label-info'><span class='fa fa-fighter-jet'></span> Customize Sprites</span></h2>
               {{#each customSpriteTypes}}
                 <input id='file-input-{{this}}' type='file' class='upload-hidden' />              
               {{/each}}
               <div class='customSprites'>
               {{#with gameUpdated}}
                 {{#each customSpriteTypes}}
-                <div class='customSprite custom-{{this}}'>
-                  <h4>{{this}}</h4>
-                  <div class='spriteImage'><img src='{{spriteFor this}}' /></div>
-                  <div>
-                    <button class='btn btn-xs btn-primary' {{fileSelect}}>Choose new file <span class='fa fa-file-image-o'></span></button>&nbsp;<span id='file-selected-{{this}}' class='file-selected'></span>&nbsp;<button class='btn btn-xs btn-success upload-sprite' {{fileUpload}} disabled>Upload <span class='fa fa-upload'></span></button>&nbsp;or
-                    <button class='btn btn-xs btn-warning' {{fileDefault}}>Reset Default <span class='fa fa-archive'></span></button>
+                <div class='customSprite custom-{{this}} panel panel-default'>
+                  <div class='panel-heading header-image'>
+                    <h3 class='panel-title'>{{this}}</h3> <div class='spriteImage'><img src='{{spriteFor this}}' /></div>
+                  </div>
+                  <div class='panel-body'>
+                    <div>
+                      <div class='upload-sprite-container'>
+                        <button class='btn btn-xs btn-primary' {{fileSelect}}>Choose new file <span class='fa fa-file-image-o'></span></button><span id='file-selected-{{this}}' class='file-selected hide'></span><button class='btn btn-xs btn-success upload-sprite' {{fileUpload}} disabled>Upload <span class='fa fa-upload'></span></button>
+                      </div>&nbsp;<b>or</b>&nbsp;<button class='btn btn-xs btn-info' {{galleryShow}}>Choose from gallery</button>&nbsp;<b>or</b>&nbsp;<button class='btn btn-xs btn-warning' {{fileDefault}}>Reset Default <span class='fa fa-archive'></span></button>
+                      {{#if galleryEnabled}}
+                      <div class='build-sprite-gallery'>
+                        {{> customSprites customSpriteType=this onSelected=spriteSelect}}
+                      </div>
+                      {{/if}}
+                    </div>
                   </div>
                 </div>
                 {{/each}}
@@ -348,7 +156,7 @@ code {
             </div>
           </div>
         </div>
-      </section>      
+      </section>
     </div>
   </div>
 </template>

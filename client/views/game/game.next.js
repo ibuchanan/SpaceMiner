@@ -16,70 +16,65 @@ window.range = range;
 // Code generation and level customization helpers
 let _spr = type => val => () => ({sprite:type, asset: val});
 
-let _e = _spr('enemy');
-let enemies = {
-  blue : _e('brainBlue'),
-  pink: _e('brainPink'),
-  red: _e('cyclopsRed'),
-  yellow: _e('cyclopsYellow'),
-  green: _e('goonGreen'),
-  purple: _e('goonPurple')
+let _spriteCollection = customSpriteType => customSpriteName => () => {
+  let obj = {
+    sprite: customSpriteType
+  };
+  let [userId, spriteName] = customSpriteName.split('/');
+  obj.asset = `${userId}|${customSpriteType}|${spriteName}.cspr`;
+  return obj;
 };
-/*
-let enemies = customSpriteName => () => ({sprite:'enemy', asset:`enemy|${customSpriteName}.cspr`});
+
+let _e = _spr('enemy');
+let enemies = _spriteCollection('enemy');
 enemies.blue = _e('brainBlue');
 enemies.pink = _e('brainPink');
 enemies.red = _e('cyclopsRed');
 enemies.yellow = _e('cyclopsYellow');
 enemies.green = _e('goonGreen');
 enemies.purple = _e('goonPurple');
-*/
 window.enemies = enemies;
 
 let _p = _spr('player');
-let players = {
-  dark: _p('dark'),
-  light: _p('light')
-};
+let players = _spriteCollection('player');
+players.dark =_p('dark');
+players.light = _p('light');
 window.players = players;
 
 let _c = _spr('coin');
-let coins = {
-  blue: _c('blue'),
-  brown: _c('brown'),
-  gold: _c('gold'),
-  green: _c('green'),
-  light: _c('light'),
-  pink: _c('pink')
-};
+let coins = _spriteCollection('coin');
+coins.blue = _c('blue');
+coins.brown = _c('brown');
+coins.gold = _c('gold');
+coins.green = _c('green');
+coins.light = _c('light');
+coins.pink = _c('pink');
 window.coins = coins;
 
 let _g = _spr('gem');
-let gems = {
-  bright: _g('brightGem'),
-  dark: _g('diamondDark'),
-  light: _g('diamondLight'),
-  emerald: _g('emerald'),
-  pink: _g('pinkGem'),
-  ruby: _g('ruby')
-};
+let gems = _spriteCollection('gem');
+gems.bright = _g('brightGem');
+gems.dark = _g('diamondDark');
+gems.light = _g('diamondLight');
+gems.emerald = _g('emerald');
+gems.pink = _g('pinkGem');
+gems.ruby = _g('ruby');
 window.gems = gems;
 
 let _t = _spr('tile');
-let tiles = {
-  fiery: _t('fiery'),
-  golden: _t('golden'),
-  plasma: _t('plasma'),
-  smooth: _t('rockSmooth'),
-  speckled: _t('rockSpeckled'),
-  swirly: _t('rockSwirly'),
-  space: _t('-')
-};
+let tiles = _spriteCollection('tile');
+tiles.fiery = _t('fiery');
+tiles.golden = _t('golden');
+tiles.plasma = _t('plasma');
+tiles.smooth = _t('rockSmooth');
+tiles.speckled = _t('rockSpeckled');
+tiles.swirly = _t('rockSwirly');
+tiles.space = _t('-');
 window.tiles = tiles;
 
 let spritesAll = [];
 for (let group of [enemies, players, coins, gems, tiles]) {
-  for (let name in group) {
+  for (let name of Object.keys(group)) {
     let data = group[name]();
     spritesAll.push('spriteParts/' + data.sprite + '/' + data.asset + '.png');
   }

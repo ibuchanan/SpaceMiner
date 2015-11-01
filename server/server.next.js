@@ -540,55 +540,13 @@ function configureCollectionAPI() {
   API.start();
 }
 
-let setupJobs = () => {
-  let myJobs = JobCollection('myJobQueue');
-  myJobs.allow({
-    admin: (userId, method, params) => userId ? true : false
-  });
-
-  Meteor.startup(() => {
-    Meteor.publish('allJobs', () => myJobs.find({}));
-    return myJobs.startJobServer();
-  });
-
-  let job = new Job(myJobs, 'spriteUploadAssociateWithUser',
-    {
-      baseDir: '/.uploads/',
-    }
-  );
-    
-  job.priority('normal')
-    .retry().repeat({
-      repeats: myJobs.forever,
-      wait: 10000
-    })
-    .save();
-
-  let workers = Job.processJobs('myJobQueue', 'spriteUploadAssociateWithUser',
-    (job, cb)  => {
-      const data = job.data;
-
-      glob('c:/.uploads/*', Meteor.bindEnvironment((er, files) => {
-        console.log("Unprocessed images found:");
-        console.log(files);
-        job.done();
-        cb();
-      }));
-    }
-  );
-
-};
-
 Meteor.startup(function() {
-    //setupJobs();
-    UploadServer.init({
-      tmpDir: root + '/.uploads/tmp',
-      uploadDir: root + '/.uploads/',
-      checkCreateDirectories: true, //create the directories for you
-      getDirectory: (fileInfo, formData) => {
-        return `/${formData.customSpriteType}`;
-      }
-    });
+    if (Meteor.settings.AWSAccessKeyId) {
+      AWS.config.update({
+        accessKeyId: Meteor.settings.AWSAccessKeyId,
+        secretAccessKey: Meteor.settings.AWSSecretAccessKey
+      });
+    }
 
     Router.map(function() {
       this.route('levelSprites/:id', {
@@ -622,12 +580,12 @@ Meteor.startup(function() {
     var Future = Npm.require('fibers/future');
   
     Meteor.methods({
-      'levelSave': (id, levelDto)=> {
+      levelSave: (id, levelDto)=> {
         createLevelRecord(levelDto, (levelDtoPoweredUp)=> {
             Levels.upsert(id, {$set: levelDtoPoweredUp});
         });
       },
-      'levelUpdate': (id, props, buildStepUpdateCounts)=> {
+      levelUpdate: (id, props, buildStepUpdateCounts) => {
         let future = new Future();
         // TODO remove this code if we get it handled on client
         //let result = babel.transform(props.script, {stage:1, ast:false});
@@ -642,7 +600,7 @@ Meteor.startup(function() {
         });
         return future.wait();
       },
-      'es6compile': source => {
+      es6compile: source => {
         let code =
 `(async (defaults) => {
 ${source}
@@ -650,13 +608,35 @@ ${source}
         let result = babel.transform(code, {stage:1, ast:false});
         return result.code;
       },
-      'es6compileDeclaration': source => {
+      es6compileDeclaration: source => {
         let code =
 `(defaults) => {
 ${source}
 };`;
         let result = babel.transform(code, {stage:1, ast:false});
         return result.code;
+      },
+      getCustomSpriteGroups: (customSpriteTypeFilter='all') => {
+        const s3 = new AWS.S3();  
+
+        let list = s3.listObjectsSync({
+          Bucket: 'openagile-testing'
+        });
+
+        let allAssets = [];
+        
+        list.Contents.forEach(i => {
+          let keyParts = i.Key.split('/');
+          if (keyParts.length !== 3) return;
+          const [userId, customSpriteType, fileName] = keyParts;
+          if (customSpriteType !== '') {
+            if (customSpriteTypeFilter === 'all') allAssets.push({userId, customSpriteType, fileName});
+            else if (customSpriteTypeFilter === customSpriteType) allAssets.push({userId, customSpriteType, fileName});
+          }
+        });
+        const assetGroups = _.groupBy(allAssets, asset => asset.customSpriteType);
+
+        return assetGroups;
       }
     });
 

@@ -19,9 +19,11 @@ let spritePathFromShortName = (type, shortName) => {
   };
 
   let filePath;
-  if (map[type] && map[type][shortName]) filePath = type + '/' + map[type][shortName] + '.png'
+  if (shortName.indexOf('.cspr') > -1) return shortName;
+  else if (map[type] && map[type][shortName]) filePath = type + '/' + map[type][shortName] + '.png';
   else filePath = type + '/' + shortName + '.png';
-  return 'spriteParts/' + filePath;
+  const spritePath = 'spriteParts/' + filePath;
+  return spritePath;
 };
 
 var boardFromText = function(board) {
@@ -57,6 +59,39 @@ let getDropSpot = (forward) => {
 
 function GameWorld(defaults, q) {
   defaults.q = q;
+
+  defaults.insertSprite = function(spriteClass, x, y, assetKey=null) {
+    let newSprite;
+    if (assetKey !== null) newSprite = new this.q[spriteClass](this.q.tilePos(x, y), assetKey);
+    else newSprite = new this.q[spriteClass](this.q.tilePos(x, y));
+    this.q.stage().insert(newSprite);
+  };
+  defaults._spritesLoading = {};
+  defaults._waitingForInsert = {};
+  defaults.spriteIsLoaded = function(assetKey) {
+    return this.q.asset(assetKey) !== undefined;
+  };
+  defaults.spriteIsLoading = function(assetKey) {
+    if (this._spritesLoading[assetKey] && this._spritesLoading[assetKey] === true) return true;
+    return false;
+  };
+  defaults.spriteLoadingRegister = function(assetKey) {
+    this._spritesLoading[assetKey] = true;
+  };
+  defaults.spriteLoadingFinished = function(assetKey) {
+    delete this._spritesLoading[assetKey];
+    if (this._waitingForInsert[assetKey] && this._waitingForInsert[assetKey].length > 0) {
+      for(let waitingSprite of this._waitingForInsert[assetKey]) {
+        this.insertSprite(waitingSprite.spriteClass, waitingSprite.x, waitingSprite.y, waitingSprite.assetKey);
+      }
+    }
+  };
+  defaults.spriteWaitForLoading = function(spriteClass, x, y, assetKey) {
+    if (!this._waitingForInsert[assetKey]) this._waitingForInsert[assetKey] = [];
+    this._waitingForInsert[assetKey].push({
+      spriteClass, x, y, assetKey
+    });
+  };
 
   // TODO add an "add" method that would allow actual addition, not just replacement
   defaults.setSprite = function(sprite, x=false, y, asset) {
@@ -137,6 +172,21 @@ function GameWorld(defaults, q) {
       if (spriteClass === 'Tile') {
         if (asset) {
           spriteNum = tilesMap[asset];
+          // TODO: have to handle custom tile types somehow...
+          /*
+          if (spriteNum === undefined) {
+            let assetKey = spritePathFromShortName('tile', asset);
+            if (this.spriteIsLoaded(assetKey)) this.insertSprite(spriteClass, x, y, assetKey);
+            else if (this.spriteIsLoading(assetKey)) this.spriteWaitForLoading(spriteClass, x, y, assetKey);
+            else {
+              this.spriteLoadingRegister(assetKey);
+              this.spriteWaitForLoading(spriteClass, x, y, assetKey);
+              this.q.load(assetKey, () => {
+                this.spriteLoadingFinished(assetKey);
+              });
+            }
+          }
+          */
         } else {
           let selectedTile = defaults.sprites.tile;
           spriteNum = tilesMap[selectedTile];
@@ -147,15 +197,20 @@ function GameWorld(defaults, q) {
       }
       lvl.setTile(x, y, spriteNum);
     } else {
-      let spr;
       if (asset) {
         let assetKey = spritePathFromShortName(spriteFilePathMap[spriteClass], asset);
-        spr = new this.q[spriteClass](this.q.tilePos(x, y), assetKey);
+        if (this.spriteIsLoaded(assetKey)) this.insertSprite(spriteClass, x, y, assetKey);
+        else if (this.spriteIsLoading(assetKey)) this.spriteWaitForLoading(spriteClass, x, y, assetKey);
+        else {
+          this.spriteLoadingRegister(assetKey);
+          this.spriteWaitForLoading(spriteClass, x, y, assetKey);
+          this.q.load(assetKey, () => {
+            this.spriteLoadingFinished(assetKey);
+          });
+        }
+      } else {
+        this.insertSprite(spriteClass, x, y);
       }
-      else {
-        spr = new this.q[spriteClass](this.q.tilePos(x, y));
-      }
-      this.q.stage().insert(spr);
     }
   };
 
