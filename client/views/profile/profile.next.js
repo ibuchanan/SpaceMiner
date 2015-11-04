@@ -1,3 +1,5 @@
+let followingUpdated = new Tracker.Dependency();
+
 Template.profile.helpers({
   nickName: function() {
     return Template.instance().data.user.profile.nickName;
@@ -20,5 +22,20 @@ Template.profile.helpers({
   },
   userId: function() {
     return Template.instance().data.userId;
+  },
+  following: function() {
+    followingUpdated.depend();
+    return Followers.following(Template.instance().data.userId);
+  }
+});
+
+Template.profile.events({
+  'click .follow': function() {
+    Followers.follow(Template.instance().data.userId);
+    followingUpdated.changed();
+  },
+  'click .unfollow': function() {
+    Followers.unfollow(Template.instance().data.userId);
+    followingUpdated.changed();
   }
 });

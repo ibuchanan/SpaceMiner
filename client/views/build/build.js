@@ -335,15 +335,11 @@ Template.build.rendered = function() {
     function release() {
       controls.confirm('Are you sure? When released, players can rank and comment on your world.', function(result) {
         if (!result) return;
-        Levels.update({_id:level.get()}, { 
-          $set: { phase: 'released', published: true, lastUpdated: new Date(), updatedBy: userName() },
-          $inc: { version : 1 }
-        }, function(err, count) {
-          if (!err) {
-            controls.alert('Your world is released for all! You can keep working...');
-          } else {
-            console.log(err);
-            controls.alert('There was an error releasing your world. Please check the browser console for details...');
+        Meteor.call('levelRelease', level.get(), userName(), function(err, result) {
+          if (!err) controls.alert('Your world is released for all! You can keep working...');
+          else {
+            console.error(err);
+            controls.alert('There was an error releasing your world. Please check the browser console for details...');            
           }
         });
       });

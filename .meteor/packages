@@ -42,3 +42,4 @@ npm-container
 joshowens:accounts-entry@=1.0.4
 edgee:slingshot
 peerlibrary:aws-sdk
+email

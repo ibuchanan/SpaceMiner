@@ -4,6 +4,16 @@
     {{#unless isNotSelf}}
     <h1><span class='label label-success'><span class= 'fa fa-play-circle-o'></span>&nbsp;<a href='{{mostRecentLessonLink}}'>Continue:&nbsp;{{mostRecentLesson}}</a></span></h1>
     {{/unless}}
+    {{#if isNotSelf}}
+      {{#unless following}}
+      <h3><button class='btn btn-success follow'>Follow {{nickName}} <span class='fa fa-bell'></span></button></h3>
+      <p>You will receive email notification when {{nickName}} releases worlds</p>
+      {{/unless}}
+      {{#if following}}
+      <h3><button class='btn btn-danger unfollow'><b>Unfollow</b> <span class='fa fa-bell-slash'></span></button></h3>
+      <p>You will no longer receive email notification when {{nickName}} releases worlds</p>
+      {{/if}}
+    {{/if}}
     <div class='container-fluid'>
       <div class='col-md-7 col-sm-12'>
         <h2><span class='label label-info'><span class='fa fa-trophy'></span>&nbsp;Worlds by {{ownerName}}</span></h2>

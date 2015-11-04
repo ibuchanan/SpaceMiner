@@ -595,7 +595,40 @@ Meteor.startup(function() {
             $set: propsPoweredUp,
             $inc : buildStepUpdateCounts
           }, function() {
-            future.return(true);
+            return future.return(true);
+          });
+        });
+        return future.wait();
+      },
+      levelRelease: function(id, updatedBy) {
+        let future = new Future();
+        let that = this;
+        Levels.update({_id:id}, {
+          $set: { phase: 'released', published: true, lastUpdated: new Date(), updatedBy },
+          $inc: { version : 1 }
+        }, (err, count) => {
+          if (err) future.throw(err);
+          future.return(count);
+          let followers = Followers.findFollowers();
+          followers.forEach(follower => {
+            if (!follower.active) return;
+            let followerUser = Meteor.users.findOne(follower.followerId);
+            let emails = followerUser.emails;
+            if (emails.length > 0) {
+              let email = emails[0].address;
+              that.unblock();
+              Email.send({
+                from: 'spaceminer.noreply@gmail.com',
+                to: email,
+                subject: `SpaceMiner Update: ${updatedBy} just released a new version of their world! Check it out...`,
+                html: `<center><p>
+  <h2>${updatedBy} is working hard!</h2>
+  <a target='_blank' href='http://spaceminer.mod.bz/play?id=${id}'>Click here to explore and play the world ${updatedBy} just released!</a>
+  <h4>Brought to you by <a href='http://spaceminer.mod.bz'>SpaceMiner</a> and <a href='http://www.mentalfitnessatl.org'>Mental Fitness</a></h4>
+  <small>To unsubscribe from notifications about updates by ${updatedBy}, <a href='http://spaceminer.mod.bz/profile/${updatedBy}'>visit this page</a> and click <b>Unfollow</b>. Replies to this email address are not monitored.</small>
+</p></center>`
+              });
+            }
           });
         });
         return future.wait();
@@ -637,7 +670,8 @@ ${source}
         const assetGroups = _.groupBy(allAssets, asset => asset.customSpriteType);
 
         return assetGroups;
-      }
+      },
+
     });
 
     /*
