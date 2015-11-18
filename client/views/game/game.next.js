@@ -1605,6 +1605,7 @@ function configureQuintus(callback, options) {
     init: function(p, asset) {
       let props = {
         type: SPRITE_PLAYER,
+        sprite: 'player',
         collisionMask: SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT
       };
       applySpriteProps(props, asset, 'player');
