@@ -616,7 +616,7 @@ Meteor.startup(function() {
             let emails = followerUser.emails;
             if (emails.length > 0) {
               let email = emails[0].address;
-              that.unblock();
+              that.unblock();
               Email.send({
                 from: 'spaceminer.noreply@gmail.com',
                 to: email,

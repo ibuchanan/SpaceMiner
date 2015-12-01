@@ -2,14 +2,14 @@
 
 <div class='container-fluid'>
   <div class='row' style='text-align:center'>
-    <h1><span class='label label-warning'><span class='fa fa-search'></span> Lesson: {{lesson.title}}</span></h1>
+    <h1><span class='label label-warning'><span class='fa fa-search'></span>&nbsp;{{lesson.title}}</span></h1>
     <h3>{{description}}</h3>
     <h3><span class='label label-primary'><span class='fa-tags fa'></span> Main topics:</span>
     {{#each lesson.topics_main}}
-      <span class='label label-default'>{{this}}</span>
+      <span class='label label-primary'>{{this}}</span>
     {{/each}}
     </h3>
-    <h4><span class='label label-primary'><span class='fa-tags fa'></span> Sub-topics:</span>
+    <h4><span class='label label-default'><span class='fa-tags fa'></span> Sub-topics:</span>
     {{#each lesson.topics_sub}}
       <span class='label label-default'>{{this}}</span>
     {{/each}}
@@ -26,25 +26,38 @@
 
 </template>
 
-<template name="lessonProgress_section">
+<template name='lessonProgress_section'>
   {{#if mostRecent}}
-  <div style='background: darkgreen; padding: 2px; border: 2px solid gold; padding: 5px;'>
-    <h2><span class='fa fa-map-marker'></span>&nbsp;<span class='label label-info'><a href='{{lessonSecLink}}'>Section: {{title}}</a></span></h2>
+  <div class='lesson-progress-section-most-recent'>
+    <h2><span class='label label-info'><span class='fa fa-map-marker'></span>&nbsp;<a href='{{lessonSecLink}}' title='{{lastViewed}}'>{{title}}</a></span></h2>
     <h5>{{description}}</h5>
-    <small><i>{{lastViewed}}</i></small>
+    <div>
+    {{#each parts}}
+      {{> lessonProgress_part}}
+    {{/each}}
+    </div>
   </div>
   {{else}}
-  <h2><span class='label label-info'><a href='{{lessonSecLink}}'>Section: {{title}}</a></span></h2>
+  <h2><span class='label label-info'><a href='{{lessonSecLink}}' title='{{lastViewed}}'>{{title}}</a></span></h2>
   <h5>{{description}}</h5>
-  <small><i>{{lastViewed}}</i></small>
-  {{/if}}
   <div>
   {{#each parts}}
     {{> lessonProgress_part}}
   {{/each}}
   </div>
+  {{/if}}
 </template>
 
-<template name="lessonProgress_part">
-  <div><a href='{{lessonSecStepLink}}'><span class='label label-danger'><b>{{index}}:</b> {{title}}</span></a> <small><i>{{lastViewed}}</i></small></div>
+<template name='lessonProgress_part'>
+  <div class='lesson-progress-part'>
+    <small><i>{{index}}</i></small>
+    <span class='badge alert-{{seenStatusColor}}'><i class='fa {{seenStatusStar}}'></i></span>
+    <a href='{{lessonSecStepLink}}' title='{{lastViewed}}'><span class='label label-default'>{{{title}}}</span></a>
+    <span class='lesson-progress-part-users'>{{> lessonStepUsers lessonId=lessonId secIndex=secIndex partIndex=partIndex}} <span class='lesson-progress-part-assessments'>{{> lessonProgress_part_assessments selfAssessments}}</span></span>
+  </div>
+</template>
+
+
+<template name='lessonProgress_part_assessments'>
+{{#each this}}<span class='{{klass key}}' title='{{value.count}}'><span class='fa fa-lg {{icon key}}'></span> {{{value.percent}}}</span>&nbsp;{{/each}}
 </template>

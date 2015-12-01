@@ -1,0 +1,68 @@
+.lesson-parts {
+  background-color: rgba(141,6,58,0.5);
+}
+
+.lesson-part {
+  padding: 8px;
+}
+
+.lesson-continue {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.lesson-sections {
+  padding-bottom: 12px;
+  background-color: #333;
+}
+
+.lesson-sections-nav-line {
+  content:"";
+  position: absolute;
+  z-index: 0;
+  top: 75px;
+  bottom: 75px;
+  left: 50%;
+  border-left: 3px inset rgba(0, 0, 0, 0.6);
+}
+
+.lesson-section-nav-container {
+  margin-bottom: 12px;
+}
+
+.lesson-section-nav {
+  font-size:55%; 
+  text-align:center;
+  margin-top: 2px;
+  margin-bottom: 0px;
+  background: #222;
+}
+
+.lesson-section-steps {
+  text-align: center;
+}
+
+.lesson-section-steps .pagination {
+  margin-top: 0px;
+}
+
+.lesson-self-assessment {
+	text-align: center;
+}
+
+.sectionWrapper {
+  /* background-color: rgba(96,96,96,0.25); */
+}
+
+.sectionNav {
+  text-align: center;
+}
+
+.sectionNav .badge {
+  margin-top: 6px;
+}
+
+.lesson-section-step-users {
+  margin-left: 4px; 
+}

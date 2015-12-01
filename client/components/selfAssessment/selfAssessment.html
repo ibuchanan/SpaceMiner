@@ -1,0 +1,23 @@
+<template name='selfAssessment'>
+<div class='btn-group' data-toggle='buttons'>
+  <h3>Got it?</h3>
+  <label class='btn btn-danger understand not btn-sm'>
+    <input type='radio' name='understand' value='not' /> Not exactly <span class='fa fa-frown-o'></span>
+  </label>
+  {{#if not}}
+  <button class='btn btn-info not-help btn-sm'><span class='fa fa-hand-stop-o'></span> Help me!</button>
+  {{/if}}
+  <label class='btn btn-warning understand almost btn-sm'>
+    <input type='radio' name='understand' value='almost' /> Almost there <span class='fa fa-meh-o'></span>
+  </label>
+  {{#if almost}}
+  <button class='btn btn-info almost-help btn-sm'><span class='fa fa-hand-stop-o'></span> Help me!</button>
+  {{/if}}
+  <label class='btn btn-success understand yes btn-sm'>
+    <input type='radio' name='understand' value='yes' /> Got it! <span class='fa fa-smile-o'></span>
+  </label>
+  {{#if yes}}
+  <button class='btn btn-info i-can-help btn-sm'><span class='fa fa-life-ring'></span> I can help!</button>
+  {{/if}}
+</div>
+</template>

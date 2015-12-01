@@ -3,13 +3,12 @@
     <section class='row'>
       <article class='lesson'>
         <div>
-          <h1 style='text-align: center'><span class='label label-danger'>{{lessonTitle}} <span class='fa fa-graduation-cap'></span></span></h1>        
-          <h6 style='text-align: center'><i>{{lastViewed}}</i></h6>
+          <h1 style='text-align: left; margin-top: 4px;'><span class='label label-danger' title='{{lastViewed}}'>{{lessonTitle}}</span></h1>
         </div>
         <div class='container-fluid'>
           <div class='row'>
             <div class='col-sm-2 lesson-sections'>
-              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'>Sections <span class='fa fa-book'></span></span></h2>
+              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'>Sections</span></h2>
                <div style='overflow-y: scroll; max-height: 500px; padding-right: 16px;'>
                 <div class='lesson-sections-nav-line'></div>
                 <ul class='nav nav-pills nav-stacked'>
@@ -30,8 +29,11 @@
     </section>
     {{#if rendered}}
       {{#unless isQuiz}}
+      <div class='row lesson-self-assessment'>
+      {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
+      </div>
       <div class='row lesson-continue'>
-        <button class='btn btn-primary continue'>Continue <span class='fa fa-step-forward'></span></button>
+        <button class='btn btn-primary continue btn-sm' disabled>Continue <span class='fa fa-step-forward'></span></button>
       </div>
       {{/unless}}
     {{/if}}
@@ -41,7 +43,7 @@
 <template name='section'>
 <div class='sectionWrapper'>
 {{#if current}}
-  <h2 style='margin-top: 0px;'><span class='label label-info'>Current Section: {{title}}</span></h2>
+  <h2 style='margin-top: 0px; text-align: center;'><span class='label label-info'>{{title}}</span></h2>
   <nav class='lesson-section-steps'>
     <ul class='pagination'>
       <li><a class="partNav" style='font-weight: bold; color: white'>Steps <span class='fa fa-bookmark'></span></a></li>
@@ -52,7 +54,9 @@
   </nav>
   {{#each parts}}
     {{#if currentPart}}
-      <h6 style='margin-top: -10px; margin-left: 4px;'><i>{{lastViewedPart}}</i></h6>
+      <h6 style='margin-top: -10px; margin-left: 4px; text-align: center;'><i>{{lastViewedPart}}</i></h6>
+      <div class='lesson-section-step-users'>{{> lessonStepUsers lessonId=lessonId secIndex=secIndex partIndex=partIndex}}</div>
+      <hr />
       {{> Template.dynamic template=type data=this}}
     {{/if}}
   {{/each}}
@@ -61,7 +65,8 @@
 </template>
 
 <template name='sectionNav'>
-  <li role="presentation" class="{{current}} lesson-section-nav-container"><a href="#" class='sectionNav'>{{title}}<div class='lesson-section-nav'>{{lastViewed}}</div>
+  <li role="presentation" class="{{current}} lesson-section-nav-container"><a href="#" class='sectionNav' title='{{lastViewed}}'>{{title}}
+    <br />
     <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span></a>
   </li>
 </template>

@@ -104,7 +104,7 @@ Template.lesson.helpers({
   lessonTitle: function() {
     var lesson = getLesson();
     if (!lesson) return '';
-    return 'Lesson: ' + lesson.title;
+    return lesson.title;
   },
   rendered: function() {
     var lesson = getLesson();
@@ -113,11 +113,31 @@ Template.lesson.helpers({
   isQuiz: function() {
     let wellIsIt = isQuiz.get();
     return wellIsIt;
+  },
+  currentPartIndex() {
+    return currentPartIndex.get();
+  },
+  selfAssessmentResourcePath() {
+    const lesson = getLesson();
+    const secIndex = currentSecIndex.get();
+    const partIndex = currentPartIndex.get();
+    const path = `lesson/${lesson.lessonId}/${secIndex}/${partIndex}`;
+    return path;
+  },
+  selfAssessmentData() {
+    return { nothing: 'here yet'};
+  },
+  onAssessmentSelected() {
+    const instance = Template.instance();
+    return () => {
+      const continueButton = instance.find('.continue');
+      continueButton.removeAttribute('disabled');
+    };
   }
 });
 
-var popquiz = {finished:false};
-var popquizDep = new Tracker.Dependency();
+let popquiz = {finished:false};
+const popquizDep = new Tracker.Dependency();
 
 Template.popquiz.rendered = function() {
   popquiz = this.data;
@@ -128,48 +148,61 @@ Template.popquiz.rendered = function() {
 
 Template.popquiz.helpers({
   lesson: getLesson,
-  finished: function() {
+  finished() {
     popquizDep.depend();
     return popquiz.finished;
   }
 });
 
 Template.section.helpers({
-  current: function() {
+  current() {
     var index = currentSecIndex.get();    
     return this.index === index;
   },
-  title: function() {
+  title() {
     var index = currentSecIndex.get();
     var lesson = getLesson();
     return lesson.sections[index].title;
   },
-  currentPart: function() {
+  currentPart() {
    var index = currentPartIndex.get();
    return this.index === index;
   },
-  lastViewedPart: function() {
+  lastViewedPart() {
     currentPartIndex.get();
     return this.lastViewed ? 'step ' + (this.index+1) + ' seen ' + moment(this.lastViewed).fromNow() : 'step ' + (this.index+1) + ' seen just now';
   },
-  partIndex: function() {
+  partIndex() {
     return this.index + 1;
+  },
+  lessonId() {
+    return Router.current().params.query.id;
+  },
+  secIndex() {
+    lessonDep.depend();
+    const index = currentSecIndex.get();
+    return index;
+  },
+  partIndex() {
+    lessonDep.depend();
+    const index = currentPartIndex.get();
+    return index;
   }
 });
 
 Template.sectionNav.helpers({
-  current: function() {
+  current() {
     return this.index === currentSecIndex.get() ? 'active' : '';
   },
-  seenStar: function() {
+  seenStar() {
     currentSecIndex.get();
     return this.lastViewed !== null ? 'fa-star' : 'fa-star-o';
   },
-  seenBadge: function() {
+  seenBadge() {
     currentSecIndex.get();
     return this.lastViewed !== null ? 'alert-success' : '';
   },
-  lastViewed : function() {
+  lastViewed() {
     var index = currentSecIndex.get();
     if (this.lastViewed) {
       var fmt = moment(this.lastViewed).fromNow();
@@ -180,7 +213,7 @@ Template.sectionNav.helpers({
 });
 
 Template.sectionNav.events({
-  'click .sectionNav': function(evt, template) {
+  'click .sectionNav'(evt, template) {
     currentSecIndex.set(template.data.index);
     currentPartIndex.set(0);
     var lesson = getLesson();
@@ -190,18 +223,18 @@ Template.sectionNav.events({
 });
 
 Template.lesson.events({  
-  'click .prev': function() {
+  'click .prev'() {
     var index = currentSecIndex.get(); 
     currentSecIndex.set(index-1);
   },
-  'click .continue': function(evt, template) {
+  'click .continue'(evt, template) {
     var index = currentSecIndex.get();     
     var lesson = getLesson();
     LessonsProgress.overlayOnLesson(lesson, lessonProgress);
     var parts = lesson.sections[index].parts;
     var partIndex = currentPartIndex.get();
     if (partIndex < parts.length - 1) {
-      var nextIndex = partIndex + 1;
+      const nextIndex = partIndex + 1;
       currentPartIndex.set(nextIndex);
       updateLessonProgressPartLastViewed(lessonProgress, index, nextIndex);
     }
@@ -210,15 +243,16 @@ Template.lesson.events({
       currentPartIndex.set(0);
       updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
     }
+    $(template.find('.continue')).attr('disabled', 'disabled');
   },  
 });
 
 Template.partNav.helpers({
-  current: function() {
+  current() {
     var partIndex = currentPartIndex.get();
     return partIndex === this.index;
   },
-  partIndex: function() {
+  partIndex() {
     return this.index + 1;
   }
 });
@@ -285,6 +319,14 @@ Template.paragraph.rendered = function() {
     el.remove();
   }); 
 };
+
+['paragraph', 'quickCheck', 'popquiz'].forEach(templateName => {
+  Template[templateName].onRendered(() => {
+    const lesson = getLesson();
+    const resourcePath = `lesson/${lesson.lessonId}/${currentSecIndex.get()}/${currentPartIndex.get()}`;
+    Presence.presenceUpdate(resourcePath, 'lesson');
+  });
+});
 
 let questionClock = new ReactiveClock('questionClock');
 
