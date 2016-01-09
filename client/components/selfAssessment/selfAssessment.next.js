@@ -34,6 +34,14 @@ Template.selfAssessment.helpers({
   } , 
   yes() {
     return getMySense(Template.instance().data) === 'yes';
+  },
+  activeFor(type) {
+    const resourcePath = Template.instance().data.resourcePath;
+    if (type === 'wants-help-yes')  return SelfAssessments.wantsHelp(resourcePath)  ? 'active' : '';
+    if (type === 'wants-help-no')   return SelfAssessments.wantsHelp(resourcePath)  ? '' : 'active';
+    if (type === 'will-help-yes')   return SelfAssessments.willHelp(resourcePath)   ? 'active' : '';
+    if (type === 'will-help-no')    return SelfAssessments.willHelp(resourcePath)   ? '' : 'active';    
+    return '';
   }
 });
 
@@ -50,10 +58,19 @@ Template.selfAssessment.events({
   'click .not-help'() {
   	SelfAssessments.helpRequest(Template.instance().data.resourcePath);
   },
+  'click .not-help-cancel'() {
+    SelfAssessments.helpRequestCancel(Template.instance().data.resourcePath);
+  },  
   'click .almost-help'() {
-	SelfAssessments.helpRequest(Template.instance().data.resourcePath);
+	 SelfAssessments.helpRequest(Template.instance().data.resourcePath);
   },
+  'click .almost-help-cancel'() {
+   SelfAssessments.helpRequestCancel(Template.instance().data.resourcePath);
+  },  
   'click .i-can-help'() {
   	SelfAssessments.helpAvailable(Template.instance().data.resourcePath);
-  }
+  },
+  'click .i-can-help-cancel'() {
+    SelfAssessments.helpAvailableCancel(Template.instance().data.resourcePath);
+  }  
 });

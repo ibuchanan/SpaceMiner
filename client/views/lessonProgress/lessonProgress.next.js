@@ -114,7 +114,7 @@ Template.lessonProgress_part.helpers({
   },
   lessonSecStepLink() {
     lessonDep.depend();
-    return '/lesson?id=' + lessonId + '&sec=' + (Template.parentData().index + 1) + '&part=' + (this.index + 1);
+    return Lessons.secStepLink(lessonId, (Template.parentData().index + 1), (this.index + 1));
   },
   seenStatusLabel() {
     const seenText = lastSeenText(this.lastViewed);
@@ -152,14 +152,8 @@ Template.lessonProgress_part.helpers({
     const users = findPresentUsers(_lessonId, Template.parentData().index, this.index);
     return users;
   },
-  lessonId() {
-    return Router.current().params.lessonId;
-  },
-  secIndex() {
-    return Template.parentData().index;
-  },
-  partIndex() {
-    return this.index;
+  options() {
+    return { resourcePath: Lessons.resourcePath(Router.current().params.lessonId, Template.parentData().index, this.index) };
   }
 });
 

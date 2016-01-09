@@ -1,14 +1,54 @@
-const options = {sort: {date: -1, limit: 5}};
-
-const getResourcePath = (lessonId, secIndex, partIndex) => `lesson/${lessonId}/${secIndex}/${partIndex}`;
+const findOptions = {sort: {date: -1}}; // OLD: , limit: 5}};
 
 const removeSelf = users => users.filter(u => u.userId !== Meteor.userId());
 
-const findPresentUsers = (lessonId, secIndex, partIndex) => Presence.presenceFromMinutes(5, getResourcePath(lessonId, secIndex, partIndex));
+const findPresentUsers = resourcePath => Presence.presenceFromMinutes(5, resourcePath);
 
-const findAssessments = (lessonId, secIndex, partIndex, criteria) => SelfAssessments.findByResourcePath(getResourcePath(lessonId, secIndex, partIndex), criteria, options);
+const findAssessments = (options, criteria) => SelfAssessments.findByResourcePath(options.resourcePath, criteria, findOptions).fetch();
 
 const findHelpOffers = users => users.filter(u => u.userId === Meteor.userId() && u.helpOfferredByUserId !== null);
+
+const findRequestForMe = (helpeeUserId, helperId=Meteor.userId()) => {
+	const item = SelfAssessments.findOne({
+		userId: helperId,
+		helpRequestedByUserId: helpeeUserId
+	});
+	return item;
+};
+
+const findRequestForMeByResourcePath = (helpeeUserId, resourcePath, helperId=Meteor.userId()) => {
+	const item = SelfAssessments.findOne({
+		userId: helperId,
+		helpRequestedByUserId: helpeeUserId,
+		resourcePath
+	});
+	return item;
+};
+
+const filterAssessmentsByUserId = (filterToUserId, assessments, isHelpee) => {
+	const filteredAssessments = assessments.filter(a => {
+		// Determine if someone wants my help for this resourcePath
+		const needsMyHelp = findRequestForMeByResourcePath(a.userId, a.resourcePath, filterToUserId) !== undefined;
+		// If so, then signal that someone has asked for my help
+		if (a.helpOfferredByUserId === filterToUserId && needsMyHelp) {
+			a.helpRequestedFromMe = true;
+		}
+		// TODO: I'm not sure why this is here, honestly:
+		if (needsMyHelp) {
+			a.helpRequestedFromMe = true;
+		}
+		if (isHelpee) {
+			const iHaveBeenAskedForHelp = a.userId === filterToUserId && a.helpRequestedByUserId !== null;
+			const iHaveOfferredHelpToSomeone = a.userId !== filterToUserId && a.helpOfferredByUserId === filterToUserId;			
+			return a.helpRequestedFromMe || iHaveOfferredHelpToSomeone;
+		} else {
+			const iHaveRequestedHelp = a.userId !== filterToUserId && a.helpRequestedByUserId === filterToUserId;
+			const iHaveBeenOfferredHelp = a.userId !== filterToUserId && a.helpOfferredToMe === true;
+			return iHaveRequestedHelp || iHaveBeenOfferredHelp;
+		}
+	});
+	return filteredAssessments;
+};
 
 const addHelpRequestInfo = users => {
 	users.forEach(user => {
@@ -24,14 +64,6 @@ const addHelpRequestInfo = users => {
 	});
 };
 
-const findRequestForMe = helpeeUserId => {
-	const item = SelfAssessments.findOne({
-		userId: Meteor.userId(),
-		helpRequestedByUserId: helpeeUserId
-	});
-	return item;
-};
-
 const pending = item => item.helpOfferredByUserId !== null && item.helpOfferredByUserId !== Meteor.userId();
 const pendingMyHelp = item => item.helpOfferredByUserId === Meteor.userId();
 const wantsMyHelp = item => findRequestForMe(item.userId) !== undefined && item.helpOfferredByUserId !== Meteor.userId();
@@ -39,29 +71,65 @@ const helpAcceptedByMe = item => item.helpOfferredToMe === true && item.helpRequ
 const iAmWillingToHelp = item => SelfAssessments.findOne({resourcePath:item.resourcePath, userId:Meteor.userId(), sense:'yes', helpMadeAvailable:true}) !== undefined;
 const iAmWillingToBeHelped = item => SelfAssessments.findOne({resourcePath:item.resourcePath, userId:Meteor.userId(), helpRequested: true}) !== undefined;
 
+Template.lessonStepUsers.onCreated(function(template) {
+	if (this.data.options && _.isString(this.data.options)) this.options = JSON.parse(this.data.options)
+	else if (this.data.options && _.isObject(this.data.options)) this.options = this.data.options;
+	else this.options = { resourcePath: undefined, filterToUserId: undefined, showLinks: false, displayMode: 'horizontal' };
+});
+
+Template.lesson_step_users_info.onRendered(function() {
+	const that = this.find('.lesson-step-users-info');
+	$(that).popover({
+		content: () => {
+			const [lessonRoute, lessonId, secIndex, partIndex] = $(that).data('resource-path').split('/');
+			const lesson = Lessons.findOne(lessonId);
+			const content = `<div style='text-align:left'><h5><span class='label label-danger'><span class='fa fa-graduation-cap'></span></span>&nbsp;${lesson.title}</h5>
+<h6><span class='label label-warning'><span class='fa fa-folder'></span></span>&nbsp;${lesson.sections[secIndex].title}</h6>
+<b><span class='label label-primary'><span class='fa fa-bookmark'></span></span>&nbsp;${lesson.sections[secIndex].parts[partIndex].title}</b>
+</div>`;
+			return content;
+		},
+		placement: 'bottom',
+		title: 'Help Details',
+		trigger: 'click',
+		html: true,
+	});
+});
+
 Template.lessonStepUsers.helpers({
+	showUsersCurrent() {
+		const options = Template.instance().options;
+		return options.resourcePath !== undefined;
+	},
 	users() {
-		const {lessonId, secIndex, partIndex} = Template.instance().data;
-		const users = removeSelf(findPresentUsers(lessonId, secIndex, partIndex));
+		const resourcePath = Template.instance().data.options.resourcePath;
+		let users = findPresentUsers(resourcePath);
+		users = removeSelf(users);
 		addHelpRequestInfo(users);
 		return users;
 	},
 	helpeeUsers() {
-		const {lessonId, secIndex, partIndex} = Template.instance().data;
-		const helpeeUsers = removeSelf(findAssessments(lessonId, secIndex, partIndex, {helpRequested:true, helpGivenEvaluationDate:null}).fetch());
-		return helpeeUsers;
+		const options = Template.instance().options;
+		const helpeeUsers = findAssessments(options, {helpGivenEvaluationDate:null});
+		if (!options.filterToUserId) return removeSelf(helpeeUsers).filter(a => a.helpRequested === true);
+		const filteredHelpeeUsers = filterAssessmentsByUserId(options.filterToUserId, helpeeUsers, true);
+		return filteredHelpeeUsers;
 	},	
 	helperUsers() {
-		const {lessonId, secIndex, partIndex} = Template.instance().data;
-		const assessments = findAssessments(lessonId, secIndex, partIndex).fetch();
+		const options = Template.instance().options;
+		const assessments = findAssessments(options);
 		const helpOffers = findHelpOffers(assessments);
-		const helperUsers = removeSelf(assessments).filter(u => u.helpMadeAvailable === true);
+		const helperUsers = (!options.filterToUserId ? removeSelf(assessments).filter(u => u.helpMadeAvailable === true) : assessments);
 		for(let helpOffer of helpOffers) {
 			for (let helperUser of helperUsers) {
-				if (helperUser.userId === helpOffer.helpOfferredByUserId) {
+				if (helperUser.userId === helpOffer.helpOfferredByUserId && helperUser.resourcePath === helpOffer.resourcePath) {
 					helperUser.helpOfferredToMe = true;
 				}
 			}
+		}
+		if (options.filterToUserId) {
+			const helperUsersFiltered = filterAssessmentsByUserId(options.filterToUserId, helperUsers, false);
+			return helperUsersFiltered;
 		}
 		return helperUsers;
 	},
@@ -110,7 +178,22 @@ Template.lessonStepUsers.helpers({
 	},
 	requestHelpCancelVisible() {
 		return this.helpRequestedByUserId === Meteor.userId() && this.helpOfferredToMe !== true;
-	}
+	},
+	showLinks() {
+		return Template.instance().options.showLinks;
+	},
+  	link() {
+    	let [lessonRoute, lessonId, secIndex, partIndex] = this.resourcePath.split('/');
+    	secIndex = parseInt(secIndex);
+    	partIndex = parseInt(partIndex);
+    	return Lessons.secStepLink(lessonId, secIndex, partIndex);
+  	},
+  	displayVertically() {
+  		return Template.instance().options.displayMode === 'vertical';
+  	},
+  	displayMode() {
+  		return Template.instance().options.displayMode;
+  	}
 });
 
 Template.lessonStepUsers.events({
@@ -139,19 +222,19 @@ Template.lessonStepUsers.events({
 		SelfAssessments.helpOfferCancel(this.resourcePath, this.userId);
 	},
 	'click .help-request-understand'() {
-		UserFeedback.create(this.userId, this.userName, 'understand');
+		UserFeedback.create(this.resourcePath, this.userId, this.userName, 'understand');
 		SelfAssessments.helpRequestFromUserCancel(this.resourcePath, this.userId);		
 	},
 	'click .help-request-eyeball'() {
-		UserFeedback.create(this.userId, this.userName, 'eyeball');
+		UserFeedback.create(this.resourcePath, this.userId, this.userName, 'eyeball');
 		SelfAssessments.helpRequestFromUserCancel(this.resourcePath, this.userId);		
 	},
 	'click .help-request-didit'() {
-		UserFeedback.create(this.userId, this.userName, 'didit');
+		UserFeedback.create(this.resourcePath, this.userId, this.userName, 'didit');
 		SelfAssessments.helpRequestFromUserCancel(this.resourcePath, this.userId);		
 	},
 	'click .help-request-tried'() {
-		UserFeedback.create(this.userId, this.userName, 'tried');
+		UserFeedback.create(this.resourcePath, this.userId, this.userName, 'tried');
 		SelfAssessments.helpRequestFromUserCancel(this.resourcePath, this.userId);		
 	}
 });

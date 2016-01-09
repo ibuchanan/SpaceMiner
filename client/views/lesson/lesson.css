@@ -1,3 +1,9 @@
+body {
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  height: inherit;
+}
+
 .lesson-parts {
   background-color: rgba(141,6,58,0.5);
 }
@@ -6,7 +12,7 @@
   padding: 8px;
 }
 
-.lesson-continue {
+.lesson-continue, .lesson-home {
   margin-top: 10px;
   margin-bottom: 10px;
   text-align: center;
@@ -23,7 +29,7 @@
   z-index: 0;
   top: 75px;
   bottom: 75px;
-  left: 50%;
+  left: 41%;
   border-left: 3px inset rgba(0, 0, 0, 0.6);
 }
 
@@ -64,5 +70,24 @@
 }
 
 .lesson-section-step-users {
-  margin-left: 4px; 
+  /*margin-left: 4px;*/
+  text-align: center;
+}
+
+.lesson-mastery-zone {
+  background-color: #333;
+  text-align: center;
+  position: fixed;
+  padding-bottom: 12px;
+  top: 0px;
+  right: 0px;
+  font-size: 80%;
+}
+
+.lesson-mastery-zone-label {
+  margin-top: 12px;
+}
+
+.lesson-mastery-zone-help-requests {
+  margin-top: 12px;
 }

@@ -1,25 +1,10 @@
-.lesson-step-users-vertical {
-	display: block;
-}
-
-.lesson-step-users-horizontal {
-	display: inline;
-}
-
-.lesson-step-users-label {
-	margin-top: 2px;
-}
-
-.lesson-step-users-icon {
-	text-align: center;
-}
+/*
 
 .lesson-step-users-current {
-	font-size: 80%;
-	padding: 4px;
+	font-size: 60%;
 }
 
-.lesson-step-users-understand- { /* for those who have not marked an understanding yet */
+.lesson-step-users-understand- { 
 	background-color: darkblue;
 }
 
@@ -40,13 +25,11 @@
 
 .lesson-step-users-helpees {
 	background-color: goldenrod;
-	font-size: 80%;
-	padding: 4px;
+	font-size: 60%;
 }
 
 .lesson-step-users-helpee {
 	margin-right: 4px;
-	display: inline-block;
 }
 
 .lesson-step-users-helpees-from-me {
@@ -72,13 +55,11 @@
 
 .lesson-step-users-helpers {
 	background-color: blueviolet;
-	font-size: 80%;
-	padding: 4px;
+	font-size: 60%;
 }
 
 .lesson-step-users-helper {
 	margin-right: 4px;
-	display: inline-block;
 }
 
 .lesson-step-users-helpers-for-me {
@@ -113,3 +94,5 @@
 	background: transparent !important;
 	border: none;
 }
+
+*/

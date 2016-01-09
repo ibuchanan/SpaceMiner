@@ -83,7 +83,7 @@ Template.home.events({
   }  
 });
 
-var sort = { sort : { lastUpdated: -1 } };
+var sort = { sort : { lastUpdated: -1 }, limit: 20 };
 
 Template.levelsForming.helpers({
   levels: function() {

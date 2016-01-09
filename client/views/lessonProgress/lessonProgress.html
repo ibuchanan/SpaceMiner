@@ -2,7 +2,7 @@
 
 <div class='container-fluid'>
   <div class='row' style='text-align:center'>
-    <h1><span class='label label-warning'><span class='fa fa-search'></span>&nbsp;{{lesson.title}}</span></h1>
+    <h1><span class='label label-danger'><span class='fa fa-graduation-cap'></span>&nbsp;{{lesson.title}}</span></h1>
     <h3>{{description}}</h3>
     <h3><span class='label label-primary'><span class='fa-tags fa'></span> Main topics:</span>
     {{#each lesson.topics_main}}
@@ -53,7 +53,7 @@
     <small><i>{{index}}</i></small>
     <span class='badge alert-{{seenStatusColor}}'><i class='fa {{seenStatusStar}}'></i></span>
     <a href='{{lessonSecStepLink}}' title='{{lastViewed}}'><span class='label label-default'>{{{title}}}</span></a>
-    <span class='lesson-progress-part-users'>{{> lessonStepUsers lessonId=lessonId secIndex=secIndex partIndex=partIndex}} <span class='lesson-progress-part-assessments'>{{> lessonProgress_part_assessments selfAssessments}}</span></span>
+    <span class='lesson-progress-part-users'>{{> lessonStepUsers options=options}} <span class='lesson-progress-part-assessments'>{{> lessonProgress_part_assessments selfAssessments}}</span></span>
   </div>
 </template>
 

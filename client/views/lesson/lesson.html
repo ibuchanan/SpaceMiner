@@ -2,13 +2,10 @@
   <div class='container-fluid lesson'>
     <section class='row'>
       <article class='lesson'>
-        <div>
-          <h1 style='text-align: left; margin-top: 4px;'><span class='label label-danger' title='{{lastViewed}}'>{{lessonTitle}}</span></h1>
-        </div>
         <div class='container-fluid'>
           <div class='row'>
             <div class='col-sm-2 lesson-sections'>
-              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'>Sections</span></h2>
+              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'><span class='fa fa-folder'></span>&nbsp;Sections</span></h2>
                <div style='overflow-y: scroll; max-height: 500px; padding-right: 16px;'>
                 <div class='lesson-sections-nav-line'></div>
                 <ul class='nav nav-pills nav-stacked'>
@@ -18,10 +15,28 @@
                 </ul>
               </div>
             </div>
-            <div class='col-sm-10'>
+            <div class='col-sm-8'>
               {{#each lesson.sections}}
               {{> section}}
               {{/each}}
+            </div>
+            <div class='col-sm-2 lesson-mastery-zone'>
+              <h3 class='lesson-mastery-zone-label'><span class='label label-info'><span class='fa fa-lightbulb-o'></span> Mastery Zone</span></h3>
+              {{#if rendered}}
+              {{#unless isQuiz}}
+                <div class='row lesson-self-assessment'>
+                {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
+                </div>
+                <hr />
+                <div class='lesson-mastery-zone-help-requests'>
+                  <h4><span class="label label-default"><span class='fa fa-child'></span> Help Requests</span></h4>
+                  <p>Monitor and jump to all your requests:</p>
+                  {{> lessonStepUsers options=helpRequestsOptions}}
+                </div>
+              {{else}}
+                No help during quizzes!
+              {{/unless}}
+              {{/if}}
             </div>
           </div>
         </div>
@@ -29,12 +44,15 @@
     </section>
     {{#if rendered}}
       {{#unless isQuiz}}
-      <div class='row lesson-self-assessment'>
-      {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
-      </div>
-      <div class='row lesson-continue'>
-        <button class='btn btn-primary continue btn-sm' disabled>Continue <span class='fa fa-step-forward'></span></button>
-      </div>
+        {{#unless lessonFinished}}
+        <div class='row lesson-continue'>
+          <button class='btn btn-primary continue btn-sm' disabled>Continue <span class='fa fa-step-forward'></span></button>
+        </div>
+        {{else}}
+        <div class='row lesson-home'>
+          <a class='btn btn-danger lesson-home btn-sm' href='/lessons'>Lessons Home <span class='fa fa-home'></span></a>
+        </div>
+        {{/unless}}
       {{/unless}}
     {{/if}}
   </div>
@@ -43,10 +61,11 @@
 <template name='section'>
 <div class='sectionWrapper'>
 {{#if current}}
-  <h2 style='margin-top: 0px; text-align: center;'><span class='label label-info'>{{title}}</span></h2>
+  <h1 style='text-align: center; margin-top: 4px;'><span class='label label-danger' title='{{lessonLastViewed}}'><span class='fa fa-graduation-cap'></span>&nbsp;{{lessonTitle}}</span></h1>
+  <h2 style='margin-top: 0px; text-align: center;'><span class='label label-info'><span class='fa fa-folder-open'></span>&nbsp;{{title}}</span></h2>
   <nav class='lesson-section-steps'>
     <ul class='pagination'>
-      <li><a class="partNav" style='font-weight: bold; color: white'>Steps <span class='fa fa-bookmark'></span></a></li>
+      <li><a class="partNav" style='font-weight: bold; color: white'><span class='fa fa-bookmark'></span></a></li>
       {{#each parts}}
         {{> partNav}}
       {{/each}}
@@ -54,8 +73,9 @@
   </nav>
   {{#each parts}}
     {{#if currentPart}}
-      <h6 style='margin-top: -10px; margin-left: 4px; text-align: center;'><i>{{lastViewedPart}}</i></h6>
-      <div class='lesson-section-step-users'>{{> lessonStepUsers lessonId=lessonId secIndex=secIndex partIndex=partIndex}}</div>
+      <!-- TODO: move this into a title attribute on the nav steps -->
+      <!-- <h6 style='margin-top: -10px; margin-left: 4px; text-align: center;'><i>{{lastViewedPart}}</i></h6> -->
+      <div class='lesson-section-step-users'>{{> lessonStepUsers options=options}}</div>
       <hr />
       {{> Template.dynamic template=type data=this}}
     {{/if}}

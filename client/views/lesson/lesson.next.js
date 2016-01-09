@@ -79,15 +79,6 @@ Template.lesson.helpers({
     };
   },
   lesson: getLesson,
-  lastViewed: function() {
-    var lesson = getLesson();
-    if (!lesson) return '';
-    if (lesson.lastViewed) {
-      var fmt = moment(lesson.lastViewed).fromNow();
-      return 'lesson seen ' + fmt;
-    }
-    return 'lesson seen just now';
-  },
   challengeReady: function() {
     answeredDep.depend();
     var lesson = getLesson();
@@ -100,11 +91,6 @@ Template.lesson.helpers({
       $('.collapse').collapse('hide');
     }
     return ready;
-  },
-  lessonTitle: function() {
-    var lesson = getLesson();
-    if (!lesson) return '';
-    return lesson.title;
   },
   rendered: function() {
     var lesson = getLesson();
@@ -121,7 +107,7 @@ Template.lesson.helpers({
     const lesson = getLesson();
     const secIndex = currentSecIndex.get();
     const partIndex = currentPartIndex.get();
-    const path = `lesson/${lesson.lessonId}/${secIndex}/${partIndex}`;
+    const path = Lessons.resourcePath(lesson.lessonId, secIndex, partIndex);
     return path;
   },
   selfAssessmentData() {
@@ -133,6 +119,17 @@ Template.lesson.helpers({
       const continueButton = instance.find('.continue');
       continueButton.removeAttribute('disabled');
     };
+  },
+  helpRequestsOptions() {    
+    return { filterToUserId: Meteor.userId(), showLinks: true, displayMode: 'vertical' };
+  },
+  lessonFinished() {
+    const index = currentSecIndex.get();     
+    const lesson = getLesson();
+    const sectionCount = lesson.sections.length;
+    const partsCount = lesson.sections[index].parts.length;
+    const partIndex = currentPartIndex.get();
+    return (index >= lesson.sections.length - 1) && partIndex >= partsCount - 1;
   }
 });
 
@@ -155,10 +152,24 @@ Template.popquiz.helpers({
 });
 
 Template.section.helpers({
+  lessonLastViewed: function() {
+    const lesson = getLesson();
+    if (!lesson) return '';
+    if (lesson.lastViewed) {
+      const fmt = moment(lesson.lastViewed).fromNow();
+      return 'lesson seen ' + fmt;
+    }
+    return 'lesson seen just now';
+  },
   current() {
     var index = currentSecIndex.get();    
     return this.index === index;
   },
+  lessonTitle: function() {
+    const lesson = getLesson();
+    if (!lesson) return '';
+    return lesson.title;
+  },  
   title() {
     var index = currentSecIndex.get();
     var lesson = getLesson();
@@ -175,18 +186,16 @@ Template.section.helpers({
   partIndex() {
     return this.index + 1;
   },
-  lessonId() {
-    return Router.current().params.query.id;
-  },
-  secIndex() {
-    lessonDep.depend();
-    const index = currentSecIndex.get();
-    return index;
-  },
   partIndex() {
     lessonDep.depend();
     const index = currentPartIndex.get();
     return index;
+  },
+  options() {
+    lessonDep.depend();
+    const secIndex = currentSecIndex.get();
+    const partIndex = currentPartIndex.get();
+    return { resourcePath: Lessons.resourcePath(Router.current().params.query.id, secIndex, partIndex) };
   }
 });
 

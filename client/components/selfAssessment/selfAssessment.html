@@ -1,23 +1,48 @@
 <template name='selfAssessment'>
-<div class='btn-group' data-toggle='buttons'>
-  <h3>Got it?</h3>
-  <label class='btn btn-danger understand not btn-sm'>
-    <input type='radio' name='understand' value='not' /> Not exactly <span class='fa fa-frown-o'></span>
+<div data-toggle='buttons'>
+  <h4><span class="label label-default"><span class='fa fa-line-chart'></span> Mastery Level</span></h4>
+  <p>Rate your mastery of this step:</p>
+  <label class='btn btn-danger self-assessment-understand not btn-sm'>
+    <input type='radio' name='understand' value='not' /> Mastering little <span class='fa fa-frown-o'></span>
   </label>
   {{#if not}}
-  <button class='btn btn-info not-help btn-sm'><span class='fa fa-hand-stop-o'></span> Help me!</button>
+  <div class='btn-group self-assessment-help-options'>
+    <h6><span class='label label-warning'>Want help? <span class='fa fa-life-saver'></span></span></h6>
+    <label class='btn btn-info btn-xs not-help self-assessment-help-option {{activeFor "wants-help-yes"}}'>
+      <input type='radio' name='not-help-options' /> Yes <span class='fa fa-hand-stop-o'></span>
+    </label>
+    <label class='btn btn-danger btn-xs not-help-cancel self-assessment-help-option {{activeFor "wants-help-no"}}'>
+      <input type='radio' name='not-help-options' /> Not now <span class='fa fa-ban'></span>
+    </label>
+  </div>
   {{/if}}
-  <label class='btn btn-warning understand almost btn-sm'>
-    <input type='radio' name='understand' value='almost' /> Almost there <span class='fa fa-meh-o'></span>
+  <label class='btn btn-warning self-assessment-understand almost btn-sm'>
+    <input type='radio' name='understand' value='almost' /> Mastering some <span class='fa fa-meh-o'></span>
   </label>
   {{#if almost}}
-  <button class='btn btn-info almost-help btn-sm'><span class='fa fa-hand-stop-o'></span> Help me!</button>
+  <div class='btn-group self-assessment-help-options'>
+    <h6><span class='label label-warning'>Want help? <span class='fa fa-life-saver'></span></span></h6>
+    <label class='btn btn-info btn-xs almost-help self-assessment-help-option {{activeFor "wants-help-yes"}}'>
+      <input type='radio' name='almost-help-options' /> Yes <span class='fa fa-hand-stop-o'></span>
+    </label>
+    <label class='btn btn-danger btn-xs almost-help-cancel self-assessment-help-option {{activeFor "wants-help-no"}}'>
+      <input type='radio' name='almost-help-options' /> Not now <span class='fa fa-ban'></span>
+    </label>
+  </div>
   {{/if}}
-  <label class='btn btn-success understand yes btn-sm'>
-    <input type='radio' name='understand' value='yes' /> Got it! <span class='fa fa-smile-o'></span>
+  <label class='btn btn-success self-assessment-understand yes btn-sm'>
+    <input type='radio' name='understand' value='yes' /> Mastering all! <span class='fa fa-smile-o'></span>
   </label>
   {{#if yes}}
-  <button class='btn btn-info i-can-help btn-sm'><span class='fa fa-life-ring'></span> I can help!</button>
+  <div class='btn-group self-assessment-help-options'>
+    <h6><span class='label label-warning'>Will you help? <span class='fa fa-life-saver'></span></span></h6>
+    <label class='btn btn-success btn-xs i-can-help self-assessment-help-option {{activeFor "will-help-yes"}}'>
+      <input type='radio' name='not-help-options' /> Yes <span class='fa fa-life-saver'></span>
+    </label>
+    <label class='btn btn-danger btn-xs i-can-help-cancel self-assessment-help-option {{activeFor "will-help-no"}}'>
+      <input type='radio' name='not-help-options' /> Not now <span class='fa fa-ban'></span>
+    </label>
+  </div>
   {{/if}}
 </div>
 </template>
