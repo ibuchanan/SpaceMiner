@@ -844,6 +844,28 @@ window.walln = walln;
 //wall({size:16, dir:'l', start:{x:16,y:1}});
 //wall({size:10, dir:'u', start:{x:1,y:10}});
 
+let minen = ({
+  start = {
+    x : 1,
+    y : 1
+  },
+  size = 1,
+  dir = 'r',
+  sprite = 'c',
+  l = null,
+  r = null,
+  u = null,
+  d = null,
+  asset
+  } = {}) => {
+  if (l !== null) dir = 'l';
+  if (r !== null) dir = 'r';
+  if (u !== null) dir = 'u';
+  if (d !== null) dir = 'd';  
+  walln({start, size, sprite, dir, asset});
+};
+window.minen = minen;
+
 let boxn = ({
   start = {
     x : 1,
@@ -853,7 +875,6 @@ let boxn = ({
   sprite = 't',
   asset
   } = {}) => {
-
   walln({start, size, sprite, dir:'r', asset});
   walln({start: { x : start.x + size - 1, y: start.y }, size, sprite, dir : 'd', asset});
   walln({start: { x : start.x + size - 1, y: start.y + size - 1}, size, sprite, dir : 'l', asset});
@@ -979,7 +1000,7 @@ window.repeatn = repeatn;
 let repeat = invokeDeferSimple(repeatn);
 window.repeat = repeat;
 
-['sprite', 'wall', 'fill', 'box', 'block'].map(funcName =>
+['sprite', 'wall', 'mine', 'fill', 'box', 'block'].map(funcName =>
  window[funcName] = invokeDefer(funcName));
 
 ['duplicate', 'dup'].map(funcName => 

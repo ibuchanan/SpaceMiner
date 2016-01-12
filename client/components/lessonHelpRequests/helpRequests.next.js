@@ -1,4 +1,4 @@
-const options = {sort: {date: -1, limit: 20}};
+const options = {sort: {date: -1}, limit: 20};
 
 const removeSelf = users => users.filter(u => u.userId !== Meteor.userId());
 

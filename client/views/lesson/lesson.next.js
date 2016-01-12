@@ -121,7 +121,7 @@ Template.lesson.helpers({
     };
   },
   helpRequestsOptions() {    
-    return { filterToUserId: Meteor.userId(), showLinks: true, displayMode: 'vertical' };
+    return { filterToUserId: Meteor.userId(), showLinks: true, displayMode: 'vertical'};
   },
   lessonFinished() {
     const index = currentSecIndex.get();     
@@ -195,7 +195,7 @@ Template.section.helpers({
     lessonDep.depend();
     const secIndex = currentSecIndex.get();
     const partIndex = currentPartIndex.get();
-    return { resourcePath: Lessons.resourcePath(Router.current().params.query.id, secIndex, partIndex) };
+    return { resourcePath: Lessons.resourcePath(Router.current().params.query.id, secIndex, partIndex), limit: 5 };
   }
 });
 

@@ -1,17 +1,23 @@
-const findOptions = {sort: {date: -1}}; // OLD: , limit: 5}};
+const findOptions = {sort: {date: -1 }, limit: 5};
 
 const removeSelf = users => users.filter(u => u.userId !== Meteor.userId());
 
-const findPresentUsers = resourcePath => Presence.presenceFromMinutes(5, resourcePath);
+const findPresentUsers = resourcePath => Presence.presenceFromMinutes(15, resourcePath);
 
-const findAssessments = (options, criteria) => SelfAssessments.findByResourcePath(options.resourcePath, criteria, findOptions).fetch();
+const findAssessments = (options, criteria) => {
+	console.log('original options: ', options);
+	findOptions.limit = options.limit;
+	console.log(findOptions.limit + ' and -> ' + options.limit);
+	return SelfAssessments.findByResourcePath(options.resourcePath, criteria, findOptions).fetch();
+}
 
 const findHelpOffers = users => users.filter(u => u.userId === Meteor.userId() && u.helpOfferredByUserId !== null);
 
-const findRequestForMe = (helpeeUserId, helperId=Meteor.userId()) => {
+const findRequestForMe = (helpeeUserId, resourcePath, helperId=Meteor.userId()) => {
 	const item = SelfAssessments.findOne({
 		userId: helperId,
-		helpRequestedByUserId: helpeeUserId
+		helpRequestedByUserId: helpeeUserId,
+		resourcePath
 	});
 	return item;
 };
@@ -66,7 +72,7 @@ const addHelpRequestInfo = users => {
 
 const pending = item => item.helpOfferredByUserId !== null && item.helpOfferredByUserId !== Meteor.userId();
 const pendingMyHelp = item => item.helpOfferredByUserId === Meteor.userId();
-const wantsMyHelp = item => findRequestForMe(item.userId) !== undefined && item.helpOfferredByUserId !== Meteor.userId();
+const wantsMyHelp = item => findRequestForMe(item.userId, item.resourcePath) !== undefined && item.helpOfferredByUserId !== Meteor.userId();
 const helpAcceptedByMe = item => item.helpOfferredToMe === true && item.helpRequestedByUserId === Meteor.userId();
 const iAmWillingToHelp = item => SelfAssessments.findOne({resourcePath:item.resourcePath, userId:Meteor.userId(), sense:'yes', helpMadeAvailable:true}) !== undefined;
 const iAmWillingToBeHelped = item => SelfAssessments.findOne({resourcePath:item.resourcePath, userId:Meteor.userId(), helpRequested: true}) !== undefined;
@@ -74,7 +80,7 @@ const iAmWillingToBeHelped = item => SelfAssessments.findOne({resourcePath:item.
 Template.lessonStepUsers.onCreated(function(template) {
 	if (this.data.options && _.isString(this.data.options)) this.options = JSON.parse(this.data.options)
 	else if (this.data.options && _.isObject(this.data.options)) this.options = this.data.options;
-	else this.options = { resourcePath: undefined, filterToUserId: undefined, showLinks: false, displayMode: 'horizontal' };
+	else this.options = { resourcePath: undefined, filterToUserId: undefined, showLinks: false, displayMode: 'horizontal', limit: 1 };
 });
 
 Template.lesson_step_users_info.onRendered(function() {
@@ -134,7 +140,7 @@ Template.lessonStepUsers.helpers({
 		return helperUsers;
 	},
 	helpeeClass() {
-		const needsMyHelp = findRequestForMe(this.userId) !== undefined;
+		const needsMyHelp = findRequestForMe(this.userId, this.resourcePath) !== undefined;
 		if (this.helpOfferredByUserId === Meteor.userId() && needsMyHelp) {
 			this.helpRequestedFromMe = true;
 			return 'lesson-step-users-helpees-from-me confirmed';

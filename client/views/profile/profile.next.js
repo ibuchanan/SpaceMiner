@@ -54,7 +54,7 @@ Template.profile.helpers({
   },
   options() {
     const userId = Template.instance().data.userId;
-    return { filterToUserId: userId, showLinks: true, displayMode: 'vertical' };
+    return { filterToUserId: userId, showLinks: true, displayMode: 'vertical', limit: 1000 };
   }
 });
 

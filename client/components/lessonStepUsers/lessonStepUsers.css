@@ -30,7 +30,7 @@
 
 .lesson-step-users-understand-almost {
 	background-color: #f89406;
-	font-size: 80%;	
+	font-size: 80%;
 }
 
 .lesson-step-users-understand-yes {
@@ -63,7 +63,7 @@
 }
 
 .lesson-step-users-helpees-from-me.requested {
-	background-color: yellow;
+	background-color: lightgray;
 }
 
 .lesson-step-users-helpees-from-me.confirmed {
@@ -91,7 +91,7 @@
 }
 
 .lesson-step-users-helpers-for-me.offerred {
-	background-color: yellow;
+	background-color: lightgray;
 }
 
 .lesson-step-users-helpers-for-me.requested {
