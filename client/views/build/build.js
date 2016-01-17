@@ -64,7 +64,7 @@ function updateDefaultSprite(customSpriteType) {
 };
 
 
-var hideInstructions = new ReactiveVar(false);
+var hideInstructions = new ReactiveVar(true);
 
 var customSpriteTypes = ['tile', 'enemy', 'coin', 'gem', 'player'];
 
@@ -383,14 +383,11 @@ Template.build.rendered = function() {
           updatedBy: userName()
         };
 
-        $('#gameTabsNav a[href="#gamePreviewTab"]').tab('show');
         Meteor.call('levelUpdate', level.get(), props, buildStepUpdateCounts, function(err) {
-          Meteor.setTimeout(function(){
-            gameUpdated = true;
-            gameUpdatedDep.changed();
-            // TODO: this is weird. It's not entirely helping prevent the phantom player and double enemies spawning
-            game.reset();
-          }, 350);
+          var previewWin = window.open('/play?id=' + level.get() + '&mode=preview', 'gamePreview', 'modal=yes,width=1024,height=768');
+          previewWin.focus();
+          gameUpdated = true;
+          gameUpdatedDep.changed();
         });
       }
       updateRun = true;

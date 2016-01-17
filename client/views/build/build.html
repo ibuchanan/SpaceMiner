@@ -66,7 +66,7 @@
               {{#each instructions}}
               <li class='list-group-item'><span class='fa fa-caret-right'></span> {{{step}}}{{#if tips}} <span class='tips label label-warning'><span class='fa fa-life-ring'></span> {{{tips}}}</span>{{/if}}</li>
               {{/each}}
-              <li class='list-group-item'><span class='fa fa-caret-right'></span> When finished, press the <b>Update world</b> button to see the change.</li>            
+              <li class='list-group-item'><span class='fa fa-caret-right'></span> When finished, press the <b>Update & preview world</b> button to see the change.</li>            
             </ul>
           </div>
           {{/if}}
@@ -83,19 +83,6 @@
           </div>      
           {{/if}}      
         {{/each}}
-        <!-- TODO replace with component -->
-        <div class='btn-group' data-toggle='buttons'>
-          <h2>Got it?</h2>
-          <label class='btn btn-danger understand not'>
-            <input type='radio' name='understand' value='not' /> Not exactly <span class='fa fa-frown-o'></span>
-          </label>
-          <label class='btn btn-warning understand almost'>
-            <input type='radio' name='understand' value='almost' /> Almost there <span class='fa fa-meh-o'></span>
-          </label>
-          <label class='btn btn-success understand yes'>
-            <input type='radio' name='understand' value='yes' /> Got it! <span class='fa fa-smile-o'></span>
-          </label> 
-        </div>      
         {{#if stepPreviousEnabled}}
         <button class="btn btn-primary stepPrev"><span class='fa fa-step-backward'></span> Previous</button>
         {{/if}}
@@ -110,13 +97,12 @@
           <!-- Nav tabs -->
           <ul class="nav nav-tabs" role="tablist" id='gameTabsNav'>
             <li role="presentation" class="active"><a href="#codeEditorTab" aria-controls="home" role="tab" data-toggle="tab"><span class='fa fa-code'></span> Code Editor</a></li>
-            <li role="presentation"><a href="#gamePreviewTab" aria-controls="profile" role="tab" data-toggle="tab"><span class='fa fa-gamepad'></span> Game Preview</a></li>
           </ul>
           <!-- Tab panes -->
           <div class="tab-content">
             <div role="tabpanel" class="tab-pane active" id="codeEditorTab">
               <div class='header'>              
-                <button class='btn btn-success btn-sm' id="update"><span class='fa fa-refresh'></span> Update world</button>
+                <button class='btn btn-success btn-sm' id="update"><span class='fa fa-refresh'></span> Update & preview world</button>
                 <button class='btn btn-danger btn-sm' id="test"><span class='fa-bug fa'></span> Send world to test</button>
                 <button class='btn btn-info btn-sm' id="release"><span class='fa fa-flag-checkered'></span> Release world!</button>
               </div>
@@ -149,36 +135,9 @@
               {{/with}}
               </div>
             </div>
-            <div role="tabpanel" class="tab-pane" id="gamePreviewTab">
-              {{#with gameUpdated}}
-                {{> game level=level buttons=buttons enableSound=false}}
-                <br />
-              {{/with}}
-            </div>
           </div>
         </div>
       </section>
     </div>
   </div>
 </template>
-
-<!--
-        <section class="col-md-7" id="instructions">
-          <h2>Code editor</h2>
-          <div id="codeInput"></div>
-          <p id="step" class="stepText"></p>
-          <button class="btn btn-success" id="update"><span class='fa fa-refresh'></span> Update world</button>
-          <button class="btn btn-primary" id="next"><span class='glyphicon glyphicon-step-forward stepNext'></span> Next</button>
-        </section>
-        <section class="col-md-5 well" style="text-align:center" id="worldSection">
-          <div id="header"></div>
-          <div id="worldContainer" class='worldMap'></div>
-          {{#with gameUpdated}}
-            {{> game level=level buttons=buttons enableSound=false}}
-            <br />
-          {{/with}}
-          <button class="btn btn-danger" id="test"><span class='fa-bug fa'></span> Test</button>
-          <button class="btn btn-info" id="release"><span class='fa fa-flag-checkered'></span> Release!</button>
-        </section>
-
--->

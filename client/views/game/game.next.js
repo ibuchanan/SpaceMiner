@@ -109,7 +109,7 @@ let startTasks = [];
 
 let start = (...tasks) => { 
   startTasks.length = 0;
-  startTasks = startTasks.concat(tasks); 
+  startTasks = startTasks.concat(tasks);
 };
 `);
 
@@ -134,7 +134,8 @@ eval(windowFuncsFromES);
 this.OnWon = function() {
 }
 
-if (this.game) this.game.reset();
+// TODO: do we really need this?
+if (this.game) this.game.resetState();
 
 this.game = new Game();
 
@@ -612,19 +613,19 @@ function _move(props, cells, direction, next) {
 }
 window._move = _move;
 
-let r, right, l, left, u, up, d, down, pt, point;
+let r, right, l, left, u, up, d, down, pt, point, teleport, tp;
 
 r = right = r => { return {r} };
 l = left = l => { return {l} };
 d = down = d => { return {d} };
 u = up = u => { return {u} };
-pt = point = (x, y) => `${x} ${y}`;
+pt = point = teleport = tp = (x, y) => `${x} ${y}`;
 
 window.r = window.right = r;
 window.u = window.up = u;
 window.l = window.left = l;
 window.d = window.down = d;
-window.pt = window.point = pt;
+window.pt = window.point = window.tp = window.teleport = pt;
 
 let moveString = m => {
   let direction = Object.keys(m)[0]
@@ -641,7 +642,7 @@ let makeMoves = moves => moves.map(move => {
   return move;
 });
 
-function move(...args) {
+let move = (...args) => {
  let [props, ...moveArgs] = args;
  if (moveNeedsPlayerProps(props)) {
   props = game.player.qobj.p;
@@ -1101,6 +1102,10 @@ game.world.rules = rules(
 );
 */
 
+let navigate = invokeDeferSimple(move);
+window.navigate = navigate;
+window.nv = navigate;
+
 function configureQuintus(callback, options) {
   /*
   if (Qloaded()) {
@@ -1120,7 +1125,9 @@ function configureQuintus(callback, options) {
     if (options.enableSound) setup.enableSound();
     window.gameSetup = setup;
     // Automatically enable the keyboard if we are on the /play route
-    if (window.location.pathname.indexOf('/play') === 0) {
+    const pathname = window.location.pathname;
+    const search = window.location.search;
+    if (pathname.indexOf('/play') === 0 && search.indexOf('mode=preview') === -1) {
       window.gameSetup.controls(true);
       q.input.keyboardControls();
       q.input.joypadControls();      
