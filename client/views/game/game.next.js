@@ -107,7 +107,10 @@ let setup = (...tasks) => {
 
 let startTasks = [];
 
-let start = (...tasks) => startTasks = startTasks.concat(tasks);
+let start = (...tasks) => { 
+  startTasks.length = 0;
+  startTasks = startTasks.concat(tasks); 
+};
 `);
 
 let windowFuncsFromES = babelize(`
@@ -866,6 +869,25 @@ let minen = ({
 };
 window.minen = minen;
 
+let landn = ({
+  start = {
+    x: 1,
+    y: 1
+  },
+  asset
+} = {}) => {
+  const sprite = 'p';
+  game.world.setSprite(sprite, start.x, start.y, asset);
+};
+window.landn = landn;
+
+let manualPilotn = () => {
+  window.gameSetup.controls(true);
+  Q.input.keyboardControls();
+  Q.input.joypadControls();
+};
+window.manualPilotn = manualPilotn;
+
 let boxn = ({
   start = {
     x : 1,
@@ -1000,7 +1022,7 @@ window.repeatn = repeatn;
 let repeat = invokeDeferSimple(repeatn);
 window.repeat = repeat;
 
-['sprite', 'wall', 'mine', 'fill', 'box', 'block'].map(funcName =>
+['sprite', 'wall', 'mine', 'fill', 'box', 'block', 'land', 'manualPilot'].map(funcName =>
  window[funcName] = invokeDefer(funcName));
 
 ['duplicate', 'dup'].map(funcName => 
@@ -1096,10 +1118,14 @@ function configureQuintus(callback, options) {
       //maximize: 'touch'
     });
     if (options.enableSound) setup.enableSound();
-    setup.controls(true);
-    q.input.keyboardControls();
-    q.input.joypadControls();
-  }
+    window.gameSetup = setup;
+    // Automatically enable the keyboard if we are on the /play route
+    if (window.location.pathname.indexOf('/play') === 0) {
+      window.gameSetup.controls(true);
+      q.input.keyboardControls();
+      q.input.joypadControls();      
+    }
+  };
 
   var modules = ["Sprites", "Scenes", "Input", "2D", "UI", "Anim"];
   var audioSupported = [];
