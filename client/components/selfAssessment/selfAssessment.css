@@ -1,3 +1,15 @@
+.self-assessment-buttons {
+	text-align: center;
+}
+
+.self-assessment-button {
+	width: 80%;
+}
+
+.self-assessment-mastery-label {
+	background-color: transparent;
+}
+
 .self-assessment-understand {
 	margin-top: 6px;
 }

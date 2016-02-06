@@ -1,8 +1,10 @@
 <template name='game'>
   <div id='gamePanel' class='{{showIfGameOpen}}'>
+    {{#if linkEnabled}}
     <h1 class='currentGameName'><span class='label label-warning'>{{name}} <span class='fa fa-flag-checkered'></span></span></h1>
     <h4>Explored by: {{explorerName}}</h4>
     <h5>Enemies respawn: {{enemiesRespawn}}</h5>
+    {{/if}}
     <div class='{{hideIfGameLoading}}'>
       <div class='btn-group btn-group-sm'>
         <button class='btn btn-warning gamePause {{allowed "gamePause"}} {{hideIfPaused}} {{hideIfGameComplete}}'><span class='fa fa-pause'></span> Pause</button>

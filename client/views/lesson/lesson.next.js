@@ -1,6 +1,13 @@
+const lastSeenText = date => {
+  const dateText = moment(date).fromNow();
+  if (dateText === 'Invalid date') return 'never seen';
+  return `seen ${dateText}`;
+};
+
 var lesson = null;
 var lessonProgress;
 var lessonDep = new Tracker.Dependency;
+const sectionNavVisible = new ReactiveVar(true);
 
 var currentSecIndex = new ReactiveVar(0);
 var currentPartIndex = new ReactiveVar(0);
@@ -68,18 +75,50 @@ function getLesson() {
   return lesson;
 }
 
+const selfAssessmentResourcePath = () => {
+  const lesson = getLesson();
+  const secIndex = currentSecIndex.get();
+  const partIndex = currentPartIndex.get();
+  const path = Lessons.resourcePath(lesson.lessonId, secIndex, partIndex);
+  return path;
+};
+
 let answeredDep = new Tracker.Dependency;
 let isQuiz = new ReactiveVar(false);
 
 Template.lesson.helpers({
-  gameData: function() {
+  sectionWidth() {
+    return sectionNavVisible.get() ? '7' : '10';
+  },
+  sectionShimClass() {
+    return sectionNavVisible.get() ? '' : 'lesson-section-fullscreen-left-shim';
+  },
+  lessonTitle() {
+    const lesson = getLesson();
+    if (!lesson) return '';
+    return lesson.title;
+  },
+  lessonDescription() {
+    const lesson = getLesson();
+    return lesson ? lesson.description : '';
+  },
+  lessonLastViewed() {
+    const lesson = getLesson();
+    if (!lesson) return '';
+    if (lesson.lastViewed) {
+      const fmt = moment(lesson.lastViewed).fromNow();
+      return 'lesson seen ' + fmt;
+    }
+    return 'lesson seen just now';
+  },  
+  gameData() {
     return {
       level: "boxStep",
       enableSound: false
     };
   },
   lesson: getLesson,
-  challengeReady: function() {
+  challengeReady() {
     answeredDep.depend();
     var lesson = getLesson();
     if (!lesson) return;
@@ -92,33 +131,12 @@ Template.lesson.helpers({
     }
     return ready;
   },
-  rendered: function() {
+  rendered() {
     var lesson = getLesson();
     return lesson !== null;
   },
-  isQuiz: function() {
-    let wellIsIt = isQuiz.get();
-    return wellIsIt;
-  },
   currentPartIndex() {
     return currentPartIndex.get();
-  },
-  selfAssessmentResourcePath() {
-    const lesson = getLesson();
-    const secIndex = currentSecIndex.get();
-    const partIndex = currentPartIndex.get();
-    const path = Lessons.resourcePath(lesson.lessonId, secIndex, partIndex);
-    return path;
-  },
-  selfAssessmentData() {
-    return { nothing: 'here yet'};
-  },
-  onAssessmentSelected() {
-    const instance = Template.instance();
-    return () => {
-      const continueButton = instance.find('.continue');
-      continueButton.removeAttribute('disabled');
-    };
   },
   helpRequestsOptions() {    
     return { filterToUserId: Meteor.userId(), showLinks: true, displayMode: 'vertical'};
@@ -130,7 +148,20 @@ Template.lesson.helpers({
     const partsCount = lesson.sections[index].parts.length;
     const partIndex = currentPartIndex.get();
     return (index >= lesson.sections.length - 1) && partIndex >= partsCount - 1;
-  }
+  },
+  selfAssessmentResourcePath() {
+    return selfAssessmentResourcePath();
+  },
+  selfAssessmentData() {
+    return { nothing: 'here yet'};
+  },
+  onAssessmentSelected() {
+    const instance = Template.instance();
+    return () => {
+      const continueButton = instance.find('.continue');
+      continueButton.removeAttribute('disabled');
+    };
+  }  
 });
 
 let popquiz = {finished:false};
@@ -152,24 +183,10 @@ Template.popquiz.helpers({
 });
 
 Template.section.helpers({
-  lessonLastViewed: function() {
-    const lesson = getLesson();
-    if (!lesson) return '';
-    if (lesson.lastViewed) {
-      const fmt = moment(lesson.lastViewed).fromNow();
-      return 'lesson seen ' + fmt;
-    }
-    return 'lesson seen just now';
-  },
   current() {
     var index = currentSecIndex.get();    
     return this.index === index;
   },
-  lessonTitle: function() {
-    const lesson = getLesson();
-    if (!lesson) return '';
-    return lesson.title;
-  },  
   title() {
     var index = currentSecIndex.get();
     var lesson = getLesson();
@@ -199,9 +216,11 @@ Template.section.helpers({
   }
 });
 
+const isCurrentSection = index => index === currentSecIndex.get();
+
 Template.sectionNav.helpers({
   current() {
-    return this.index === currentSecIndex.get() ? 'active' : '';
+    return isCurrentSection(this.index) ? 'active' : '';
   },
   seenStar() {
     currentSecIndex.get();
@@ -218,6 +237,16 @@ Template.sectionNav.helpers({
       return 'seen ' + fmt;
     }
     return index === this.index ? 'seen just now' : 'never seen';
+  },
+  sectionCurrent() {
+    return currentSecIndex.get() + 1;
+  },
+  sectionTotal() {
+    const lesson = getLesson();
+    return lesson.sections.length;
+  },
+  sectionCurrentClass() {
+    return isCurrentSection(this.index) ? '' : 'lesson-section-nav-unselected';
   }
 });
 
@@ -231,7 +260,71 @@ Template.sectionNav.events({
   }
 });
 
-Template.lesson.events({  
+const isCurrentPart = index => currentPartIndex.get() === index;
+
+Template.sectionNavParts.helpers({
+  current() {
+    return isCurrentPart(this.index);
+  },
+  partIndex() {
+    return this.index + 1;
+  },
+  seenStatusColor() {
+    const seenText = lastSeenText(this.lastViewed);
+    return seenText === 'never seen' ? 'primary' : 'success';
+  },
+  seenStatusEye() {
+    const seenText = lastSeenText(this.lastViewed);
+    return seenText === 'never seen' ? 'fa-eye-slash' : 'fa-eye';
+  },
+  labelType() {
+    return isCurrentPart(this.index) ? 'primary' : 'default';
+  },
+  stepCurrent() {
+    return currentPartIndex.get() + 1;
+  },
+  stepTotal() {
+    const lesson = getLesson();
+    return lesson.sections[currentSecIndex.get()].parts.length;
+  },
+  isQuiz() {
+    const wellIsIt = isQuiz.get();
+    return wellIsIt;
+  },
+  selfAssessmentResourcePath() {
+    return selfAssessmentResourcePath();
+  },
+  selfAssessmentData() {
+    return { nothing: 'here yet'};
+  },
+  onAssessmentSelected() {
+    const instance = Template.instance();
+    return () => {
+      const continueButton = instance.find('.continue');
+      continueButton.removeAttribute('disabled');
+    };
+  }
+});
+
+Template.sectionNavParts.events({
+  'click .lesson-section-nav-parts-part-link': function(evt, template) {
+    currentPartIndex.set(this.index);
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
+    updateLessonProgressPartLastViewed(lessonProgress, currentSecIndex.get(), this.index);    
+  }
+});
+
+Template.lesson.events({
+  'click .lesson-menu-hide'() {
+    $('.lesson-menu').hide();
+    $('.lesson-menu-show').show();
+    sectionNavVisible.set(false);
+  },
+  'click .lesson-menu-show'() {
+    $('.lesson-menu-show').hide();    
+    $('.lesson-menu').show();
+    sectionNavVisible.set(true);
+  },  
   'click .prev'() {
     var index = currentSecIndex.get(); 
     currentSecIndex.set(index-1);
@@ -254,24 +347,6 @@ Template.lesson.events({
     }
     $(template.find('.continue')).attr('disabled', 'disabled');
   },  
-});
-
-Template.partNav.helpers({
-  current() {
-    var partIndex = currentPartIndex.get();
-    return partIndex === this.index;
-  },
-  partIndex() {
-    return this.index + 1;
-  }
-});
-
-Template.partNav.events({
-  'click .partNav': function(evt, template) {
-    currentPartIndex.set(template.data.index);
-    LessonsProgress.overlayOnLesson(lesson, lessonProgress);
-    updateLessonProgressPartLastViewed(lessonProgress, currentSecIndex.get(), template.data.index);    
-  }
 });
 
 var sharedHelpers = {

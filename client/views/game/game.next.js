@@ -734,7 +734,8 @@ let Rule = class {
     when = game => false,
     once = true,
     continuous = false,
-    then = game => {}
+    then = game => {},
+    collision = null
   }) {
     this.score = score;
     this.enemyCount = enemyCount;
@@ -742,6 +743,7 @@ let Rule = class {
     this.once = once;
     this.executed = false;
     this.continuous = continuous && once == false;
+    this.collision = collision;
     this.then = then;
   }
 
@@ -755,6 +757,9 @@ let Rule = class {
       } else if (this.enemyCount > -1) {
         let enemyCount = game.enemies.length;
         shouldExecute = enemyCount === this.enemyCount;
+      } else if (this.collision !== null) {
+        new Collision(game.q, this.collision).execute();
+        this.executed = true;
       }
 
       let execute = () => {
@@ -961,6 +966,12 @@ let duplicaten = (count,
 };
 window.duplicaten = window.dupn = duplicaten;
 
+let warpn = (id = 'starter') => {
+    game.pause();
+    window.location = `/play?id=${id}`;
+};
+window.warpn = warpn;
+
 let invoke = (list, funcName, ...args) => {
   let array = Array.from(list);
   for(let item of array) {
@@ -1066,7 +1077,7 @@ window.recur = recur;
 
 let score = (...opts) => {
   let props = {};
-  if (opts.length < 2) throw 'Must pass at least two arguments to score(...) function';
+  if (opts.length < 2) throw 'Must pass at least two arguments to the score(...) function';
   // Assume number here:
   let scoreMin = parseInt(opts.shift());
   props.score = scoreMin;
@@ -1075,20 +1086,61 @@ let score = (...opts) => {
 };
 window.score = score;
 
-let collision = (at, func) => {
-    let targetPos = Q.tilePos(at.start.x, at.start.y);
-    let targetSprite = Q.stage().locate(targetPos.x, targetPos.y);
+let Collision = class {
+  constructor(q, props) {
+    this.q = q;
+    this.x = props.x;
+    this.y = props.y
+    this.handler = props.handler;
+  }
+
+  execute() {
+    let targetPos = this.q.tilePos(this.x, this.y);
+    let targetSprite = this.q.stage().locate(targetPos.x, targetPos.y);
     if (targetSprite && targetSprite.sensor) {
-        targetSprite.on('sensor', func);
+        targetSprite.on('sensor', this.handler);
     }
+  }
+};
+
+let collision = (...opts) => {
+    let props = { collision: {} };
+    if (opts.length < 2) throw 'Must pass at least two arguments to the collision(...) function';
+    let at = opts.shift();
+    if (!at.start) throw 'Must pass a call to the at(...) function as the firgst argument to the collision(...) function';
+    props.collision.x = at.start.x;
+    props.collision.y = at.start.y;
+    let mappedOpts = opts.map(opt => {
+      if (opt.collision && opt.collision.handler) {
+        return () => new Collision(game.q, opt.collision).execute();
+      }
+      return opt;
+    });
+    props.collision.handler = funcCombine(mappedOpts);
+    return props;
+
 };
 window.collision = collision;
 
-let warpn = (id = 'starter') => {
-    game.pause();
-    window.location = `/play?id=${id}`;
-};
-window.warpn = warpn;
+/* Example
+
+let worldName = 'Collision Test';
+
+start(
+    fill(coin),
+    land(at(10,9)),
+    manualPilot
+)
+
+rules(
+    collision(at(10,7), wall(coins.pink), 
+        collision(at(10, 5), wall(gem), 
+            collision(at(10, 2), wall(gems.emerald))
+        )
+    )
+)
+
+*/
 
 // Example:
 /*
@@ -1105,6 +1157,9 @@ game.world.rules = rules(
 let navigate = invokeDeferSimple(move);
 window.navigate = navigate;
 window.nv = navigate;
+
+let warp = invokeDeferSimple(warpn);
+window.warp = warp;
 
 function configureQuintus(callback, options) {
   /*

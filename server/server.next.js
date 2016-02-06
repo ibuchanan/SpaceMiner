@@ -503,8 +503,6 @@ function cleanDbAndCreateDefaultRecords() {
     var imageGlobPath = IMAGES_BASE + "spriteParts/**/*.png";
     
     glob(imageGlobPath, Meteor.bindEnvironment((er, files)=> {
-      console.log("Sprite part images found:");
-      console.log(files);
       var spriteParts = _.chain(files)
       .map((file)=> { 
         return file.replace(IMAGES_BASE + "spriteParts/", "");

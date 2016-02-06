@@ -5,11 +5,9 @@ const removeSelf = users => users.filter(u => u.userId !== Meteor.userId());
 const findPresentUsers = resourcePath => Presence.presenceFromMinutes(15, resourcePath);
 
 const findAssessments = (options, criteria) => {
-	console.log('original options: ', options);
 	findOptions.limit = options.limit;
-	console.log(findOptions.limit + ' and -> ' + options.limit);
 	return SelfAssessments.findByResourcePath(options.resourcePath, criteria, findOptions).fetch();
-}
+};
 
 const findHelpOffers = users => users.filter(u => u.userId === Meteor.userId() && u.helpOfferredByUserId !== null);
 

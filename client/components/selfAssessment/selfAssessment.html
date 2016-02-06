@@ -1,9 +1,8 @@
 <template name='selfAssessment'>
-<div data-toggle='buttons'>
-  <h4><span class="label label-default"><span class='fa fa-line-chart'></span> Mastery Level</span></h4>
-  <p>Rate your mastery of this step:</p>
-  <label class='btn btn-danger self-assessment-understand not btn-sm'>
-    <input type='radio' name='understand' value='not' /> Mastering little <span class='fa fa-frown-o'></span>
+<div data-toggle='buttons' class='self-assessment-buttons'>
+  <h4><span class="label label-default self-assessment-mastery-label"><span class='fa fa-line-chart'></span> I'm Mastering:</span></h4>
+  <label class='btn btn-danger self-assessment-button self-assessment-understand not btn-sm'>
+    <input type='radio' name='understand' value='not' /> Little <span class='fa fa-frown-o'></span>
   </label>
   {{#if not}}
   <div class='btn-group self-assessment-help-options'>
@@ -16,8 +15,8 @@
     </label>
   </div>
   {{/if}}
-  <label class='btn btn-warning self-assessment-understand almost btn-sm'>
-    <input type='radio' name='understand' value='almost' /> Mastering some <span class='fa fa-meh-o'></span>
+  <label class='btn btn-warning self-assessment-button self-assessment-understand almost btn-sm'>
+    <input type='radio' name='understand' value='almost' /> Some <span class='fa fa-meh-o'></span>
   </label>
   {{#if almost}}
   <div class='btn-group self-assessment-help-options'>
@@ -30,8 +29,8 @@
     </label>
   </div>
   {{/if}}
-  <label class='btn btn-success self-assessment-understand yes btn-sm'>
-    <input type='radio' name='understand' value='yes' /> Mastering most! <span class='fa fa-smile-o'></span>
+  <label class='btn btn-success self-assessment-button self-assessment-understand yes btn-sm'>
+    <input type='radio' name='understand' value='yes' /> Most! <span class='fa fa-smile-o'></span>
   </label>
   {{#if yes}}
   <div class='btn-group self-assessment-help-options'>

@@ -4,10 +4,14 @@
       <article class='lesson'>
         <div class='container-fluid'>
           <div class='row'>
-            <div class='col-sm-2 lesson-sections'>
-              <h2 style='text-align: center; margin-top: 12px; margin-bottom: 16px;'><span class='label label-warning'><span class='fa fa-folder'></span>&nbsp;Sections</span></h2>
-               <div style='overflow-y: scroll; max-height: 500px; padding-right: 16px;'>
-                <div class='lesson-sections-nav-line'></div>
+             <div class='col-sm-3 lesson-sections lesson-menu'>
+              <div class='lesson-sections-title-container'>
+                <a href='#' class='lesson-menu-hide'><span class='btn btn-primary fa fa-bars'></span></a>
+                <h3><span class='label label-danger lesson-title' title='{{lessonLastViewed}}'><span class='fa fa-graduation-cap'></span>&nbsp;{{lessonTitle}}</span></h3>
+                <div><a class='btn btn-xs btn-primary lesson-details-link' role='button' data-toggle='collapse' href='#lessonDescription' aria-expanded='false' aria-controls='lessonDescription'>SHOW DETAILS&nbsp;<span class='fa fa-chevron-down'></span></a></div>
+                <blockquote id='lessonDescription' class='collapse'>{{{lessonDescription}}}</blockquote>
+              </div>
+              <div style='overflow-y: scroll; max-height: 500px; padding-right: 16px;'>
                 <ul class='nav nav-pills nav-stacked'>
                   {{#each lesson.sections}}
                   {{> sectionNav}}
@@ -15,21 +19,19 @@
                 </ul>
               </div>
             </div>
-            <div class='col-sm-8'>
+            <div class='col-sm-{{sectionWidth}}'>
+              <a href='#' class='lesson-menu-show'><span class='btn btn-primary fa fa-bars'></span></a>
+              <div class='{{sectionShimClass}}'>
               {{#each lesson.sections}}
               {{> section}}
               {{/each}}
+              </div>
             </div>
-            <div class='col-sm-2 lesson-mastery-zone'>
-              <h3 class='lesson-mastery-zone-label'><span class='label label-info'><span class='fa fa-lightbulb-o'></span> Mastery Zone</span></h3>
+            <div class='col-sm-2 lesson-mastery-zone'>            
+              <h3 class='lesson-mastery-zone-label'><span class='label label-info'><span class='fa fa-child'></span>&nbsp;Help Requests</span></h3>
               {{#if rendered}}
-              {{#unless isQuiz}}
-                <div class='row lesson-self-assessment'>
-                {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
-                </div>
-                <hr />
+              {{#unless isQuiz}}              
                 <div class='lesson-mastery-zone-help-requests'>
-                  <h4><span class="label label-default"><span class='fa fa-child'></span> Help Requests</span></h4>
                   <p>Monitor and jump to all your requests:</p>
                   {{> lessonStepUsers options=helpRequestsOptions}}
                 </div>
@@ -43,8 +45,12 @@
       </article>
     </section>
     {{#if rendered}}
+      <div class='lesson-step-footer'>
       {{#unless isQuiz}}
         {{#unless lessonFinished}}
+        <div class='row lesson-self-assessment less-self-assessment-in-step'>
+        {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
+        </div>
         <div class='row lesson-continue'>
           <button class='btn btn-primary continue btn-sm' disabled>Continue <span class='fa fa-step-forward'></span></button>
         </div>
@@ -54,6 +60,7 @@
         </div>
         {{/unless}}
       {{/unless}}
+      </div>
     {{/if}}
   </div>
 </template>
@@ -61,16 +68,6 @@
 <template name='section'>
 <div class='sectionWrapper'>
 {{#if current}}
-  <h1 style='text-align: center; margin-top: 4px;'><span class='label label-danger' title='{{lessonLastViewed}}'><span class='fa fa-graduation-cap'></span>&nbsp;{{lessonTitle}}</span></h1>
-  <h2 style='margin-top: 0px; text-align: center;'><span class='label label-info'><span class='fa fa-folder-open'></span>&nbsp;{{title}}</span></h2>
-  <nav class='lesson-section-steps'>
-    <ul class='pagination'>
-      <li><a class="partNav" style='font-weight: bold; color: white'><span class='fa fa-bookmark'></span></a></li>
-      {{#each parts}}
-        {{> partNav}}
-      {{/each}}
-    </ul>
-  </nav>
   {{#each parts}}
     {{#if currentPart}}
       <!-- TODO: move this into a title attribute on the nav steps -->
@@ -85,18 +82,31 @@
 </template>
 
 <template name='sectionNav'>
-  <li role="presentation" class="{{current}} lesson-section-nav-container"><a href="#" class='sectionNav' title='{{lastViewed}}'>{{title}}
-    <br />
-    <span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span></a>
+  <li role="presentation" class="{{current}} lesson-section-nav-container"><a href="#" class='sectionNav' title='{{lastViewed}}'>
+    <h4 class='lesson-section-nav-heading'><span class='badge {{seenBadge}}'><i class="fa {{seenStar}}"></i></span>&nbsp;<span class='label label-info {{sectionCurrentClass}}' >{{#if current}}<span class='fa fa-folder-open'></span>{{else}}<span class='fa fa-folder'></span>{{/if}}&nbsp;{{title}}{{#if current}}&nbsp;<span class='label label-default' style='font-size: 60%'>{{sectionCurrent}}/{{sectionTotal}}</span>{{/if}}</span></h4></a>
+    {{#if current}}
+      {{> sectionNavParts parts}}
+    {{/if}}
   </li>
 </template>
 
-<template name='partNav'>
-{{#if current}}
-  <li class='active'><a href="#" class='partNav'>{{partIndex}}</a></li>
-{{else}}
-  <li><a href="#" class='partNav'>{{partIndex}}</a></li>
-{{/if}}
+<template name='sectionNavParts'>
+<div class='lesson-section-nav-parts'>
+{{#each this}}
+  <div class='lesson-section-nav-parts-part'>
+    <span class='badge alert-{{seenStatusColor}}'><i class='fa {{seenStatusEye}}'></i></span>
+    <a href='#' title='{{lastViewed}}' class='lesson-section-nav-parts-part-link'><span class='label label-{{labelType}}'>{{{title}}}{{#if current}}&nbsp;<span class='label label-default' style='font-size: 60%'>{{stepCurrent}}/{{stepTotal}}</span>{{/if}}</span>
+    </a>
+    {{#if current}}
+    {{#unless isQuiz}}
+    <div class='lesson-self-assessment'>
+    {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
+    </div>
+    {{/unless}}
+    {{/if}}
+  </div>
+{{/each}}
+</div>
 </template>
 
 <template name='paragraph'>
