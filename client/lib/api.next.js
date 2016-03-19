@@ -1,3 +1,7 @@
+const SPRITE_TILES = 2;
+const SPRITE_ENEMY = 4;
+const SPRITE_DOT = 8;
+
 let spritePathFromShortName = (type, shortName) => {
   let map = {
     enemy: {
@@ -55,6 +59,22 @@ let getDropSpot = (forward) => {
   if (direction === 'right') { pos.x += offset; }
   var gridPos = Q.gridPos(pos.x, pos.y);
   return gridPos;
+};
+
+const getCurrentLevel = q => {
+  let levelName;
+  for (let p in q) {
+    if (p.indexOf('Level') === 0) {
+      levelName = p;
+      break;
+    }
+  }
+
+  if (!levelName) return null;
+
+  const lvl = q(levelName).items[0];
+
+  return lvl ? lvl : null;
 };
 
 function GameWorld(defaults, q) {
@@ -147,17 +167,9 @@ function GameWorld(defaults, q) {
     sprite = sprite.toLowerCase();
     let spriteClass = spritesMap[sprite];
 
-    var levelName;
-    for (var p in this.q) {
-      if (p.indexOf('Level') === 0) {
-        levelName = p;
-        break;
-      }
-    }
+    const lvl = getCurrentLevel(this.q);
+    if (lvl === null) return;
 
-    if (!levelName) return;
-
-    let lvl = this.q(levelName).items[0];
     let targetPos = this.q.tilePos(x, y);
     let currentSprite = this.q.stage().locate(targetPos.x, targetPos.y);
     if (currentSprite) {
@@ -267,18 +279,55 @@ this.Game = class {
     return Array.from(this.q(selector).items);
   }
   get gems() {
-    return this._select('Tower');
+    return this._select('Tower').map((item, index) => {
+      item.index = index;
+      return item;
+    });
   }
   get coins() {
-    return this._select('Dot');
+    return this._select('Dot').map((item, index) => {
+      item.index = index;
+      return item;
+    });
   }
-  /*
+  get tiles() {
+    const lvl = getCurrentLevel(this.q);
+    if (lvl === null) return [];
+    let tiles2Dim = lvl.p.tiles;
+    let yPos = 0;
+    let tilePositions = [];
+    for(let row of tiles2Dim) {
+      let xPos = 0;
+      let tileRow = [];
+      for(let tileNum of row) {
+        const pos = this.q.tilePos(xPos, yPos);
+        const item = this.q.stage().locate(pos.x, pos.y, SPRITE_TILES);
+        // TODO is this right?
+        if (item !== false) tileRow.push(`${xPos} ${yPos}`);
+        xPos++;
+      }
+      tilePositions.push(tileRow);
+      yPos++;
+    }
+    tilePositions.pop();
+    tilePositions.shift();
+    tilePositions = tilePositions.map(row => {
+      row.pop();
+      row.shift();
+      return row;
+    });    
+    
+    const tiles = [].concat.apply([], tilePositions);
+    return tiles;
+  }
+  /****
+  Example for below:
   let count = 1;
   for (let t of game.treasures) { 
     console.write(`Moving to #${count++} at ${t.pos}! `);
     await move(t.pos);
   }
-  */
+  ****/
   get treasures() {
     return this._select('.treasure');
   }
@@ -748,10 +797,6 @@ You can also use the shortcut form like this:
       distModifiers.d = distModifiers.down;
       distModifiers.l = distModifiers.left;
       distModifiers.r = distModifiers.right;
-
-      const SPRITE_TILES = 2;
-      const SPRITE_ENEMY = 4;
-      const SPRITE_DOT = 8;
 
       const collisionMask = SPRITE_TILES | SPRITE_ENEMY | SPRITE_DOT;
 

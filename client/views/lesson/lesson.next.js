@@ -142,12 +142,17 @@ Template.lesson.helpers({
     return { filterToUserId: Meteor.userId(), showLinks: true, displayMode: 'vertical'};
   },
   lessonFinished() {
-    const index = currentSecIndex.get();     
-    const lesson = getLesson();
-    const sectionCount = lesson.sections.length;
-    const partsCount = lesson.sections[index].parts.length;
-    const partIndex = currentPartIndex.get();
-    return (index >= lesson.sections.length - 1) && partIndex >= partsCount - 1;
+    try {
+      const index = currentSecIndex.get();     
+      const lesson = getLesson();
+      const sectionCount = lesson.sections.length;
+      const partsCount = lesson.sections[index].parts.length;
+      const partIndex = currentPartIndex.get();
+      return (index >= lesson.sections.length - 1) && partIndex >= partsCount - 1;
+    } catch(ex) {
+      console.error('lessonFinished error: ', ex);
+      return false;
+    }
   },
   selfAssessmentResourcePath() {
     return selfAssessmentResourcePath();
@@ -359,35 +364,6 @@ _.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
   Template[item].helpers(sharedHelpers);
 });
 
-var sharedEvents = {
-  'click .quickCheckSubmit': (evt, template)=> {
-    var input = $(template.find('.quickCheckInput')).val();
-    var index = currentSecIndex.get();
-    var lesson = getLesson();
-    LessonsProgress.overlayOnLesson(lesson, lessonProgress);    
-    var part = template.data;
-    try {
-      var evaluator = eval(part.evaluator);
-      var correct = evaluator(input);
-      if (correct) {
-        bootbox.alert("<div class='bbalert'><i class='fa fa-smile-o'></i><h2>Correct!</h2> <p>Press OK to continue...</p></div>", ()=> {
-          currentSecIndex.set(index+1);
-          currentPartIndex.set(0);
-          updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
-        });
-      } else {
-        bootbox.alert("<div class='bbalert'><i class='fa fa-frown-o'></i><h2>Nope!</h2><p>Press OK to try again...</p></div>");
-      }
-    } catch(ex) {
-      bootbox.alert("<h2>There was a problem with the system!</h2>");
-    }
-  }
-};
-
-_.each(['paragraph', 'quickCheck', 'popquiz'], function(item) {
-  Template[item].events(sharedEvents);
-});
-
 Template.paragraph.rendered = function() {  
   $('script[type="text/spaceminer+dynamic"]').each(function() {
     var el = $(this);
@@ -410,6 +386,32 @@ Template.paragraph.rendered = function() {
     const resourcePath = `lesson/${lesson.lessonId}/${currentSecIndex.get()}/${currentPartIndex.get()}`;
     Presence.presenceUpdate(resourcePath, 'lesson');
   });
+});
+
+Template.quickCheck.events({
+  'click .quickCheckSubmit'(evt, template) {
+    const input = $(template.find('.quickCheckInput')).val();
+    const index = currentSecIndex.get();
+    const lesson = getLesson();
+    LessonsProgress.overlayOnLesson(lesson, lessonProgress);    
+    const part = template.data;
+    try {
+      const evaluator = eval(part.evaluator);
+      const correct = evaluator(input);
+      if (correct) {
+        bootbox.alert("<div class='bbalert'><i class='fa fa-smile-o'></i><h2>Correct!</h2> <p>Press OK to continue...</p></div>", ()=> {
+          currentSecIndex.set(index+1);
+          currentPartIndex.set(0);
+          updateLessonProgressPartLastViewed(lessonProgress, index+1, 0, true);
+        });
+      } else {
+        bootbox.alert("<div class='bbalert'><i class='fa fa-frown-o'></i><h2>Nope!</h2><p>Press OK to try again...</p></div>");
+      }
+    } catch(ex) {
+      bootbox.alert("<h2>There was a problem with the system!</h2>");
+      console.error('quickCheck:click .quickCheckSubmit exception: ', ex);      
+    }
+  }
 });
 
 let questionClock = new ReactiveClock('questionClock');

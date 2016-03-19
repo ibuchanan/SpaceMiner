@@ -2,8 +2,7 @@
   <div id='gamePanel' class='{{showIfGameOpen}}'>
     {{#if linkEnabled}}
     <h1 class='currentGameName'><span class='label label-warning'>{{name}} <span class='fa fa-flag-checkered'></span></span></h1>
-    <h4>Explored by: {{explorerName}}</h4>
-    <h5>Enemies respawn: {{enemiesRespawn}}</h5>
+    <h4>Explored by: <span class='label label-info'>{{> profileLink name=userName target='_blank'}}</span></h4>
     {{/if}}
     <div class='{{hideIfGameLoading}}'>
       <div class='btn-group btn-group-sm'>
@@ -15,8 +14,12 @@
           {{#if userOwnsCurrentLevel}}
           <button class='btn btn-warning customize {{allowed "customize"}}'><span class='fa fa-gears'></span> Customize</button>
           {{/if}}
-          <button class='btn btn-success fork {{allowed "fork"}}'><span class='fa fa-code-fork'></span> Fork Level</button>
         {{/if}}
+        <button class='btn btn-info gameCodeShow'><span class='fa fa-code'></span> View Code</button>
+        <button class='btn btn-danger gameCodeHide'><span class='fa fa-code'></span> Hide Code</button>
+        {{#if currentUser}}
+          <button class='btn btn-success fork {{allowed "fork"}}'><span class='fa fa-code-fork'></span> Fork World</button>
+        {{/if}}        
       </div>
       <div id='gameContainer' class='{{hideIfGameComplete}}'>
         <div id="worldContainer" class='worldMap'>
@@ -29,6 +32,9 @@
           {{/each}}
         </div>
         <canvas id='game' class='game' width='640' height='448'></canvas>
+        <div class='game-worldScript-container'>
+          <div id='game-worldScript'></div>
+        </div>
       </div>
       {{#if linkEnabled}}
       <section class='play-link'>

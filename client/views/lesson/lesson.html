@@ -95,15 +95,8 @@
 {{#each this}}
   <div class='lesson-section-nav-parts-part'>
     <span class='badge alert-{{seenStatusColor}}'><i class='fa {{seenStatusEye}}'></i></span>
-    <a href='#' title='{{lastViewed}}' class='lesson-section-nav-parts-part-link'><span class='label label-{{labelType}}'>{{{title}}}{{#if current}}&nbsp;<span class='label label-default' style='font-size: 60%'>{{stepCurrent}}/{{stepTotal}}</span>{{/if}}</span>
+    <a href='#' title='{{lastViewed}}' class='lesson-section-nav-parts-part-link'><span class='label label-{{labelType}}'>{{{title}}}</span>
     </a>
-    {{#if current}}
-    {{#unless isQuiz}}
-    <div class='lesson-self-assessment'>
-    {{> selfAssessment resourcePath=selfAssessmentResourcePath data=selfAssessmentData selected=onAssessmentSelected}}
-    </div>
-    {{/unless}}
-    {{/if}}
   </div>
 {{/each}}
 </div>

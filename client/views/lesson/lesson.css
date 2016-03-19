@@ -112,6 +112,9 @@ body {
 
 .sectionWrapper {
   margin-top: 14px;
+  font-family: verdana, sans-serif;
+  line-height: 1.5;
+  font-size: 150%;
 }
 
 .sectionNav {
@@ -277,3 +280,6 @@ iframe {
   letter-spacing: 1px;
 }
 
+.ace_gutter-cell {
+  color: whitesmoke !important;
+}

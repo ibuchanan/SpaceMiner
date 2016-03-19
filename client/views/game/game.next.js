@@ -1,5 +1,5 @@
 // General helpers
-let range = (min, max=null) => {
+const range = (min, max=null) => {
  let cur = 0;
  if (max === null) max = min;
  else {
@@ -14,13 +14,13 @@ let range = (min, max=null) => {
 window.range = range;
 
 // Code generation and level customization helpers
-let _spr = type => val => () => ({sprite:type, asset: val});
+const _spr = type => val => () => ({sprite:type, asset: val});
 
-let _spriteCollection = customSpriteType => customSpriteName => () => {
-  let obj = {
+const _spriteCollection = customSpriteType => customSpriteName => () => {
+  const obj = {
     sprite: customSpriteType
   };
-  let [userId, spriteName] = customSpriteName.split('/');
+  const [userId, spriteName] = customSpriteName.split('/');
   obj.asset = `${userId}|${customSpriteType}|${spriteName}.cspr`;
   return obj;
 };
@@ -49,6 +49,7 @@ coins.gold = _c('gold');
 coins.green = _c('green');
 coins.light = _c('light');
 coins.pink = _c('pink');
+coins.all = () => game.coins;
 window.coins = coins;
 
 let _g = _spr('gem');
@@ -59,6 +60,7 @@ gems.light = _g('diamondLight');
 gems.emerald = _g('emerald');
 gems.pink = _g('pinkGem');
 gems.ruby = _g('ruby');
+gems.all = () => game.gems;
 window.gems = gems;
 
 let _t = _spr('tile');
@@ -75,6 +77,7 @@ window.tiles = tiles;
 let spritesAll = [];
 for (let group of [enemies, players, coins, gems, tiles]) {
   for (let name of Object.keys(group)) {
+    if (name === 'all') continue;
     let data = group[name]();
     spritesAll.push('spriteParts/' + data.sprite + '/' + data.asset + '.png');
   }
@@ -168,7 +171,7 @@ var signals = AutoSignal.register('game', {
   }
 });
 
-var buttons = ['gamePause', 'gamePlay', 'gameReset']; //, 'customize', 'fork'];
+let buttons = ['gamePause', 'gamePlay', 'gameReset', 'fork']; //, 'customize', 'fork'];
 
 function argify(args) {
   if (_.isString(args)) args = { level : args };
@@ -199,7 +202,29 @@ Template.game.created = function() {
   }
 };
 
+let aceEditorPathSet = false;
+
+const aceConfigure = () => {
+  if (!aceEditorPathSet) {
+    const paths = ['modePath', 'themePath', 'workerPath', 'basePath'];
+    for(const path of paths) {
+      ace.config.set(path, '/packages/mrt_ace-embed/ace');
+    }
+    aceEditorPathSet = true;
+  }
+  const editor = ace.edit('game-worldScript');
+  editor.setTheme('ace/theme/chrome');
+  editor.getSession().setMode('ace/mode/javascript');
+  editor.setOptions({
+    readOnly: true,
+    showPrintMargin: false,
+    highlightActiveLine: true,
+    highlightGutterLine: true    
+  });
+};
+
 Template.game.rendered = function() {
+  aceConfigure();
   var args = argify(this.data);
   signals.gameLoadStarted.dispatch(args.level);
   gameOpen.set(true); // Manual since we could not hear the event published from the home module
@@ -220,48 +245,48 @@ Template.game.rendered = function() {
 };
 
 Template.game.helpers({
-  name: function() {
+  name() {
     if (gameLoading.get() === true) return 'Teleporting...';
     return gameReactive.get().worldName;
   },
-  explorerName: function() {
+  userName() {
     if (gameLoading.get() === true) return '...';
-    return gameReactive.get().explorerName;
+    return userNameById(gameReactive.get().world.userId);
   },
-  enemiesRespawn: function() {
+  enemiesRespawn() {
     if (gameLoading.get() === true) return '...';
     return gameReactive.get().enableEnemyRespawn ? 'true' : 'false';
   },
-  allowed: function(button) {
+  allowed(button) {
     var allowButton = _.indexOf(buttons, button);
     return showIfTrue(allowButton > -1);
   },
-  userOwnsCurrentLevel: function() {
+  userOwnsCurrentLevel() {
     var level = Levels.findOne({_id: levelId});
     if (level) return Meteor.userId() !== null && level.userId === Meteor.userId();
     return false;
   },
   showIfGameOpen: showIfTrue(gameOpen),
-  hideIfGameComplete: function() {
+  hideIfGameComplete() {
     return hideIfTrue(Session.get('gameComplete'));
   },
-  showIfGameComplete: function() {
+  showIfGameComplete() {
     return showIfTrue(Session.get('gameComplete'));
   },
   hideIfGameLoading: hideIfTrue(gameLoading),
   showIfGameLoading: showIfTrue(gameLoading),
-  hideIfPaused: function() {
+  hideIfPaused() {
     return hideIfTrue(gamePaused.get());
   },
-  hideIfPlaying: function() {
+  hideIfPlaying() {
     return hideIfTrue(!gamePaused.get());
   },
   showIfChatEnabled: showIfTrue(chatEnabled),
-  messages: function() {
+  messages() {
     var sort = { sort : { date : -1 } };
     return LevelsChat.find({level:levelId}, sort);
   },
-  worldRows: function() {
+  worldRows() {
     var rows = 14;
     var cols = 21;    
     var worldRows = [];
@@ -274,50 +299,66 @@ Template.game.helpers({
     }
     return worldRows;
   },
-  linkEnabled: function() {
+  linkEnabled() {
     return linkEnabled.get();
+  },
+  worldScript() {
+    if (gameLoading.get() === true) return '';
+    return game.world.worldScript;
   }
 });
 
 Template.game.events({
-  'click .gamePause': function() {
+  'click .gamePause'() {
     game.pause();
     gamePaused.set(true);
   },
-  'click .gamePlay': function() {
+  'click .gamePlay'() {
     game.unpause();
     gamePaused.set(false);
     gameShow();
     gameFocus();
   },
-  'click .gameReset': function() {
+  'click .gameReset'() {
     game.unpause();
     gamePaused.set(false);
     game.reset();
     gameShow();
     gameFocus();
   },
-  'click button.customize': function(evt, template) {
+  'click button.customize'(evt, template) {
     evt.preventDefault();
     window.open('/levelCustomize/' + levelId, '_blank');
   },
-  'click button.fork': function(evt, template) {
+  'click button.fork'(evt, template) {
     evt.preventDefault();
     var levelDoc = Levels.findOne({_id: levelId});
     delete levelDoc._id;
     levelDoc.published = false;
     levelDoc.phase = 'forked';
-    Levels.insert(levelDoc, function(err, forkedLevelId) {
-      window.open('/levelCustomize/' + forkedLevelId, '_blank');
+    levelDoc.userId = Meteor.userId();    
+    Levels.insert(levelDoc, function(err, forkedWorldId) {
+      window.open(`/build?id=${forkedWorldId}`, '_blank');
     });
   },
-  'click .chatSend': function() {
+  'click .chatSend'() {
     var message = $('#chatEditor').val();
     var user = Meteor.user().profile.nickName;
     var level = levelId;
     LevelsChat.insert({ message, user, level });
+  },
+  'click .gameCodeShow'() {
+    const editor = ace.edit('game-worldScript');
+    editor.getSession().setValue(game.world.worldScript);
+    $('#game-worldScript').show();
+    $('.gameCodeShow').hide();
+    $('.gameCodeHide').show();    
+  },
+  'click .gameCodeHide'() {
+    $('#game-worldScript').hide();
+    $('.gameCodeHide').hide();
+    $('.gameCodeShow').show();
   }
-
 });
 
 
@@ -434,7 +475,7 @@ var rules = function() {
   for (var _i = 0; _i < arguments.length; _i++) {
     worldRules.push(arguments[_i]);
   }
-}
+};
 
 ${spriteFuncs}
 
@@ -444,11 +485,13 @@ ${funcCode}`;
     var obj = {};
     if (_.isFunction(func)) {
       obj = func(defaults);
+      obj.worldScript = worldScript;
       return obj;
     } else {
       throw "parseWorldDefinitionFromScript could not parse function from code: " + funcScript;
     }
   } catch(err) {
+    controls.alert('<h2>Error</h2> <h4>There was an error parsing your world script:</h4><p>' + err + '</p>');
     console.log(err);
   }
   return {};
@@ -634,7 +677,7 @@ let moveString = m => {
 
 let moveNeedsPlayerProps = arg => {
   if (!_.isObject(arg)) return true;
-  if (_.isObject(arg) && !_.has(arg, 'spriteProperties')) return true;
+  if ((_.isObject(arg) && !_.isArray(arg)) && !_.has(arg, 'spriteProperties')) return true;
 };
 
 let makeMoves = moves => moves.map(move => {
@@ -642,16 +685,46 @@ let makeMoves = moves => moves.map(move => {
   return move;
 });
 
-let move = (...args) => {
- let [props, ...moveArgs] = args;
- if (moveNeedsPlayerProps(props)) {
-  props = game.player.qobj.p;
-  if (moveArgs.length > 0) {
-    moveArgs.unshift(args[0]);
-  } else {
-    moveArgs = [args[0]];
+const NOT_FUNCTION = 0;
+const NOT_ARRAY = 1;
+
+const getArrayFromFunction = arg => {
+  if (!_.isFunction(arg)) return NOT_FUNCTION;
+  const array = arg();
+  if (!_.isArray(array)) return NOT_ARRAY;
+  return array;
+};
+
+let move = (...args) => {    
+  let [props, ...moveArgs] = args;
+  if (moveNeedsPlayerProps(props)) {
+    props = game.player.qobj.p;
+    if (moveArgs.length > 0) {
+      moveArgs.unshift(args[0]);
+    } else {
+      moveArgs = [args[0]];
+    }
   }
- }
+
+  // This will be used to check whether to move to a particular
+  // position or not
+  let stepEvaluator = (index, pos) => true;
+  // Now determine if the first argument is an array of objects
+  // If so, reduce it to the .pos properties of that array
+  
+  const arrayOfMoves = getArrayFromFunction(moveArgs[0]);
+  console.log('arrayOfMoves:', arrayOfMoves);
+  if (arrayOfMoves === NOT_ARRAY) {
+      const errorMessage = 'When the first argument is a function, it must be a function that returns an array.';
+      console.error(errorMessage);
+      alert(errorMessage); 
+  } else if (arrayOfMoves !== NOT_FUNCTION) {
+    if (_.isFunction(moveArgs[1])) stepEvaluator = moveArgs[1];
+    moveArgs = arrayOfMoves.map(item => {
+      if (_.isObject(item)) return item.pos;
+      return item;
+    });
+  }
 
   let execute = (resolve) => {
    let moves = makeMoves(moveArgs);
@@ -660,6 +733,9 @@ let move = (...args) => {
      var nextIndex = index+1;
      if (index < moves.length) {
        var move = moves[index];
+       if (!stepEvaluator(index, move)) {
+        return runStep(nextIndex);
+       }
        if (_.isString(move) && move.indexOf(' ') === -1) {
          var cmd = move.toLowerCase();
          var map = {
@@ -704,6 +780,45 @@ let move = (...args) => {
  return new Promise(execute);
 }
 window.move = move;
+
+const teleportToEachn = (...args) => {
+  const arrayOfMoves = getArrayFromFunction(args[0]);
+  if (arrayOfMoves === NOT_FUNCTION || arrayOfMoves === NOT_ARRAY) {
+      const errorMessage = 'The first argument to teleportToEach must be a function that returns an array.';
+      console.error(errorMessage);
+      alert(errorMessage);
+  } else {
+    return move(...args);
+  }
+};
+window.teleportToEachn = teleportToEachn;
+
+const terraformEachn = (...args) => {
+  const arrayOfTilePositions = getArrayFromFunction(args[0]);
+  if (arrayOfTilePositions === NOT_FUNCTION || arrayOfTilePositions === NOT_ARRAY) {
+      const errorMessage = 'The first argument to terraformEach must be a function that returns an array.';
+      console.error(errorMessage);
+      alert(errorMessage);
+  } else {
+    args.shift(); // Remove the function parameter
+    let stepEvaluator = (index, pos) => true;
+    if (_.isFunction(args[0])) { 
+      stepEvaluator = args[0];
+      args.shift(); // Remove the evaluator parameter
+    }
+    let index = 0;
+    for(let tilePos of arrayOfTilePositions) {
+      // TODO: send the at(tilePos).start result into the evaluator instead of the `x y` string!
+      const shouldProcess = stepEvaluator(index, tilePos);
+      if (shouldProcess) {
+        let spriteArgs = [at(tilePos)].concat(args);
+        sprite(...spriteArgs)();
+      }
+      index++;
+    }
+  }
+};
+window.terraformEachn = terraformEachn;
 
 function command(cmd, ...args) {
   if (cmd === 'move') {
@@ -983,7 +1098,13 @@ Array.prototype.invoke = function(funcName, ...args) {
   invoke(this, funcName, ...args);
 };
 
-let at = (x=1, y=1) => ({start:{x:x, y:y}});
+let at = (x=1, y=1) => {
+  if (_.isString(x)) {
+    const coords = x.split(' ');
+    return {start:{x:coords[0], y:coords[1]}};
+  }
+  return {start:{x:x, y:y}};
+}
 let _sprite = (type='t') => ({sprite:type});
 let dir = (direction='d') => ({dir:direction});
 window.at = at;
@@ -1154,12 +1275,18 @@ game.world.rules = rules(
 );
 */
 
-let navigate = invokeDeferSimple(move);
+const navigate = invokeDeferSimple(move);
 window.navigate = navigate;
 window.nv = navigate;
 
-let warp = invokeDeferSimple(warpn);
+const warp = invokeDeferSimple(warpn);
 window.warp = warp;
+
+window.teleportToEach = invokeDeferSimple(teleportToEachn);
+window.tpEach = window.teleportToEach;
+
+window.terraformEach = invokeDeferSimple(terraformEachn);
+window.tfEach = window.terraformEach;
 
 function configureQuintus(callback, options) {
   /*
@@ -1266,6 +1393,7 @@ function configureQuintus(callback, options) {
         let worldRepeat = defaults.worldRepeat;
         if (_.has(obj, 'script') && _.isString(obj.script)) {
           let world = parseWorldDefinitionFromScript(obj.script, defaults);
+          world.userId = obj.userId;     
           if (customSprites) world.customSprites = customSprites;
           worldRepeat = world.worldRepeat;
           // TODO remove hack
