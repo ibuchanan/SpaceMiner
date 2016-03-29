@@ -17,6 +17,7 @@ this.QuintusOverrides = class {
                 errors = true;
                 (options.errorCallback ||
                     function (itm) {
+                        console.log(arguments);
                         throw ("Error Loading: " + itm);
                     })(itm);
             };

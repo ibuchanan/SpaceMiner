@@ -22,6 +22,8 @@ Learn how to control the powers of your ship with JavaScript functions to get st
 
 Once you discover a new world your first task is to drill a mine by programming your ship to deploy drones into one of its ore rich areas.
 
+${createSimple('mission-one')}
+
 These drones transform raw materials into easy to collect and store coins. 
  -Somethign about how ship tps those coins out as currency to justify the score counter
 -Gems as fuel source maybe
@@ -48,3 +50,13 @@ ${program('', \`start(
     mine(at(2))
 );\`)}
 
+## More Mines
+
+Here's your code again:
+
+${createWithTest('mission-one')}
+
+
+## Advanced Editor
+
+${create('mission-one')}
