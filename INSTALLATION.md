@@ -1,6 +1,7 @@
 ## Installation
 
 #### Mac OSX and Windows
+* If you don't already have git installed, [grab a copy here and install it](https://git-scm.com/downloads).
 * Download and install the [Meteor framework](https://www.meteor.com/)
 * Clone the repository:
    * git clone git@github.com:JogoShugh/SpaceMiner.git
