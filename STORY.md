@@ -1,6 +1,6 @@
 # SpaceMiner
 
-On July 20, 2269, exactly 300 years after humans landed on the Moon, we were contacted by a peaceful civilization from a distant solar system in our Milky Way Galaxy, but peace soon faced a colossal threat. didn't last long.tions with other civilizations in the Milky Way Galaxy. Contact with intelligent civilizations began after humans started receiving signals containing encoded photographic images of the Voyager 1 space probe that departed from Earth in 1977.  Included along with the images were unmistakable images of intelligent beings, posing in spacesuits along side the craft.
+On July 20, 2269, exactly 300 years after humans landed on the Moon, a peaceful civilization from a distant solar system in our Milky Way Galaxy contacted us, but peace soon faced a colossal threat. The first contact from this civilization was in the form of signals containing encoded photographic images of the Voyager 1 space probe that departed from Earth in 1977.  Included along with the images were unmistakable images of intelligent beings, posing in spacesuits along side the craft.
 
 The reception of this information was met with both excitement and fear on planet Earth, but paled in comparison to the response when visitors from the civilization made their presence in Earth's orbit known with geometric light pulses visible to inhabitants of the entire planet at night.
 
