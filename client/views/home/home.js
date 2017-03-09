@@ -113,7 +113,15 @@ Template.level.events({
   },
   'click button.levelEdit': function(evt, template) {
     Session.set('levelId', null);
-    window.location = '/build?id=' + this._id;    
+    window.location = '/build?id=' + this._id;
+  },
+  'click button.levelDelete': function(evt, template) {
+    var that = this;
+    controls.confirm("<div style='text-align: center'><h1><span class='fa fa-times'></span></h1> Are you sure you want to permanently delete this world?</div>", function(result) {
+      if (result) {
+        Levels.remove({_id: that._id});
+      }
+    });
   }
 });
 
