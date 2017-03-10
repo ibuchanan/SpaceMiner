@@ -1,5 +1,5 @@
 ---
-id: math-operators
+id: operators
 author: Josh Gough
 topics:
  - arithmetic operators
