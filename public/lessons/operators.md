@@ -5,6 +5,7 @@ topics:
  - arithmetic operators
  - relational operators
  - comparison operators
+
 sub-topics:
  - boolean values
  - logical operators

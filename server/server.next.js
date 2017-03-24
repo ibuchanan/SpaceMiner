@@ -463,10 +463,19 @@ var worldRows = ${worldRowsString};
   };  
   
   createLevelRecord(level, function(levelDto) {
-    Levels.insert(levelDto);          
+    Levels.insert(levelDto);
   });
   
 }
+
+const lessonsRepopulate = (lessonId='') => Lessons.repopulate(lessonId);
+
+const lessonsRefresh = () => {
+  Lessons.remove({});
+  if (Lessons.find().count() === 0) {
+    createLessonsDefault();
+  }
+};
 
 function cleanDbAndCreateDefaultRecords() {
   if(Surveys.find().count() === 0) {
@@ -485,10 +494,7 @@ function cleanDbAndCreateDefaultRecords() {
     createTrainingLevels();
   }
   
-  Lessons.remove({});
-  if (Lessons.find().count() === 0) {
-    createLessonsDefault();
-  }  
+  lessonsRefresh();
 
   SpriteParts.remove({});
   if (SpriteParts.find().count() === 0) {
@@ -572,7 +578,17 @@ Meteor.startup(function() {
           });
           this.response.end(img);
         }
-      });      
+      });
+      this.route('lessonsRefresh/:lessonId?', {
+        where: 'server',
+        action: function() {
+          console.log('Refreshing lessons started.');  
+          lessonsRepopulate(this.params.lessonId);
+          lessonsRefresh();
+          console.log('Refreshing lessons completed.');
+          this.response.end('Refreshed');
+        }
+      })
     });
     
     var Future = Npm.require('fibers/future');
